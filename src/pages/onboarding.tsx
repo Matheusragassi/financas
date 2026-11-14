@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { ArrowLeft, ArrowRight, CloudCheck, Loader2, ShieldCheck, Sparkles, UserRound, WifiOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -54,22 +54,41 @@ export function Onboarding() {
     if (user && syncStatus !== "connecting") startEmpty(0, user.name.split(" ")[0], currentMonthId())
   }, [user, syncStatus, startEmpty])
 
+  const rootRef = useRef<HTMLDivElement>(null)
+  const onMove = useCallback((e: React.PointerEvent) => {
+    const el = rootRef.current
+    if (!el || e.pointerType === "touch") return
+    const r = el.getBoundingClientRect()
+    const x = e.clientX - r.left, y = e.clientY - r.top
+    el.style.setProperty("--mx", `${x}px`)
+    el.style.setProperty("--my", `${y}px`)
+    el.style.setProperty("--rx", `${((y / r.height) - 0.5) * -4}deg`)
+    el.style.setProperty("--ry", `${((x / r.width) - 0.5) * 5}deg`)
+    el.style.setProperty("--spot", "1")
+  }, [])
+  const onLeave = useCallback(() => {
+    const el = rootRef.current
+    if (!el) return
+    el.style.setProperty("--rx", "0deg"); el.style.setProperty("--ry", "0deg"); el.style.setProperty("--spot", "0")
+  }, [])
+
   return (
-    <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-background px-4 py-10">
+    <div ref={rootRef} onPointerMove={onMove} onPointerLeave={onLeave}
+      style={{ "--mx": "50%", "--my": "40%", "--rx": "0deg", "--ry": "0deg", "--spot": "0" } as React.CSSProperties}
+      className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-background px-4 py-10 [perspective:1200px]">
       <Backdrop />
       <div className="absolute top-3 right-3 rounded-full glass"><ThemeToggle /></div>
 
       <main className="relative w-full max-w-[400px]">
-        <div className="rounded-[28px] p-7 glass sm:p-8">
+        <div className="tilt-card rounded-[28px] p-7 glass transition-transform duration-300 ease-out sm:p-8"
+          style={{ transform: "rotateX(var(--rx)) rotateY(var(--ry))" }}>
           <div className="flex flex-col items-center text-center">
-            <AppLogo className="size-16 drop-shadow-[0_10px_30px_rgba(59,130,246,0.45)]" />
-            <h1 className="mt-5 text-2xl font-semibold tracking-tight">
-              Finanças
-            </h1>
+            <AppLogo className="size-16 shadow-[0_14px_40px_-8px_rgba(59,130,246,0.65),inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform duration-500 hover:-rotate-6 hover:scale-105" />
+            <h1 className="mt-5 font-brand text-[28px] leading-none font-semibold tracking-tight">finitree</h1>
             <p className="mt-1.5 text-sm text-balance text-muted-foreground">
               {view === "guest"
                   ? "Só precisamos de duas informações para começar."
-                  : "Seus gastos, parcelas e saldo do mês num só lugar. Simples, bonito e sempre com você."}
+                  : "Suas finanças crescendo, mês a mês. Gastos, parcelas e cartões num só lugar."}
             </p>
           </div>
 
@@ -159,22 +178,35 @@ function Pill({ icon: Icon, children }: { icon: typeof WifiOff; children: React.
   )
 }
 
-/** Fundo: brilhos em Blue Period + grade de pixels sutil */
+/** Fundo: brilhos em Blue Period que flutuam, luz que segue o mouse e grade de pixels que acende perto dele */
 function Backdrop({ className }: { className?: string }) {
+  const grid = (alpha: number) => ({
+    backgroundImage: `linear-gradient(to right, color-mix(in srgb, var(--foreground) ${alpha}%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in srgb, var(--foreground) ${alpha}%, transparent) 1px, transparent 1px)`,
+    backgroundSize: "26px 26px",
+  })
   return (
     <div aria-hidden className={cn("pointer-events-none absolute inset-0", className)}>
-      <div className="absolute -top-40 left-1/2 size-[640px] -translate-x-1/2 rounded-full bg-brand/25 blur-[120px] dark:bg-brand/20" />
-      <div className="absolute -bottom-48 -left-24 size-[420px] rounded-full bg-[#6D28D9]/15 blur-[110px]" />
-      <div className="absolute -right-24 bottom-10 size-[360px] rounded-full bg-[#7DD3FC]/15 blur-[110px]" />
-      <div
-        className="absolute inset-0 opacity-[0.35] dark:opacity-[0.22]"
-        style={{
-          backgroundImage: "linear-gradient(to right, color-mix(in srgb, var(--foreground) 7%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in srgb, var(--foreground) 7%, transparent) 1px, transparent 1px)",
-          backgroundSize: "26px 26px",
-          maskImage: "radial-gradient(ellipse 60% 55% at 50% 45%, black 20%, transparent 75%)",
-          WebkitMaskImage: "radial-gradient(ellipse 60% 55% at 50% 45%, black 20%, transparent 75%)",
-        }}
-      />
+      <div className="animate-drift-a absolute -top-40 left-1/2 size-[640px] rounded-full bg-brand/25 blur-[120px] dark:bg-brand/20" />
+      <div className="animate-drift-b absolute -bottom-48 -left-24 size-[420px] rounded-full bg-[#6D28D9]/15 blur-[110px]" />
+      <div className="animate-drift-c absolute -right-24 bottom-10 size-[360px] rounded-full bg-[#7DD3FC]/15 blur-[110px]" />
+      {/* grade de base */}
+      <div className="absolute inset-0 opacity-[0.3] dark:opacity-[0.2]" style={{
+        ...grid(7),
+        maskImage: "radial-gradient(ellipse 60% 55% at 50% 45%, black 20%, transparent 75%)",
+        WebkitMaskImage: "radial-gradient(ellipse 60% 55% at 50% 45%, black 20%, transparent 75%)",
+      }} />
+      {/* luz que segue o cursor */}
+      <div className="absolute inset-0 transition-opacity duration-500" style={{
+        opacity: "var(--spot)",
+        background: "radial-gradient(520px circle at var(--mx) var(--my), color-mix(in srgb, #3B82F6 22%, transparent), transparent 65%)",
+      }} />
+      {/* grade que acende perto do cursor */}
+      <div className="absolute inset-0 transition-opacity duration-500" style={{
+        opacity: "var(--spot)",
+        ...grid(22),
+        maskImage: "radial-gradient(220px circle at var(--mx) var(--my), black, transparent 70%)",
+        WebkitMaskImage: "radial-gradient(220px circle at var(--mx) var(--my), black, transparent 70%)",
+      }} />
     </div>
   )
 }

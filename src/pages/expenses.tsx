@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import {
-  ArrowUpDown, Check, CircleDashed, Copy, Download, MoreHorizontal, Pencil, Search, ShieldCheck, Trash2, X, Ban, Filter,
+  ArrowUpDown, Check, CreditCard as CreditCardIcon, CircleDashed, Copy, Download, MoreHorizontal, Pencil, Search, ShieldCheck, Trash2, X, Ban, Filter,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -26,17 +26,21 @@ import { formatDate, money, monthLabel } from "@/lib/format"
 import { downloadCsv } from "@/lib/backup"
 import { KIND_LABEL, STATUS_LABEL, type Expense, type ExpenseKind, type ExpenseStatus } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { CardChip } from "@/components/card-visual"
 
 type SortKey = "description" | "amount" | "category" | "default"
 
 export function Expenses() {
-  const { expenses, setStatus, removeMany, removeExpense, duplicateExpense, updateExpense, months } = useStore()
+  const { expenses, setStatus, removeMany, removeExpense, duplicateExpense, updateExpense, months, settings, assignCard } = useStore()
+  const cards = settings.cards ?? []
+  const cardOf = (id?: string) => cards.find((c) => c.id === id)
   const month = useSelectedMonth()
   const [q, setQ] = useState("")
   const [cat, setCat] = useState("all")
   const [method, setMethod] = useState("all")
   const [status, setStatusF] = useState("all")
   const [kind, setKind] = useState("all")
+  const [card, setCard] = useState("all")
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "default", dir: 1 })
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [editing, setEditing] = useState<Expense | null>(null)
@@ -54,17 +58,18 @@ export function Expenses() {
       (cat === "all" || e.category === cat) &&
       (method === "all" || e.method === method) &&
       (status === "all" || e.status === status) &&
-      (kind === "all" || e.kind === kind))
+      (kind === "all" || e.kind === kind) &&
+      (card === "all" || (card === "none" ? !cardOf(e.cardId) : e.cardId === card)))
     if (sort.key === "default") return allMonths ? [...r].sort((a, b) => b.month.localeCompare(a.month)) : r
     return [...r].sort((a, b) => {
       const k = sort.key as "description" | "amount" | "category"
       const va = a[k], vb = b[k]
       return (typeof va === "number" ? va - (vb as number) : String(va).localeCompare(String(vb))) * sort.dir
     })
-  }, [base, q, cat, method, status, kind, sort, allMonths])
+  }, [base, q, cat, method, status, kind, card, sort, allMonths]) // eslint-disable-line
 
   const visibleTotal = rows.filter((e) => e.status !== "cancelled").reduce((a, e) => a + e.amount, 0)
-  const filtersOn = [cat, method, status, kind].filter((f) => f !== "all").length
+  const filtersOn = [cat, method, status, kind, card].filter((f) => f !== "all").length
   const allChecked = rows.length > 0 && rows.every((r) => selected.has(r.id))
   const toggle = (id: string) => setSelected((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
   const sel = [...selected].filter((id) => rows.some((r) => r.id === id))
@@ -106,10 +111,11 @@ export function Expenses() {
             <FilterSelect label="Tipo" value={kind} onChange={setKind} options={(Object.keys(KIND_LABEL) as ExpenseKind[]).map((k) => ({ value: k, label: KIND_LABEL[k] }))} />
             <FilterSelect label="Categoria" value={cat} onChange={setCat} options={cats.map((c) => ({ value: c, label: c }))} />
             <FilterSelect label="Método" value={method} onChange={setMethod} options={methods.map((c) => ({ value: c, label: c }))} />
+            {cards.length > 0 && <FilterSelect label="Cartão" value={card} onChange={setCard} options={[...cards.map((c) => ({ value: c.id, label: c.name })), { value: "none", label: "Sem cartão" }]} />}
             <FilterSelect label="Status" value={status} onChange={setStatusF} options={(Object.keys(STATUS_LABEL) as ExpenseStatus[]).map((k) => ({ value: k, label: STATUS_LABEL[k] }))} />
             <label className="flex items-center gap-2 text-sm"><Checkbox checked={allMonths} onCheckedChange={(v) => setAllMonths(!!v)} /> Buscar em todos os meses</label>
             {filtersOn > 0 && (
-              <Button variant="ghost" size="sm" className="w-full" onClick={() => { setCat("all"); setMethod("all"); setStatusF("all"); setKind("all") }}>
+              <Button variant="ghost" size="sm" className="w-full" onClick={() => { setCat("all"); setMethod("all"); setStatusF("all"); setKind("all"); setCard("all") }}>
                 <X /> Limpar filtros
               </Button>
             )}
@@ -124,6 +130,20 @@ export function Expenses() {
           <Button size="sm" variant="secondary" onClick={() => { setStatus(sel, "paid"); toast.success("Marcados como pagos") }}><Check /> Pago</Button>
           <Button size="sm" variant="secondary" onClick={() => { setStatus(sel, "pending"); toast.success("Marcados como pendentes") }}><CircleDashed /> Pendente</Button>
           <Button size="sm" variant="secondary" onClick={() => { setStatus(sel, "cancelled"); toast.success("Marcados como cancelados") }}><Ban /> Cancelar</Button>
+          {cards.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger render={<Button size="sm" variant="secondary" />}><CreditCardIcon /> Cartão</DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {cards.map((c) => (
+                  <DropdownMenuItem key={c.id} onClick={() => { assignCard(sel, c.id); toast.success(`${sel.length} vinculados a ${c.name}`) }}>
+                    <CardChip card={c} />
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => { assignCard(sel, undefined); toast.success("Cartão removido dos selecionados") }}>Sem cartão</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           <Button size="sm" variant="destructive" onClick={() => { removeMany(sel); setSelected(new Set()); toast.success(`${sel.length} excluídos`) }}><Trash2 /> Excluir</Button>
           <Button size="sm" variant="ghost" className="ml-auto" onClick={() => setSelected(new Set())}><X /></Button>
         </div>
@@ -165,7 +185,7 @@ export function Expenses() {
                   </div>
                 </TableCell>
                 <TableCell className="hidden md:table-cell text-muted-foreground">{e.category}</TableCell>
-                <TableCell className="hidden lg:table-cell text-muted-foreground">{e.method}</TableCell>
+                <TableCell className="hidden lg:table-cell text-muted-foreground">{cardOf(e.cardId) ? <CardChip card={cardOf(e.cardId)} className="text-foreground/80" /> : e.method}</TableCell>
                 <TableCell className="hidden sm:table-cell">
                   {e.kind === "installment" ? (
                     <span className={cn("num text-sm", e.installmentCurrent === e.installmentTotal && "font-medium text-success")}>

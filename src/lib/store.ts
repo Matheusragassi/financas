@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { addMonths, uid } from "./format"
-import type { Backup, Expense, ExpenseStatus, Month, Settings } from "./types"
+import type { Backup, CreditCard, Expense, ExpenseStatus, Month, Settings } from "./types"
 
 export const DEFAULT_SETTINGS: Settings = {
   ownerName: "",
@@ -37,6 +37,10 @@ interface State {
   removeMany: (ids: string[]) => void
   duplicateExpense: (id: string) => void
   generateNextMonth: (from: string) => { month: string; added: number }
+  saveCard: (card: Omit<CreditCard, "id"> & { id?: string }) => string
+  removeCard: (id: string) => void
+  /** Vincula lançamentos a um cartão; retorna quantos */
+  assignCard: (ids: string[], cardId: string | undefined) => number
 }
 
 /** Itens do mês que ainda não foram levados para o mês seguinte */
@@ -187,6 +191,26 @@ export const useStore = create<State>()(
         const e = get().expenses.find((x) => x.id === id)
         if (!e) return
         set((s) => ({ expenses: [...s.expenses, { ...e, id: uid(), groupId: uid(), description: `${e.description} (cópia)` }] }))
+      },
+
+      saveCard: (card) => {
+        const id = card.id ?? uid()
+        set((s) => {
+          const cards = s.settings.cards ?? []
+          const next = cards.some((c) => c.id === id) ? cards.map((c) => (c.id === id ? { ...c, ...card, id } : c)) : [...cards, { ...card, id }]
+          return { settings: { ...s.settings, cards: next } }
+        })
+        return id
+      },
+      removeCard: (id) =>
+        set((s) => ({
+          settings: { ...s.settings, cards: (s.settings.cards ?? []).filter((c) => c.id !== id) },
+          expenses: s.expenses.map((e) => (e.cardId === id ? { ...e, cardId: undefined } : e)),
+        })),
+      assignCard: (ids, cardId) => {
+        const set_ = new Set(ids)
+        set((s) => ({ expenses: s.expenses.map((e) => (set_.has(e.id) ? { ...e, cardId } : e)) }))
+        return set_.size
       },
 
       generateNextMonth: (from) => {

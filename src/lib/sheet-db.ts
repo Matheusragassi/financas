@@ -13,7 +13,7 @@ const APP_KEY = "financasApp"
 
 const EXPENSE_COLS = [
   "id", "mes", "descricao", "categoria", "metodo", "valor", "tipo", "data_compra",
-  "parcela_atual", "parcelas_total", "valor_total", "essencial", "status", "ultima_parcela", "observacao", "grupo",
+  "parcela_atual", "parcelas_total", "valor_total", "essencial", "status", "ultima_parcela", "observacao", "grupo", "cartao",
 ] as const
 
 export interface RemoteFile { id: string; modifiedTime: string; webViewLink?: string }
@@ -30,14 +30,14 @@ export async function createDataFile(ownerName: string): Promise<RemoteFile> {
   const sheet = await gfetch<{ spreadsheetId: string }>(SHEETS, {
     method: "POST",
     body: JSON.stringify({
-      properties: { title: `Finanças — dados${ownerName ? ` de ${ownerName}` : ""}`, locale: "pt_BR" },
+      properties: { title: `Finitree — dados${ownerName ? ` de ${ownerName}` : ""}`, locale: "pt_BR" },
       sheets: ["Lançamentos", "Meses", "Config"].map((title) => ({ properties: { title, gridProperties: { frozenRowCount: 1 } } })),
     }),
   })
   // Marca o arquivo para encontrá-lo em outros aparelhos
   return gfetch<RemoteFile>(`${DRIVE}/${sheet.spreadsheetId}?fields=id,modifiedTime,webViewLink`, {
     method: "PATCH",
-    body: JSON.stringify({ appProperties: { [APP_KEY]: "1" }, description: "Dados do app Finanças. Não renomeie as abas." }),
+    body: JSON.stringify({ appProperties: { [APP_KEY]: "1" }, description: "Dados do app Finitree. Não renomeie as abas." }),
   })
 }
 
@@ -46,7 +46,7 @@ const num = (v: unknown) => (v === "" || v == null ? null : Number(v))
 const bool = (v: unknown) => v === true || str(v).toUpperCase() === "TRUE"
 
 export async function readData(id: string): Promise<Backup> {
-  const ranges = ["Lançamentos!A1:P", "Meses!A1:B", "Config!A1:B"].map((r) => `ranges=${encodeURIComponent(r)}`).join("&")
+  const ranges = ["Lançamentos!A1:Q", "Meses!A1:B", "Config!A1:B"].map((r) => `ranges=${encodeURIComponent(r)}`).join("&")
   const r = await gfetch<{ valueRanges: { values?: unknown[][] }[] }>(
     `${SHEETS}/${id}/values:batchGet?${ranges}&valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=FORMATTED_STRING`)
   const [exp, mon, cfg] = r.valueRanges.map((v) => v.values ?? [])
@@ -72,6 +72,7 @@ export async function readData(id: string): Promise<Backup> {
       lastInstallment: bool(g("ultima_parcela")),
       note: str(g("observacao")) || undefined,
       groupId: str(g("grupo")) || undefined,
+      cardId: col("cartao") >= 0 ? str(g("cartao")) || undefined : undefined,
     }
   })
   const months: Month[] = mon.slice(1).filter((row) => str(row[0])).map((row) => ({ id: str(row[0]), salary: Number(row[1]) || 0 }))
@@ -96,7 +97,7 @@ export async function writeData(id: string, b: Backup): Promise<string> {
     ...b.expenses.map((e) => [
       e.id, e.month, e.description, e.category, e.method, e.amount, e.kind, e.purchaseDate ?? "",
       e.installmentCurrent ?? "", e.installmentTotal ?? "", e.totalValue ?? "", e.essential, e.status,
-      !!e.lastInstallment, e.note ?? "", e.groupId ?? "",
+      !!e.lastInstallment, e.note ?? "", e.groupId ?? "", e.cardId ?? "",
     ]),
   ]
   const monRows = [["mes", "renda"], ...b.months.map((m) => [m.id, m.salary])]

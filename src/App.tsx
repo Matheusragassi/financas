@@ -18,6 +18,7 @@ import { Installments } from "@/pages/installments"
 import { Reports } from "@/pages/reports"
 import { SettingsPage } from "@/pages/settings"
 import { AccountPage } from "@/pages/account"
+import { CardsPage } from "@/pages/cards"
 
 const TITLES = {
   dashboard: "Visão geral",
@@ -26,6 +27,7 @@ const TITLES = {
   relatorios: "Relatórios",
   ajustes: "Ajustes & backup",
   conta: "Minha conta",
+  cartoes: "Cartões",
 } as const
 
 export default function App() {
@@ -42,6 +44,10 @@ export default function App() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[520px] overflow-hidden md:rounded-t-xl">
+          <div className="absolute -top-48 left-1/4 size-[560px] rounded-full bg-brand/12 blur-[120px] dark:bg-brand/10" />
+          <div className="absolute -top-32 right-0 size-[380px] rounded-full bg-[#A78BFA]/10 blur-[110px]" />
+        </div>
         <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b px-3 glass-subtle md:rounded-t-xl md:px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-1 hidden h-4! self-center sm:block" />
@@ -64,13 +70,14 @@ export default function App() {
             </Button>
           </div>
         )}
-        <main className="mx-auto w-full max-w-7xl flex-1 p-3 pb-24 md:p-6">
+        <main className="relative mx-auto w-full max-w-7xl flex-1 p-3 pb-24 md:p-6">
           {route === "dashboard" && <Dashboard onAdd={() => setAdding(true)} />}
           {route === "lancamentos" && <Expenses />}
           {route === "parcelas" && <Installments />}
           {route === "relatorios" && <Reports />}
           {route === "ajustes" && <SettingsPage />}
           {route === "conta" && <AccountPage />}
+          {route === "cartoes" && <CardsPage />}
         </main>
         <Button
           size="icon-lg"

@@ -9,9 +9,10 @@ import { useStore } from "@/lib/store"
 import { active, average, groupSum, history, topN } from "@/lib/stats"
 import { money, monthLabel, percent } from "@/lib/format"
 import { cn } from "@/lib/utils"
+import { cardTotals } from "@/lib/cards"
 
 export function Reports() {
-  const { expenses, months } = useStore()
+  const { expenses, months, settings } = useStore()
   const years = useMemo(() => [...new Set(months.map((m) => m.id.slice(0, 4)))].sort(), [months])
   const [year, setYear] = useState("all")
   const inRange = (m: string) => year === "all" || m.startsWith(year)
@@ -27,6 +28,7 @@ export function Reports() {
   const byMethod = groupSum(list, (e) => e.method)
   const byItem = groupSum(list, (e) => e.description.trim()).slice(0, 10)
   const subs = groupSum(list.filter((e) => e.kind === "subscription" || e.method === "Assinatura"), (e) => e.description.trim())
+  const byCard = cardTotals(expenses, settings.cards ?? [], inRange)
   const overBudget = withData.filter((h) => h.commitment > 1).length
 
   return (
@@ -76,8 +78,17 @@ export function Reports() {
           <CardContent><BarList data={byItem} total={total} max={10} /></CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>Métodos de pagamento</CardTitle><CardDescription>Participação no total</CardDescription></CardHeader>
-          <CardContent><BarList data={byMethod} total={total} color={SERIES[1]} /></CardContent>
+          {byCard.length > 0 ? (
+            <>
+              <CardHeader><CardTitle>Por cartão</CardTitle><CardDescription>Quanto passou em cada cartão no período</CardDescription></CardHeader>
+              <CardContent><BarList data={byCard} total={total} /></CardContent>
+            </>
+          ) : (
+            <>
+              <CardHeader><CardTitle>Métodos de pagamento</CardTitle><CardDescription>Participação no total</CardDescription></CardHeader>
+              <CardContent><BarList data={byMethod} total={total} color={SERIES[1]} /></CardContent>
+            </>
+          )}
         </Card>
         <Card>
           <CardHeader><CardTitle>Assinaturas</CardTitle><CardDescription>Quanto cada uma custou no período</CardDescription></CardHeader>

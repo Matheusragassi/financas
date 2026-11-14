@@ -1,33 +1,39 @@
 import { cn } from "@/lib/utils"
 
-/** Marca do app: barras pixeladas sobre o Blue Period */
+/*
+ * Finitree — árvore de finanças em pixel art (grid de 13 px, como a MAVI).
+ * Copa arredondada em blocos + tronco; o bloco verde na copa é o "fruto":
+ * o dinheiro que a árvore dá.
+ */
+export const TREE_PATH = "M13 0H52V13H65V39H52V52H39V78H26V52H13V39H0V13H13V0Z"
+export const FRUIT = { x: 39, y: 13, s: 13 }
+
+/** Símbolo puro (herda a cor do texto; fruto em destaque opcional) */
+export function FinitreeMark({ className, fruit = "currentColor" }: { className?: string; fruit?: string }) {
+  return (
+    <svg viewBox="0 0 65 78" className={className} fill="currentColor" shapeRendering="crispEdges" aria-hidden="true">
+      <path d={TREE_PATH} />
+      <rect x={FRUIT.x} y={FRUIT.y} width={FRUIT.s} height={FRUIT.s} fill={fruit} />
+    </svg>
+  )
+}
+
+/** Ícone do app: símbolo branco sobre Blue Period */
 export function AppLogo({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 512 512" className={cn("size-8 shrink-0", className)} aria-hidden="true">
-      <defs>
-        <linearGradient id="al-g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#5B9BFF" />
-          <stop offset="0.55" stopColor="#3B82F6" />
-          <stop offset="1" stopColor="#2557C7" />
-        </linearGradient>
-        <linearGradient id="al-s" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#fff" stopOpacity=".28" />
-          <stop offset=".5" stopColor="#fff" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <rect width="512" height="512" rx="116" fill="url(#al-g)" />
-      <rect width="512" height="512" rx="116" fill="url(#al-s)" />
-      <g fill="#fff">
-        <rect x="113" y="295" width="52" height="104" rx="6" />
-        <rect x="230" y="217" width="52" height="182" rx="6" />
-        <rect x="347" y="139" width="52" height="260" rx="6" />
-      </g>
-      <g fill="#fff" opacity=".55">
-        <rect x="113" y="230" width="52" height="52" rx="6" />
-        <rect x="230" y="152" width="52" height="52" rx="6" />
-        <rect x="347" y="74" width="52" height="52" rx="6" />
-      </g>
-    </svg>
+    <span className={cn("relative inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[28%] bg-[linear-gradient(145deg,#5B9BFF,#3B82F6_55%,#2557C7)] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]", className)}>
+      <FinitreeMark className="h-[56%] w-auto text-white" fruit="#9BE858" />
+    </span>
+  )
+}
+
+/** Logotipo: símbolo + nome */
+export function FinitreeWordmark({ className, iconClassName }: { className?: string; iconClassName?: string }) {
+  return (
+    <span className={cn("inline-flex items-center gap-2.5", className)}>
+      <AppLogo className={iconClassName} />
+      <span className="font-brand text-lg leading-none font-semibold tracking-tight">finitree</span>
+    </span>
   )
 }
 

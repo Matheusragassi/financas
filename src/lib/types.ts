@@ -22,6 +22,20 @@ export interface Expense {
   note?: string
   /** Liga lançamentos da mesma compra/assinatura entre meses */
   groupId?: string
+  /** Cartão de crédito usado (id em Settings.cards) */
+  cardId?: string
+}
+
+export interface CreditCard {
+  id: string
+  /** Apelido, ex.: "Nubank roxinho" */
+  name: string
+  bank: string
+  /** Bandeira (opcional) */
+  network?: string
+  color: string
+  limit?: number
+  dueDay?: number
 }
 
 export interface Month {
@@ -42,6 +56,7 @@ export interface Settings {
   budgetAlert: number
   /** Link da planilha do Google usada na importação */
   sheetUrl?: string
+  cards?: CreditCard[]
 }
 
 export interface Backup {

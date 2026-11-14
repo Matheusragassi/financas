@@ -9,6 +9,9 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { SimpleSelect } from "@/components/simple-select"
+import { CardDialog } from "@/components/card-dialog"
+import { isCreditMethod } from "@/lib/cards"
+import { Plus } from "lucide-react"
 import { useStore, type Scope } from "@/lib/store"
 import { addMonths, money, monthLabel, parseMoney } from "@/lib/format"
 import { KIND_LABEL, STATUS_LABEL, type Expense, type ExpenseKind, type ExpenseStatus } from "@/lib/types"
@@ -41,6 +44,10 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
   const [spread, setSpread] = useState(true)
   const [repeat, setRepeat] = useState("1")
   const [scope, setScope] = useState<Scope>("this")
+  const [cardId, setCardId] = useState("")
+  const [newCard, setNewCard] = useState(false)
+  const cards = settings.cards ?? []
+  const lastCardId = useStore((st) => [...st.expenses].reverse().find((x) => x.cardId)?.cardId ?? "")
 
   useEffect(() => {
     if (!open) return
@@ -61,7 +68,8 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
     setSpread(true)
     setRepeat("1")
     setScope("this")
-  }, [open, expense, month, settings.categories, settings.methods])
+    setCardId(e ? e.cardId ?? "" : lastCardId || (settings.cards?.[0]?.id ?? ""))
+  }, [open, expense, month, settings.categories, settings.methods]) // eslint-disable-line
 
   const monthOptions = useMemo(() => {
     const ids = new Set(months.map((x) => x.id))
@@ -104,6 +112,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
       status,
       lastInstallment: isInst ? nC === nT : false,
       note: note.trim() || undefined,
+      cardId: isCreditMethod(method) && cardId ? cardId : undefined,
     }
     if (editing && expense) {
       const n = updateExpense(expense.id, data, scope)
@@ -182,6 +191,20 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
               <Label>Método de pagamento</Label>
               <SimpleSelect value={method} onChange={setMethod} options={withCurrent(settings.methods, method).map((c) => ({ value: c, label: c }))} />
             </div>
+            {isCreditMethod(method) && (
+              <div className="grid gap-1.5 sm:col-span-2">
+                <Label>Cartão</Label>
+                <div className="flex gap-2">
+                  {cards.length > 0 && (
+                    <SimpleSelect value={cardId || "none"} onChange={(v) => setCardId(v === "none" ? "" : v)}
+                      options={[...cards.map((c) => ({ value: c.id, label: `${c.name} · ${c.bank}` })), { value: "none", label: "Não informar" }]} />
+                  )}
+                  <Button type="button" variant="outline" className={cards.length ? "" : "w-full"} onClick={() => setNewCard(true)}>
+                    <Plus /> {cards.length ? "Novo" : "Cadastrar cartão"}
+                  </Button>
+                </div>
+              </div>
+            )}
             <div className="grid gap-1.5">
               <Label>Status</Label>
               <SimpleSelect value={status} onChange={(v) => setStatus(v as ExpenseStatus)} options={(Object.keys(STATUS_LABEL) as ExpenseStatus[]).map((s) => ({ value: s, label: STATUS_LABEL[s] }))} />
@@ -229,6 +252,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
           </DialogFooter>
         </form>
       </DialogContent>
+      <CardDialog open={newCard} onOpenChange={setNewCard} onSaved={setCardId} />
     </Dialog>
   )
 }

@@ -2,25 +2,18 @@
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#5B9BFF"/>
-      <stop offset="0.55" stop-color="#3B82F6"/>
+      <stop offset=".55" stop-color="#3B82F6"/>
       <stop offset="1" stop-color="#2557C7"/>
     </linearGradient>
     <linearGradient id="s" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#fff" stop-opacity=".28"/>
+      <stop offset="0" stop-color="#fff" stop-opacity=".22"/>
       <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="116" fill="url(#g)"/>
-  <rect width="512" height="512" rx="116" fill="url(#s)"/>
-  <!-- barras pixeladas: grid de blocos de 52px -->
-  <g fill="#fff">
-    <rect x="113" y="295" width="52" height="104" rx="6"/>
-    <rect x="230" y="217" width="52" height="182" rx="6"/>
-    <rect x="347" y="139" width="52" height="260" rx="6"/>
-  </g>
-  <g fill="#fff" opacity=".55">
-    <rect x="113" y="230" width="52" height="52" rx="6"/>
-    <rect x="230" y="152" width="52" height="52" rx="6"/>
-    <rect x="347" y="74" width="52" height="52" rx="6"/>
+  <rect width="512" height="512" rx="143" fill="url(#g)"/>
+  <rect width="512" height="512" rx="143" fill="url(#s)"/>
+  <g transform="translate(152 131) scale(3.2)" shape-rendering="crispEdges">
+    <path d="M13 0H52V13H65V39H52V52H39V78H26V52H13V39H0V13H13V0Z" fill="#fff"/>
+    <rect x="39" y="13" width="13" height="13" fill="#9BE858"/>
   </g>
 </svg>

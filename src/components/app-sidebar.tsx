@@ -1,4 +1,4 @@
-import { LayoutDashboard, ListChecks, CreditCard, BarChart3, Settings, WifiOff, UserRound } from "lucide-react"
+import { CalendarClock, LayoutDashboard, ListChecks, CreditCard, BarChart3, Settings, WifiOff, UserRound } from "lucide-react"
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, useSidebar,
@@ -14,7 +14,8 @@ import { useSync } from "@/lib/sync"
 const NAV: { route: Route; label: string; icon: typeof LayoutDashboard }[] = [
   { route: "dashboard", label: "Visão geral", icon: LayoutDashboard },
   { route: "lancamentos", label: "Lançamentos", icon: ListChecks },
-  { route: "parcelas", label: "Parcelas", icon: CreditCard },
+  { route: "parcelas", label: "Parcelas", icon: CalendarClock },
+  { route: "cartoes", label: "Cartões", icon: CreditCard },
   { route: "relatorios", label: "Relatórios", icon: BarChart3 },
   { route: "ajustes", label: "Ajustes & backup", icon: Settings },
   { route: "conta", label: "Minha conta", icon: UserRound },
@@ -31,11 +32,11 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<a href="#/dashboard" />}>
-              <AppLogo className="size-8" />
-              <div className="grid flex-1 text-left leading-tight">
-                <span className="truncate font-semibold">Finanças</span>
-                <span className="truncate text-xs text-muted-foreground">{name ? `de ${name}` : "Controle pessoal"}</span>
+            <SidebarMenuButton size="lg" className="group-data-[collapsible=icon]:p-0!" render={<a href="#/dashboard" />}>
+              <AppLogo className="size-8 transition-transform group-hover/menu-button:scale-105" />
+              <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
+                <span className="truncate font-brand text-[15px] font-semibold tracking-tight">finitree</span>
+                <span className="truncate text-xs text-muted-foreground">{name ? `de ${name}` : "finanças pessoais"}</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

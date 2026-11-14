@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { StatCard } from "@/components/stat-card"
 import { GettingStarted } from "@/components/getting-started"
+import { cardStats } from "@/lib/cards"
 import { BarList, Donut, Meter, SERIES, TrendChart } from "@/components/charts"
 import { carryCandidates, useStore } from "@/lib/store"
 import { useSelectedMonth } from "@/lib/use-month"
@@ -14,12 +15,14 @@ import { addMonths, money, monthLabel, percent } from "@/lib/format"
 import { KIND_LABEL } from "@/lib/types"
 
 export function Dashboard({ onAdd }: { onAdd: () => void }) {
-  const { expenses, months, generateNextMonth } = useStore()
+  const { expenses, months, generateNextMonth, settings } = useStore()
+  const cards = settings.cards ?? []
   const month = useSelectedMonth()
   const s = useMemo(() => monthSummary(expenses, months, month), [expenses, months, month])
   const prev = useMemo(() => monthSummary(expenses, months, addMonths(month, -1)), [expenses, months, month])
   const trend = useMemo(() => history(expenses, months).filter((h) => h.month <= month).slice(-12), [expenses, months, month])
   const inst = useMemo(() => installmentsOf(expenses, month), [expenses, month])
+  const byCard = useMemo(() => cardStats(expenses, cards, month), [expenses, cards, month])
   const next = addMonths(month, 1)
   const hasNext = expenses.some((e) => e.month === next)
   const toCarry = useMemo(() => carryCandidates(expenses, month).length, [expenses, month])
@@ -135,13 +138,26 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
           </CardHeader>
           <CardContent><Donut data={topN(s.byCategory, 5)} total={s.total} /></CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Por método de pagamento</CardTitle>
-            <CardDescription>Onde o dinheiro sai</CardDescription>
-          </CardHeader>
-          <CardContent><BarList data={s.byMethod} total={s.total} /></CardContent>
-        </Card>
+        {cards.length > 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Por cartão</CardTitle>
+              <CardDescription>Fatura do mês em cada cartão</CardDescription>
+              <CardAction><Button variant="ghost" size="sm" nativeButton={false} render={<a href="#/cartoes" />}>Ver cartões</Button></CardAction>
+            </CardHeader>
+            <CardContent>
+              <BarList total={byCard.reduce((a, c) => a + c.month, 0)} data={byCard.filter((c) => c.month > 0).map((c) => ({ name: c.card?.name ?? "Crédito sem cartão", value: c.month, color: c.card?.color ?? "var(--muted-foreground)" }))} />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Por método de pagamento</CardTitle>
+              <CardDescription>Onde o dinheiro sai</CardDescription>
+            </CardHeader>
+            <CardContent><BarList data={s.byMethod} total={s.total} /></CardContent>
+          </Card>
+        )}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">

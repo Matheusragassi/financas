@@ -102,7 +102,7 @@ export function Donut({ data, total }: { data: { name: string; value: number }[]
 }
 
 /** Barras horizontais em HTML: legíveis, com rótulo e valor */
-export function BarList({ data, total, color = SERIES[0], max = 8 }: { data: { name: string; value: number }[]; total: number; color?: string; max?: number }) {
+export function BarList({ data, total, color = SERIES[0], max = 8 }: { data: { name: string; value: number; color?: string }[]; total: number; color?: string; max?: number }) {
   const top = data.slice(0, max)
   const peak = Math.max(...top.map((d) => d.value), 1)
   return (
@@ -110,13 +110,13 @@ export function BarList({ data, total, color = SERIES[0], max = 8 }: { data: { n
       {top.map((d) => (
         <li key={d.name} className="space-y-1">
           <div className="flex items-baseline justify-between gap-2 text-sm">
-            <span className="truncate">{d.name}</span>
+            <span className="flex min-w-0 items-center gap-1.5">{d.color && <span className="size-2.5 shrink-0 rounded-[3px]" style={{ background: d.color }} />}<span className="truncate">{d.name}</span></span>
             <span className="num shrink-0 font-medium">
               {money(d.value)} <span className="text-xs font-normal text-muted-foreground">· {percent(total ? d.value / total : 0)}</span>
             </span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-muted">
-            <div className="h-full rounded-full" style={{ width: `${(d.value / peak) * 100}%`, background: color }} />
+            <div className="h-full rounded-full" style={{ width: `${(d.value / peak) * 100}%`, background: d.color ?? color }} />
           </div>
         </li>
       ))}

@@ -21,16 +21,16 @@ export function NavUser() {
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger render={<SidebarMenuButton size="lg" className="data-popup-open:bg-sidebar-accent" />}>
+          <DropdownMenuTrigger render={<SidebarMenuButton size="lg" className="data-popup-open:bg-sidebar-accent group-data-[collapsible=icon]:p-0!" />}>
             <span className="relative">
               <UserAvatar className="size-8" />
               {p.google && <span className="absolute -right-0.5 -bottom-0.5"><SyncDot status={status} dirty={dirty} /></span>}
             </span>
-            <div className="grid flex-1 text-left leading-tight">
+            <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
               <span className="truncate text-sm font-medium">{p.isDemo ? "Demonstração" : p.fullName}</span>
               <span className="truncate text-xs text-muted-foreground">{p.isDemo ? "dados fictícios" : p.email || "Sem conta conectada"}</span>
             </div>
-            <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
+            <ChevronsUpDown className="ml-auto size-4 text-muted-foreground group-data-[collapsible=icon]:hidden" />
           </DropdownMenuTrigger>
           <DropdownMenuContent side={isMobile ? "top" : "right"} align="end" sideOffset={6} className="w-60">
             <DropdownMenuGroup>
