@@ -46,6 +46,8 @@ export interface Backup {
   settings: Settings
   months: Month[]
   expenses: Expense[]
+  /** versão remota (sincronização) */
+  rev?: string
 }
 
 export const KIND_LABEL: Record<ExpenseKind, string> = {

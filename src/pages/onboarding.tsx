@@ -12,6 +12,10 @@ import { currentMonthId, parseMoney } from "@/lib/format"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { SheetImportDialog } from "@/components/sheet-import-dialog"
 import { AuthorCredit } from "@/components/author-credit"
+import { GoogleSignInButton } from "@/components/sync-indicator"
+import { googleEnabled } from "@/lib/config"
+import { signOut, useSync } from "@/lib/sync"
+import { Cloud } from "lucide-react"
 
 export function Onboarding() {
   const { importBackup, startEmpty } = useStore()
@@ -19,6 +23,7 @@ export function Onboarding() {
   const [name, setName] = useState("")
   const [salary, setSalary] = useState("")
   const [sheetOpen, setSheetOpen] = useState(false)
+  const user = useSync((s) => s.user)
 
   async function onFile(f?: File) {
     if (!f) return
@@ -48,6 +53,28 @@ export function Onboarding() {
             <span className="flex items-center gap-1.5"><ShieldCheck className="size-3.5" /> Dados só no seu aparelho</span>
           </div>
         </div>
+
+        {googleEnabled() && (user ? (
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border bg-card p-3 text-sm">
+            {user.picture && <img src={user.picture} alt="" referrerPolicy="no-referrer" className="size-8 rounded-full" />}
+            <div className="flex-1">
+              <div className="font-medium">Conectado como {user.name}</div>
+              <div className="text-xs text-muted-foreground">Escolha abaixo como começar. Tudo fica salvo automaticamente na sua conta Google.</div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => signOut(false)}>Trocar conta</Button>
+          </div>
+        ) : (
+          <Card className="ring-2 ring-primary/25">
+            <CardContent className="flex flex-col items-center gap-3 py-2 text-center sm:flex-row sm:text-left">
+              <Cloud className="size-8 shrink-0 text-chart-1" />
+              <div className="flex-1">
+                <div className="font-medium">Entre com sua conta Google</div>
+                <div className="text-sm text-muted-foreground">Seus dados ficam salvos no seu Google Drive e aparecem no celular e no computador. Sem backup manual.</div>
+              </div>
+              <GoogleSignInButton size="lg" className="w-full sm:w-auto" />
+            </CardContent>
+          </Card>
+        ))}
 
         <div className="grid gap-4 md:grid-cols-2">
           <Card className="ring-2 ring-primary/20">
@@ -101,7 +128,10 @@ export function Onboarding() {
             </CardContent>
           </Card>
         </div>
-        <AuthorCredit className="justify-center" />
+        <div className="flex flex-col items-center gap-2">
+          <AuthorCredit className="justify-center" />
+          <a href="./privacidade.html" className="text-[11px] text-muted-foreground underline-offset-2 hover:underline">Política de privacidade</a>
+        </div>
       </div>
       <SheetImportDialog open={sheetOpen} onOpenChange={setSheetOpen} />
     </div>

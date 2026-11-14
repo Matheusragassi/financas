@@ -6,6 +6,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/app-sidebar"
 import { MonthPicker } from "@/components/month-picker"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { SyncIndicator } from "@/components/sync-indicator"
 import { ExpenseForm } from "@/components/expense-form"
 import { useStore } from "@/lib/store"
 import { useRoute } from "@/lib/use-route"
@@ -46,6 +47,7 @@ export default function App() {
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
             {route !== "ajustes" && route !== "relatorios" && <MonthPicker />}
             <ThemeToggle />
+            <SyncIndicator />
             <Button size="sm" onClick={() => setAdding(true)} className="hidden sm:inline-flex">
               <Plus /> Novo gasto
             </Button>

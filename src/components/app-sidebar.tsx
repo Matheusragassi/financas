@@ -7,6 +7,7 @@ import { useRoute, type Route } from "@/lib/use-route"
 import { useStore } from "@/lib/store"
 import { useOnline } from "@/lib/use-online"
 import { AuthorCredit } from "@/components/author-credit"
+import { useSync } from "@/lib/sync"
 
 const NAV: { route: Route; label: string; icon: typeof Wallet }[] = [
   { route: "dashboard", label: "Visão geral", icon: LayoutDashboard },
@@ -20,6 +21,7 @@ export function AppSidebar() {
   const route = useRoute()
   const name = useStore((s) => s.settings.ownerName)
   const online = useOnline()
+  const googleUser = useSync((s) => s.user)
   const { setOpenMobile } = useSidebar()
   return (
     <Sidebar collapsible="icon" variant="inset">
@@ -62,7 +64,7 @@ export function AppSidebar() {
       <SidebarFooter>
         <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
           {online ? <span className="size-2 rounded-full bg-success" /> : <WifiOff className="size-3.5" />}
-          {online ? "Online · dados salvos neste aparelho" : "Offline · tudo continua funcionando"}
+          {!online ? "Offline · tudo continua funcionando" : googleUser ? "Online · salvo na sua conta Google" : "Online · dados salvos neste aparelho"}
         </div>
         <AuthorCredit className="px-2 pb-1 group-data-[collapsible=icon]:hidden" />
       </SidebarFooter>
