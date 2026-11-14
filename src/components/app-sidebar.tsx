@@ -1,4 +1,4 @@
-import { LayoutDashboard, ListChecks, CreditCard, BarChart3, Settings, Wallet, WifiOff, UserRound } from "lucide-react"
+import { LayoutDashboard, ListChecks, CreditCard, BarChart3, Settings, WifiOff, UserRound } from "lucide-react"
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, useSidebar,
@@ -8,9 +8,10 @@ import { useStore } from "@/lib/store"
 import { useOnline } from "@/lib/use-online"
 import { AuthorCredit } from "@/components/author-credit"
 import { NavUser } from "@/components/nav-user"
+import { AppLogo } from "@/components/app-logo"
 import { useSync } from "@/lib/sync"
 
-const NAV: { route: Route; label: string; icon: typeof Wallet }[] = [
+const NAV: { route: Route; label: string; icon: typeof LayoutDashboard }[] = [
   { route: "dashboard", label: "Visão geral", icon: LayoutDashboard },
   { route: "lancamentos", label: "Lançamentos", icon: ListChecks },
   { route: "parcelas", label: "Parcelas", icon: CreditCard },
@@ -31,9 +32,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<a href="#/dashboard" />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Wallet className="size-4" />
-              </div>
+              <AppLogo className="size-8" />
               <div className="grid flex-1 text-left leading-tight">
                 <span className="truncate font-semibold">Finanças</span>
                 <span className="truncate text-xs text-muted-foreground">{name ? `de ${name}` : "Controle pessoal"}</span>
@@ -52,6 +51,7 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     isActive={route === n.route}
                     tooltip={n.label}
+                    className="data-active:bg-brand/12 data-active:text-foreground data-active:[&>svg]:text-brand"
                     render={<a href={`#/${n.route}`} onClick={() => setOpenMobile(false)} />}
                   >
                     <n.icon />

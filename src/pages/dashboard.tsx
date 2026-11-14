@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { StatCard } from "@/components/stat-card"
+import { GettingStarted } from "@/components/getting-started"
 import { BarList, Donut, Meter, SERIES, TrendChart } from "@/components/charts"
 import { carryCandidates, useStore } from "@/lib/store"
 import { useSelectedMonth } from "@/lib/use-month"
@@ -26,12 +27,14 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
   const ending = inst.filter((i) => i.remaining === 0)
   const relief = ending.reduce((a, i) => a + i.expense.amount, 0)
 
+  const hasAnyData = expenses.length > 0
+  if (!s.list.length && !hasAnyData) return <GettingStarted month={month} onAdd={onAdd} />
   if (!s.list.length)
     return (
       <Card className="mx-auto mt-10 max-w-lg text-center">
         <CardHeader>
           <CardTitle>Nenhum lançamento em {monthLabel(month)}</CardTitle>
-          <CardDescription>Adicione o primeiro gasto ou copie os fixos e parcelas do mês anterior.</CardDescription>
+          <CardDescription>Adicione um gasto ou copie os fixos e parcelas do mês anterior.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap justify-center gap-2">
           <Button onClick={onAdd}><Plus /> Novo gasto</Button>

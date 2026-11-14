@@ -42,7 +42,7 @@ export default function App() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-3 backdrop-blur md:rounded-t-xl md:px-4">
+        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b px-3 glass-subtle md:rounded-t-xl md:px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-1 hidden h-4! self-center sm:block" />
           <h1 className="hidden text-sm font-medium sm:block">{TITLES[route]}</h1>
@@ -50,14 +50,14 @@ export default function App() {
             {!["ajustes", "relatorios", "conta"].includes(route) && <MonthPicker />}
             <ThemeToggle />
             <SyncIndicator />
-            <Button size="sm" onClick={() => setAdding(true)} className="hidden sm:inline-flex">
+            <Button size="sm" onClick={() => setAdding(true)} className="hidden bg-brand text-brand-foreground hover:bg-brand/90 sm:inline-flex">
               <Plus /> Novo gasto
             </Button>
           </div>
         </header>
         {isDemo && (
-          <div className="flex flex-wrap items-center gap-2 border-b bg-chart-1/10 px-3 py-2 text-sm md:px-4">
-            <Sparkles className="size-4 text-chart-1" />
+          <div className="flex flex-wrap items-center gap-2 border-b bg-brand/10 px-3 py-2 text-sm md:px-4">
+            <Sparkles className="size-4 text-brand" />
             <span>Você está vendo uma <b>demonstração</b> com dados fictícios.</span>
             <Button size="sm" className="ml-auto" onClick={() => { resetAll(); window.location.hash = ""; window.scrollTo(0, 0) }}>
               <LogOut /> Sair da demo e usar meus dados
@@ -74,7 +74,7 @@ export default function App() {
         </main>
         <Button
           size="icon-lg"
-          className="fixed right-4 bottom-4 z-30 size-14 rounded-full shadow-lg sm:hidden"
+          className="fixed right-4 bottom-4 z-30 size-14 rounded-full bg-brand text-brand-foreground shadow-[0_10px_30px_-6px_rgba(59,130,246,0.6)] hover:bg-brand/90 sm:hidden"
           onClick={() => setAdding(true)}
           aria-label="Novo gasto"
         >

@@ -5,6 +5,7 @@ import { createDataFile, findDataFile, getFileMeta, getRemoteRev, readData, writ
 import { useStore } from "./store"
 import { googleEnabled } from "./config"
 import type { Backup } from "./types"
+import { currentMonthId } from "./format"
 
 /*
  * Sincronização com a planilha do Google Drive do usuário.
@@ -131,7 +132,9 @@ export async function signIn() {
       if (hasLocalData()) { set({ dirty: true }); await push() } else set({ status: "synced" })
     }
     const st = useStore.getState()
-    if (!st.settings.ownerName) st.updateSettings({ ownerName: user.name.split(" ")[0] })
+    // Conta nova, sem dados: entra direto no app (os primeiros passos aparecem lá dentro)
+    if (!st.initialized || st.isDemo) st.startEmpty(0, user.name.split(" ")[0], currentMonthId())
+    else if (!st.settings.ownerName) st.updateSettings({ ownerName: user.name.split(" ")[0] })
   } catch (e) {
     fail(e)
     throw e

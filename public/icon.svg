@@ -1,7 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#0f1014"/>
-  <rect x="96" y="150" width="320" height="230" rx="44" fill="none" stroke="#fafafa" stroke-width="30"/>
-  <path d="M96 210h228a44 44 0 0 1 0 88H96" fill="none" stroke="#fafafa" stroke-width="30"/>
-  <circle cx="326" cy="254" r="18" fill="#1baf7a"/>
-  <path d="M150 150l150-50a24 24 0 0 1 30 18l8 32" fill="none" stroke="#fafafa" stroke-width="30" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5B9BFF"/>
+      <stop offset="0.55" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#2557C7"/>
+    </linearGradient>
+    <linearGradient id="s" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".28"/>
+      <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#g)"/>
+  <rect width="512" height="512" rx="116" fill="url(#s)"/>
+  <!-- barras pixeladas: grid de blocos de 52px -->
+  <g fill="#fff">
+    <rect x="113" y="295" width="52" height="104" rx="6"/>
+    <rect x="230" y="217" width="52" height="182" rx="6"/>
+    <rect x="347" y="139" width="52" height="260" rx="6"/>
+  </g>
+  <g fill="#fff" opacity=".55">
+    <rect x="113" y="230" width="52" height="52" rx="6"/>
+    <rect x="230" y="152" width="52" height="52" rx="6"/>
+    <rect x="347" y="74" width="52" height="52" rx="6"/>
+  </g>
 </svg>
