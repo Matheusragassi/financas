@@ -50,6 +50,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
   const [cardId, setCardId] = useState("")
   const [newCard, setNewCard] = useState(false)
   const [confirmClose, setConfirmClose] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
   const cards = settings.cards ?? []
 
   useEffect(() => {
@@ -71,6 +72,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
     setSpread(true)
     setRepeat("1")
     setScope("all")
+    setSubmitted(false)
     setCardId(e?.cardId ?? "")
   }, [open, expense, month, settings.categories, settings.methods]) // eslint-disable-line
 
@@ -90,6 +92,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
 
   function submit(ev: React.FormEvent) {
     ev.preventDefault()
+    setSubmitted(true)
     const value = amount
     if (!description.trim()) return toast.error("Informe a descrição.")
     if (!value) return toast.error("Informe o valor.")
@@ -152,11 +155,11 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="grid gap-1.5 sm:col-span-2">
               <FieldLabel htmlFor="desc" required>Descrição</FieldLabel>
-              <Input id="desc" autoFocus value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ex.: Mercado, Netflix, Notebook…" />
+              <Input id="desc" autoFocus aria-invalid={submitted && !description.trim()} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ex.: Mercado, Netflix, Notebook…" />
             </div>
             <div className="grid gap-1.5">
               <FieldLabel htmlFor="amount" required>{isInst ? "Valor da parcela" : "Valor"}</FieldLabel>
-              <MoneyInput id="amount" value={amount} onChange={setAmount} />
+              <MoneyInput id="amount" aria-invalid={submitted && !amount} value={amount} onChange={setAmount} />
             </div>
             <div className="grid gap-1.5">
               <FieldLabel required>Mês</FieldLabel>
@@ -167,11 +170,11 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
               <>
                 <div className="grid gap-1.5">
                   <FieldLabel htmlFor="ntotal" required>Total de parcelas</FieldLabel>
-                  <Input id="ntotal" inputMode="numeric" className="num" value={nTotal} onChange={(e) => { const nv = e.target.value.replace(/\D/g, ""); setNTotal(nv); const t = parseInt(nv) || 0; if (total && t) setAmount(Math.round((total / t) * 100) / 100) }} placeholder="10" />
+                  <Input id="ntotal" inputMode="numeric" className="num" aria-invalid={submitted && isInst && !nT} value={nTotal} onChange={(e) => { const nv = e.target.value.replace(/\D/g, ""); setNTotal(nv); const t = parseInt(nv) || 0; if (total && t) setAmount(Math.round((total / t) * 100) / 100) }} placeholder="10" />
                 </div>
                 <div className="grid gap-1.5">
                   <FieldLabel htmlFor="ncur" required>Parcela atual</FieldLabel>
-                  <Input id="ncur" inputMode="numeric" className="num" value={nCurrent} onChange={(e) => setNCurrent(e.target.value.replace(/\D/g, ""))} placeholder="1" />
+                  <Input id="ncur" inputMode="numeric" className="num" aria-invalid={submitted && isInst && (nC > nT)} value={nCurrent} onChange={(e) => setNCurrent(e.target.value.replace(/\D/g, ""))} placeholder="1" />
                 </div>
               </>
             )}
@@ -253,7 +256,6 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
           )}
 
           <DialogFooter className="items-center">
-            <span className="mr-auto hidden text-xs text-muted-foreground sm:block"><span className="text-critical">*</span> obrigatório</span>
             <Button type="button" variant="outline" onClick={() => close()}>Cancelar</Button>
             <Button type="submit">{editing ? "Salvar alterações" : "Adicionar"}</Button>
           </DialogFooter>
