@@ -57,6 +57,8 @@ export interface Settings {
   /** Link da planilha do Google usada na importação */
   sheetUrl?: string
   cards?: CreditCard[]
+  /** Código ISO da moeda (padrão BRL) */
+  currency?: string
 }
 
 export interface Backup {

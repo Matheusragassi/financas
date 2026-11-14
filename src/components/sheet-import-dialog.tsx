@@ -4,8 +4,9 @@ import { Loader2, Sheet as SheetIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { FieldLabel } from "@/components/field-label"
 import { Progress } from "@/components/ui/progress"
+import { FunSteps } from "@/components/fun-steps"
 import { useStore } from "@/lib/store"
 import { importFromGoogleSheet, type ImportProgress } from "@/lib/sheets-import"
 import { money, monthLabel } from "@/lib/format"
@@ -55,13 +56,23 @@ export function SheetImportDialog({ open, onOpenChange, defaultUrl = "" }: { ope
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-1.5">
-          <Label htmlFor="sheet-url">Link da planilha</Label>
+          <FieldLabel htmlFor="sheet-url" required>Link da planilha</FieldLabel>
           <Input id="sheet-url" value={url} onChange={(e) => { setUrl(e.target.value); setResult(null) }} placeholder="https://docs.google.com/spreadsheets/d/…" />
         </div>
-        {loading && (
-          <div className="space-y-1.5 text-sm">
-            <Progress value={progress ? (progress.done / progress.total) * 100 : 5} />
-            <p className="text-muted-foreground">{progress ? `Lendo ${progress.tab} (${progress.done}/${progress.total})` : "Abrindo planilha…"}</p>
+        {(loading || result) && (
+          <div className="space-y-3 rounded-2xl bg-foreground/[0.03] p-4 ring-1 ring-foreground/8">
+            {loading && <Progress value={progress ? (progress.done / progress.total) * 100 : 6} />}
+            <FunSteps
+              done={!!result}
+              active={!progress ? 0 : progress.done < progress.total ? 1 : 2}
+              steps={[
+                { label: "Abrindo sua planilha", hint: "Pedindo licença ao Google com educação…" },
+                { label: progress ? `Lendo os meses (${progress.done}/${progress.total})` : "Lendo os meses", hint: progress?.tab ? `Agora em: ${progress.tab}` : undefined },
+                { label: "Conferindo cores, parcelas e cancelados", hint: "Laranja é cancelado, verde é última parcela 🎨" },
+                { label: result ? "Opa, chegamos no final! Encontramos seus dados 🎉" : "Organizando tudo para você" },
+              ]}
+              quips={["Coando um café enquanto lemos ☕", "Somando parcelas sem calculadora 🧮", "Separando o fixo do variável…", "Regando sua árvore de finanças 🌱", "Quase lá, prometo!"]}
+            />
           </div>
         )}
         {error && <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}

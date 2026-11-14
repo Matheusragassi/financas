@@ -3,12 +3,13 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { MoneyInput } from "@/components/money-input"
+import { FieldLabel } from "@/components/field-label"
 import { SimpleSelect } from "@/components/simple-select"
 import { CardVisual } from "@/components/card-visual"
 import { BANKS, NETWORKS, bankColor } from "@/lib/cards"
 import { useStore } from "@/lib/store"
-import { money, parseMoney } from "@/lib/format"
+import { money } from "@/lib/format"
 import type { CreditCard } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -22,7 +23,7 @@ export function CardDialog({ open, onOpenChange, card, onSaved }: {
   const [name, setName] = useState("")
   const [network, setNetwork] = useState("")
   const [color, setColor] = useState(bankColor("Nubank"))
-  const [limit, setLimit] = useState("")
+  const [limit, setLimit] = useState(0)
   const [dueDay, setDueDay] = useState("")
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export function CardDialog({ open, onOpenChange, card, onSaved }: {
     setName(card?.name ?? "")
     setNetwork(card?.network ?? "")
     setColor(card?.color ?? bankColor(card?.bank ?? "Nubank"))
-    setLimit(card?.limit ? String(card.limit).replace(".", ",") : "")
+    setLimit(card?.limit ?? 0)
     setDueDay(card?.dueDay ? String(card.dueDay) : "")
   }, [open, card])
 
@@ -42,7 +43,7 @@ export function CardDialog({ open, onOpenChange, card, onSaved }: {
     const day = parseInt(dueDay)
     const id = saveCard({
       id: card?.id, bank, name: name.trim() || bank, network: network || undefined, color,
-      limit: parseMoney(limit) || undefined, dueDay: day >= 1 && day <= 31 ? day : undefined,
+      limit: limit || undefined, dueDay: day >= 1 && day <= 31 ? day : undefined,
     })
     toast.success(card ? "Cartão atualizado" : "Cartão adicionado")
     onOpenChange(false)
@@ -57,31 +58,31 @@ export function CardDialog({ open, onOpenChange, card, onSaved }: {
           <DialogDescription>Só para organizar seus gastos. Nenhum número ou dado do cartão é pedido.</DialogDescription>
         </DialogHeader>
         <CardVisual card={preview} className="mx-auto max-w-[300px]">
-          {limit && <div className="text-[11px] opacity-80">Limite {money(parseMoney(limit))}</div>}
+          {limit > 0 && <div className="text-[11px] opacity-80">Limite {money(limit)}</div>}
         </CardVisual>
         <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
           <div className="grid gap-1.5">
-            <Label>Banco</Label>
+            <FieldLabel required>Banco</FieldLabel>
             <SimpleSelect value={bank} onChange={(v) => { setBank(v); if (!card) setColor(bankColor(v)) }} options={BANKS.map((b) => ({ value: b.name, label: b.name }))} />
           </div>
           <div className="grid gap-1.5">
-            <Label>Bandeira <span className="font-normal text-muted-foreground">(opcional)</span></Label>
+            <FieldLabel optional>Bandeira</FieldLabel>
             <SimpleSelect value={network || "none"} onChange={(v) => setNetwork(v === "none" ? "" : v)} options={[{ value: "none", label: "Não informar" }, ...NETWORKS.map((n) => ({ value: n, label: n }))]} />
           </div>
           <div className="grid gap-1.5 sm:col-span-2">
-            <Label htmlFor="card-name">Apelido</Label>
+            <FieldLabel htmlFor="card-name" optional>Apelido</FieldLabel>
             <Input id="card-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={`Ex.: ${bank} principal, ${bank} virtual…`} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="card-limit">Limite <span className="font-normal text-muted-foreground">(opcional)</span></Label>
-            <Input id="card-limit" className="num" inputMode="decimal" value={limit} onChange={(e) => setLimit(e.target.value)} placeholder="R$ 0,00" />
+            <FieldLabel htmlFor="card-limit" optional>Limite</FieldLabel>
+            <MoneyInput id="card-limit" value={limit} onChange={setLimit} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="card-due">Dia do vencimento <span className="font-normal text-muted-foreground">(opcional)</span></Label>
+            <FieldLabel htmlFor="card-due" optional>Vencimento (dia)</FieldLabel>
             <Input id="card-due" inputMode="numeric" value={dueDay} onChange={(e) => setDueDay(e.target.value.replace(/\D/g, "").slice(0, 2))} placeholder="10" />
           </div>
           <div className="grid gap-1.5 sm:col-span-2">
-            <Label>Cor</Label>
+            <FieldLabel>Cor</FieldLabel>
             <div className="flex flex-wrap items-center gap-2">
               {[bankColor(bank), ...SWATCHES.filter((c) => c !== bankColor(bank))].map((c) => (
                 <button key={c} type="button" onClick={() => setColor(c)} aria-label={`Cor ${c}`}

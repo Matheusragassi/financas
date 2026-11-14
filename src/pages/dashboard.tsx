@@ -51,7 +51,7 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
     )
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-6 md:space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-sm text-muted-foreground">Resumo de</p>
@@ -67,7 +67,7 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         <StatCard
           label="Total do mês"
           value={money(s.total)}
@@ -98,7 +98,7 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
         </StatCard>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 md:gap-5 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Evolução dos gastos</CardTitle>
@@ -130,7 +130,7 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 md:gap-5 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Por categoria</CardTitle>
@@ -160,7 +160,7 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
         )}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 md:gap-5 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Maiores gastos</CardTitle>

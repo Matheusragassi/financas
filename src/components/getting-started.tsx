@@ -2,13 +2,13 @@ import { useRef, useState } from "react"
 import { toast } from "sonner"
 import { Check, CloudCheck, FileUp, Plus, Sheet as SheetIcon, Wallet } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { MoneyInput } from "@/components/money-input"
 import { SheetImportDialog } from "@/components/sheet-import-dialog"
 import { AppLogo } from "@/components/app-logo"
 import { useStore } from "@/lib/store"
 import { useSync } from "@/lib/sync"
 import { readBackup } from "@/lib/backup"
-import { money, monthLabel, parseMoney } from "@/lib/format"
+import { money, monthLabel } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
 /** Primeiros passos: aparece dentro do app quando ainda não há lançamentos */
@@ -16,17 +16,17 @@ export function GettingStarted({ month, onAdd }: { month: string; onAdd: () => v
   const { settings, months, setSalary, updateSettings, importBackup } = useStore()
   const user = useSync((s) => s.user)
   const salary = months.find((m) => m.id === month)?.salary ?? 0
-  const [value, setValue] = useState("")
+  const [value, setValue] = useState(0)
   const [sheetOpen, setSheetOpen] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   function saveSalary(e: React.FormEvent) {
     e.preventDefault()
-    const v = parseMoney(value)
+    const v = value
     if (!v) return toast.error("Informe um valor.")
     setSalary(month, v)
     updateSettings({ defaultSalary: v })
-    setValue("")
+    setValue(0)
     toast.success(`Renda definida: ${money(v)}`)
   }
   async function onFile(f?: File) {
@@ -51,7 +51,7 @@ export function GettingStarted({ month, onAdd }: { month: string; onAdd: () => v
           <Step n={1} done={salary > 0} icon={Wallet} title="Defina sua renda mensal" desc={salary > 0 ? `${money(salary)} em ${monthLabel(month)}` : "Base para calcular saldo e comprometimento."}>
             {salary === 0 && (
               <form onSubmit={saveSalary} className="flex gap-2">
-                <Input className="num h-9 w-36" inputMode="decimal" placeholder="R$ 0,00" value={value} onChange={(e) => setValue(e.target.value)} />
+                <MoneyInput className="w-44" value={value} onChange={setValue} />
                 <Button type="submit" size="sm" className="h-9 bg-brand text-brand-foreground hover:bg-brand/90">Salvar</Button>
               </form>
             )}

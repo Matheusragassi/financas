@@ -26,7 +26,7 @@ createRoot(document.getElementById("root")!).render(
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
       <TooltipProvider>
         <App />
-        <Toaster position="top-center" richColors closeButton />
+        <Toaster position="bottom-right" visibleToasts={4} offset={20} mobileOffset={{ bottom: 92, left: 16, right: 16 }} closeButton />
       </TooltipProvider>
     </ThemeProvider>
   </StrictMode>,

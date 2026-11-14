@@ -12,8 +12,8 @@
   </defs>
   <rect width="512" height="512" rx="143" fill="url(#g)"/>
   <rect width="512" height="512" rx="143" fill="url(#s)"/>
-  <g transform="translate(152 131) scale(3.2)" shape-rendering="crispEdges">
-    <path d="M13 0H52V13H65V39H52V52H39V78H26V52H13V39H0V13H13V0Z" fill="#fff"/>
-    <rect x="39" y="13" width="13" height="13" fill="#9BE858"/>
+  <g transform="translate(207 126) scale(2.5)" shape-rendering="crispEdges">
+    <path d="M0 0h13v13H0zM13 13h13v13H13zM0 26h39v13H0zM0 39h13v13H0zM0 52h39v13H0zM26 65h13v13H26zM0 78h39v13H0zM13 91h13v13H13z" fill="#fff"/>
+    <rect x="26" y="0" width="13" height="13" fill="#9BE858"/>
   </g>
 </svg>

@@ -101,12 +101,21 @@ export async function resolveConflict(keep: "local" | "remote") {
   if (keep === "local") { try { await push() } catch (e) { fail(e) } } else set({ status: "synced" })
 }
 
-/** Login + localiza (ou cria) a planilha de dados */
-export async function signIn() {
+/* Última conta usada neste aparelho (para "Continuar como …" na tela inicial). Não guarda tokens. */
+const LAST_KEY = "finitree-last-account"
+export function lastAccount(): GoogleUser | null {
+  try { return JSON.parse(localStorage.getItem(LAST_KEY) ?? "null") } catch { return null }
+}
+export function forgetLastAccount() { try { localStorage.removeItem(LAST_KEY) } catch { /* sem armazenamento */ } }
+
+/** Login + localiza (ou cria) a planilha de dados. `hint` pula a escolha de conta. */
+export async function signIn(opts?: { hint?: string; chooseAccount?: boolean }) {
   set({ status: "connecting", error: "" })
   try {
-    await requestToken(get().user ? "" : "select_account", get().user?.email)
+    const hint = opts?.hint ?? get().user?.email
+    await requestToken(opts?.chooseAccount || !hint ? "select_account" : "", hint)
     const user = await fetchUser()
+    try { localStorage.setItem(LAST_KEY, JSON.stringify({ name: user.name, email: user.email, picture: user.picture })) } catch { /* sem armazenamento */ }
     const sameUser = get().user?.email === user.email
     set({ user })
     let file = sameUser && get().fileId ? await getFileMeta(get().fileId!).catch(() => null) : null

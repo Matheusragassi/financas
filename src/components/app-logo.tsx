@@ -2,16 +2,16 @@ import { cn } from "@/lib/utils"
 
 /*
  * Finitree — árvore de finanças em pixel art (grid de 13 px, como a MAVI).
- * Copa arredondada em blocos + tronco; o bloco verde na copa é o "fruto":
- * o dinheiro que a árvore dá.
+ * Um cifrão em pixels cuja haste brota no topo em duas folhas:
+ * o dinheiro germinando como uma árvore. A folha verde é o "fruto".
  */
-export const TREE_PATH = "M13 0H52V13H65V39H52V52H39V78H26V52H13V39H0V13H13V0Z"
-export const FRUIT = { x: 39, y: 13, s: 13 }
+export const TREE_PATH = "M0 0h13v13H0zM13 13h13v13H13zM0 26h39v13H0zM0 39h13v13H0zM0 52h39v13H0zM26 65h13v13H26zM0 78h39v13H0zM13 91h13v13H13z"
+export const FRUIT = { x: 26, y: 0, s: 13 }
 
 /** Símbolo puro (herda a cor do texto; fruto em destaque opcional) */
 export function FinitreeMark({ className, fruit = "currentColor" }: { className?: string; fruit?: string }) {
   return (
-    <svg viewBox="0 0 65 78" className={className} fill="currentColor" shapeRendering="crispEdges" aria-hidden="true">
+    <svg viewBox="0 0 39 104" className={className} fill="currentColor" shapeRendering="crispEdges" aria-hidden="true">
       <path d={TREE_PATH} />
       <rect x={FRUIT.x} y={FRUIT.y} width={FRUIT.s} height={FRUIT.s} fill={fruit} />
     </svg>
@@ -22,7 +22,7 @@ export function FinitreeMark({ className, fruit = "currentColor" }: { className?
 export function AppLogo({ className }: { className?: string }) {
   return (
     <span className={cn("relative inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[28%] bg-[linear-gradient(145deg,#5B9BFF,#3B82F6_55%,#2557C7)] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]", className)}>
-      <FinitreeMark className="h-[56%] w-auto text-white" fruit="#9BE858" />
+      <FinitreeMark className="h-[62%] w-auto text-white" fruit="#9BE858" />
     </span>
   )
 }

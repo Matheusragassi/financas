@@ -32,7 +32,7 @@ export function Reports() {
   const overBudget = withData.filter((h) => h.commitment > 1).length
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-6 md:space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-sm text-muted-foreground">Estatísticas</p>
@@ -46,7 +46,7 @@ export function Reports() {
         </Tabs>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         <StatCard label="Total gasto" value={money(total)} icon={Sigma} hint={`${percent(income ? total / income : 0)} da renda no período`} />
         <StatCard label="Média mensal" value={money(avg)} icon={CalendarRange} hint={`${withData.length} meses com lançamentos`} />
         <StatCard label="Mês mais caro" value={max ? money(max.total) : "—"} icon={Flame} hint={max ? monthLabel(max.month) : ""} />
@@ -61,7 +61,7 @@ export function Reports() {
         <CardContent><TrendChart data={hist} height={300} /></CardContent>
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 md:gap-5 lg:grid-cols-2">
         <Card>
           <CardHeader><CardTitle>Saldo mensal</CardTitle><CardDescription>Renda menos gastos · verde sobrou, vermelho faltou</CardDescription></CardHeader>
           <CardContent><SimpleBars data={hist} dataKey="balance" label="Saldo" signed /></CardContent>
@@ -72,7 +72,7 @@ export function Reports() {
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 md:gap-5 lg:grid-cols-3">
         <Card>
           <CardHeader><CardTitle>Onde mais gastei</CardTitle><CardDescription>Top 10 itens somados no período</CardDescription></CardHeader>
           <CardContent><BarList data={byItem} total={total} max={10} /></CardContent>

@@ -36,7 +36,7 @@ export function GoogleSignInButton({ className, label = "Entrar com Google", siz
   return (
     <Button variant="outline" size={size} className={cn("gap-2", className)} disabled={busy} onClick={async () => {
       setBusy(true)
-      try { await signIn(); toast.success("Conectado ao Google", { description: "Seus dados agora ficam salvos na sua conta." }) }
+      try { await signIn({ chooseAccount: true }); toast.success("Conectado ao Google", { description: "Seus dados agora ficam salvos na sua conta." }) }
       catch (e) { toast.error((e as Error).message) }
       finally { setBusy(false) }
     }}>

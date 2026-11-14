@@ -59,6 +59,7 @@
 }
 
 :root {
+    /* Gráficos: paleta MAVI em variações de tom validadas (contraste e daltonismo) */
     --background: oklch(0.985 0.002 270);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
@@ -77,15 +78,15 @@
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: color-mix(in srgb, #3B82F6 60%, transparent);
-    --chart-1: #2a78d6;
-    --chart-2: #eb6834;
-    --chart-3: #1baf7a;
-    --chart-4: #eda100;
-    --chart-5: #e87ba4;
+    --chart-1: #3a81f5;
+    --chart-2: #0b9e6f;
+    --chart-3: #8044f1;
+    --chart-4: #cf6227;
+    --chart-5: #8c6fdc;
     --radius: 0.75rem;
-    --chart-6: #008300;
-    --chart-7: #6250d6;
-    --chart-8: #e34948;
+    --chart-6: #5a9b05;
+    --chart-7: #2b92bc;
+    --chart-8: #94A3B8;
     --brand: #3B82F6;
     --brand-foreground: #ffffff;
     --success: #0b7a0b;
@@ -120,14 +121,14 @@
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: color-mix(in srgb, #3B82F6 60%, transparent);
-    --chart-1: #3987e5;
-    --chart-2: #d95926;
-    --chart-3: #199e70;
-    --chart-4: #c98500;
-    --chart-5: #d55181;
-    --chart-6: #0ca30c;
-    --chart-7: #9085e9;
-    --chart-8: #e66767;
+    --chart-1: #3b82f6;
+    --chart-2: #18ad7b;
+    --chart-3: #8a57f9;
+    --chart-4: #de7037;
+    --chart-5: #9a7deb;
+    --chart-6: #64aa12;
+    --chart-7: #3da0ca;
+    --chart-8: #64748B;
     --brand: #3B82F6;
     --brand-foreground: #ffffff;
     --success: #2fbf4a;

@@ -40,7 +40,7 @@ export function CardsPage() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-6 md:space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-sm text-muted-foreground">Cartões de crédito em</p>
@@ -79,14 +79,14 @@ export function CardsPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
             <StatCard label="Faturas do mês" value={money(totalMonth)} icon={CardIcon} hint={`${cards.length} ${cards.length === 1 ? "cartão" : "cartões"}`} />
             <StatCard label="Total devido" value={money(totalOwed)} icon={Wallet} hint="Mês atual + parcelas futuras" />
             <StatCard label="Mais usado" value={top?.card?.name ?? "—"} hint={top ? `${money(top.owed)} devidos` : ""} />
             <StatCard label="Parcelas futuras" value={money(stats.reduce((a, s) => a + s.future, 0))} hint="Ainda vão cair nas próximas faturas" />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 md:gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {stats.filter((s) => s.card).map((s) => (
               <div key={s.card!.id} className="space-y-3 rounded-3xl border border-foreground/8 bg-card p-3">
                 <CardVisual card={s.card!}>

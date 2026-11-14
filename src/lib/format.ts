@@ -1,14 +1,28 @@
-const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
-const brlCompact = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-  notation: "compact",
-  maximumFractionDigits: 1,
-})
+import { currencyOf, type Currency } from "./currency"
+
+/* Moeda ativa (definida em Ajustes). Os formatadores são trocados quando ela muda. */
+let active: Currency = currencyOf("BRL")
+let fmt = makeFormatters(active)
+function makeFormatters(c: Currency) {
+  return {
+    money: new Intl.NumberFormat(c.locale, { style: "currency", currency: c.code, minimumFractionDigits: c.decimals, maximumFractionDigits: c.decimals }),
+    compact: new Intl.NumberFormat(c.locale, { style: "currency", currency: c.code, notation: "compact", maximumFractionDigits: 1 }),
+    number: new Intl.NumberFormat(c.locale, { minimumFractionDigits: c.decimals, maximumFractionDigits: c.decimals }),
+  }
+}
+export function setCurrency(code?: string) {
+  const c = currencyOf(code)
+  if (c.code === active.code) return
+  active = c
+  fmt = makeFormatters(c)
+}
+export const activeCurrency = () => active
 const pct = new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 1 })
 
-export const money = (v: number) => brl.format(v || 0)
-export const moneyCompact = (v: number) => brlCompact.format(v || 0)
+export const money = (v: number) => fmt.money.format(v || 0)
+export const moneyCompact = (v: number) => fmt.compact.format(v || 0)
+/** Número no formato da moeda, sem o símbolo (para campos de valor) */
+export const moneyDigits = (v: number) => fmt.number.format(v || 0)
 export const percent = (v: number) => (Number.isFinite(v) ? pct.format(v) : "—")
 
 const MONTHS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]

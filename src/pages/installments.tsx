@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { StatCard } from "@/components/stat-card"
-import { Legend, SERIES } from "@/components/charts"
+import { GlassTooltip, HoverCursor, Legend, SERIES } from "@/components/charts"
 import { ChartContainer, ChartTooltip, type ChartConfig } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { useStore } from "@/lib/store"
@@ -28,12 +28,12 @@ export function Installments() {
   const ending = list.filter((i) => i.remaining === 0)
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-6 md:space-y-8">
       <div>
         <p className="text-sm text-muted-foreground">Compras parceladas em</p>
         <h2 className="text-2xl font-semibold tracking-tight">{monthLabel(month)}</h2>
       </div>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         <StatCard label="Parcelas no mês" value={money(monthly)} icon={CreditCard} hint={`${list.length} compras ativas`} />
         <StatCard label="Ainda falta pagar" value={money(debt)} icon={Wallet} hint="Após a parcela deste mês" />
         <StatCard label="Terminam este mês" value={String(ending.length)} icon={CalendarCheck} hint={`Libera ${money(ending.reduce((a, i) => a + i.expense.amount, 0))} no próximo mês`} />
@@ -48,24 +48,12 @@ export function Installments() {
         <CardContent>
           <ChartContainer config={cfg} className="h-64 w-full">
             <BarChart data={proj} margin={{ left: 4, right: 8, top: 8 }} barCategoryGap="22%">
-              <CartesianGrid vertical={false} />
+              <CartesianGrid vertical={false} strokeDasharray="3 6" strokeOpacity={0.6} />
               <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} tickFormatter={monthShort} />
               <YAxis tickLine={false} axisLine={false} width={64} tickFormatter={(v) => moneyCompact(v)} />
-              <ChartTooltip cursor={{ fill: "var(--muted)", opacity: 0.5 }} content={({ active, payload, label }) => active && payload?.length ? (
-                <div className="grid min-w-44 gap-1 rounded-lg border bg-popover px-2.5 py-1.5 text-xs shadow-xl">
-                  <div className="font-medium">{monthLabel(String(label))}</div>
-                  {payload.map((p) => (
-                    <div key={String(p.dataKey)} className="flex items-center gap-2">
-                      <span className="size-2.5 rounded-[3px]" style={{ background: p.color }} />
-                      <span className="text-muted-foreground">{cfg[p.dataKey as keyof typeof cfg].label}</span>
-                      <span className="num ml-auto font-medium">{money(Number(p.value))}</span>
-                    </div>
-                  ))}
-                  <div className="mt-1 flex justify-between border-t pt-1"><span>Total</span><span className="num font-medium">{money(Number(payload[0].payload.total))}</span></div>
-                </div>
-              ) : null} />
+              <ChartTooltip cursor={HoverCursor} content={<GlassTooltip config={cfg} labelFmt={monthLabel} showTotal />} />
               <Bar dataKey="fixed" stackId="a" fill="var(--color-fixed)" stroke="var(--card)" strokeWidth={2} />
-              <Bar dataKey="installments" stackId="a" fill="var(--color-installments)" radius={[4, 4, 0, 0]} stroke="var(--card)" strokeWidth={2} />
+              <Bar dataKey="installments" stackId="a" fill="var(--color-installments)" radius={[6, 6, 0, 0]} stroke="var(--card)" strokeWidth={2} />
             </BarChart>
           </ChartContainer>
           <Legend items={[{ label: cfg.fixed.label, color: SERIES[0] }, { label: cfg.installments.label, color: SERIES[1] }]} />

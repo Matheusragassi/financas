@@ -1,4 +1,4 @@
-import { CalendarClock, LayoutDashboard, ListChecks, CreditCard, BarChart3, Settings, WifiOff, UserRound } from "lucide-react"
+import { CalendarClock, LayoutDashboard, ListChecks, CreditCard, BarChart3, Settings, UserRound } from "lucide-react"
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, useSidebar,
@@ -29,7 +29,7 @@ export function AppSidebar() {
   const { setOpenMobile } = useSidebar()
   return (
     <Sidebar collapsible="icon" variant="inset">
-      <SidebarHeader>
+      <SidebarHeader className="px-3 pt-3">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="group-data-[collapsible=icon]:p-0!" render={<a href="#/dashboard" />}>
@@ -44,7 +44,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
+          <SidebarGroupLabel className="mb-1 px-2.5 text-[11px] tracking-wider uppercase">Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {NAV.map((n) => (
@@ -64,15 +64,28 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
-          {online ? <span className="size-2 rounded-full bg-success" /> : <WifiOff className="size-3.5" />}
-          {!online ? "Offline · tudo continua funcionando" : googleUser ? "Online · salvo na sua conta Google" : "Online · dados salvos neste aparelho"}
-        </div>
+      <SidebarFooter className="gap-3 px-3 pb-3">
+        <ConnectionPill online={online} google={!!googleUser} />
         <NavUser />
-        <AuthorCredit className="px-2 pb-1 group-data-[collapsible=icon]:hidden" />
+        <AuthorCredit className="px-2.5 group-data-[collapsible=icon]:hidden" />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
+  )
+}
+
+function ConnectionPill({ online, google }: { online: boolean; google: boolean }) {
+  return (
+    <div
+      title={!online ? "Sem internet: tudo continua funcionando e é salvo quando a conexão voltar" : google ? "Seus dados são salvos automaticamente na sua conta Google" : "Seus dados ficam salvos só neste aparelho"}
+      className="flex items-center gap-2 rounded-xl bg-foreground/[0.035] px-2.5 py-2 text-xs ring-1 ring-foreground/6 group-data-[collapsible=icon]:hidden"
+    >
+      <span className="relative flex size-2">
+        {online && <span className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-60 [animation-duration:2s]" />}
+        <span className={online ? "relative inline-flex size-2 rounded-full bg-success" : "relative inline-flex size-2 rounded-full bg-warning"} />
+      </span>
+      <span className="font-medium">{online ? "Online" : "Offline"}</span>
+      <span className="ml-auto truncate text-muted-foreground">{google ? "Salvo no Google" : "Neste aparelho"}</span>
+    </div>
   )
 }

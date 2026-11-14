@@ -4,54 +4,132 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Política de Privacidade · Finitree</title>
-<link rel="icon" href="./icon.svg" />
+<link rel="icon" type="image/svg+xml" href="./icon.svg?v=3" />
+<meta name="theme-color" content="#090B12" />
+<script>
+  // Mesmo tema escolhido no app (next-themes salva em "theme")
+  try {
+    var t = localStorage.getItem("theme") || "dark";
+    var dark = t === "dark" || (t === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+  } catch (e) { document.documentElement.dataset.theme = "dark"; }
+</script>
 <style>
-  :root { color-scheme: light dark; --bg: #fbfbfc; --fg: #16161a; --muted: #5e5e66; --line: #e4e4e8; }
-  @media (prefers-color-scheme: dark) { :root { --bg: #0f1014; --fg: #f2f2f4; --muted: #a0a0aa; --line: #26262c; } }
-  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  main { max-width: 720px; margin: 0 auto; padding: 48px 16px 64px; }
-  h1 { font-size: 1.8rem; margin: 0 0 4px; } h2 { font-size: 1.1rem; margin: 32px 0 6px; }
-  p, li { color: var(--muted); } a { color: inherit; }
-  .meta { font-size: .9rem; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 16px; }
+  :root {
+    --brand: #3B82F6; --fruit: #9BE858;
+    --bg: #F4F7FB; --fg: #0F172A; --muted: #5B6476; --line: rgba(15, 23, 42, .08);
+    --card: rgba(255, 255, 255, .62); --chip: rgba(15, 23, 42, .04);
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    --bg: #090B12; --fg: #F2F4F8; --muted: #9AA3B5; --line: rgba(255, 255, 255, .08);
+    --card: rgba(16, 24, 39, .55); --chip: rgba(255, 255, 255, .04);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100dvh; background: var(--bg); color: var(--fg); font: 15px/1.7 "Geist Variable", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+  .glow { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+  .glow i { position: absolute; border-radius: 50%; filter: blur(120px); }
+  .glow i:nth-child(1) { width: 640px; height: 640px; top: -320px; left: 50%; transform: translateX(-50%); background: rgba(59, 130, 246, .22); }
+  .glow i:nth-child(2) { width: 420px; height: 420px; bottom: -220px; left: -120px; background: rgba(109, 40, 217, .14); }
+  .glow i:nth-child(3) { width: 380px; height: 380px; bottom: 10%; right: -160px; background: rgba(125, 211, 252, .16); }
+  .wrap { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 20px 16px 64px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0 24px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; font-weight: 600; letter-spacing: -.02em; font-size: 17px; }
+  .brand .tile { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; background: linear-gradient(145deg, #5B9BFF, #3B82F6 55%, #2557C7); box-shadow: inset 0 1px 0 rgba(255,255,255,.35); }
+  .back { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 10px; text-decoration: none; color: var(--fg); background: var(--chip); border: 1px solid var(--line); font-size: 13px; font-weight: 500; transition: background .15s, transform .15s; }
+  .back:hover { background: color-mix(in srgb, var(--brand) 14%, transparent); }
+  .back:active { transform: scale(.97); }
+  nav.crumbs { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  nav.crumbs a { color: inherit; text-decoration: none; } nav.crumbs a:hover { color: var(--fg); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 28px; backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); box-shadow: 0 8px 32px rgba(0,0,0,.12); }
+  @media (min-width: 640px) { .card { padding: 40px; } }
+  h1 { margin: 0; font-size: 28px; line-height: 1.2; letter-spacing: -.02em; }
+  .meta { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+  .summary { margin: 24px 0 8px; padding: 16px 18px; border-radius: 16px; background: color-mix(in srgb, var(--brand) 10%, transparent); border: 1px solid color-mix(in srgb, var(--brand) 25%, transparent); }
+  .summary p { margin: 0; color: var(--fg); }
+  h2 { font-size: 16px; margin: 32px 0 8px; display: flex; align-items: center; gap: 10px; }
+  h2::before { content: ""; width: 8px; height: 8px; background: var(--brand); flex: none; }
+  p, li { color: var(--muted); } ul { padding-left: 20px; margin: 8px 0; } li { margin: 4px 0; }
+  b, code { color: var(--fg); } code { font: 13px "JetBrains Mono", ui-monospace, monospace; background: var(--chip); padding: 1px 6px; border-radius: 6px; }
+  a.link { color: var(--brand); text-decoration: none; } a.link:hover { text-decoration: underline; }
+  footer { margin-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); }
+  footer a { display: inline-flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; }
+  footer a:hover { color: var(--fg); } footer a:hover svg { color: var(--brand); }
+  footer svg { height: 10px; width: auto; color: color-mix(in srgb, var(--fg) 70%, transparent); transition: color .2s; }
 </style>
 </head>
 <body>
-<main>
-  <h1>Política de Privacidade</h1>
-  <p class="meta">App Finitree · atualizada em novembro de 2026</p>
+<div class="glow" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="wrap">
+  <header>
+    <a class="brand" href="./">
+      <span class="tile">
+        <svg viewBox="0 0 39 104" height="19" shape-rendering="crispEdges" aria-hidden="true">
+          <path fill="#fff" d="M0 0h13v13H0zM13 13h13v13H13zM0 26h39v13H0zM0 39h13v13H0zM0 52h39v13H0zM26 65h13v13H26zM0 78h39v13H0zM13 91h13v13H13z"/>
+          <rect x="26" y="0" width="13" height="13" fill="#9BE858"/>
+        </svg>
+      </span>
+      finitree
+    </a>
+    <a class="back" href="./" onclick="if (document.referrer && new URL(document.referrer).origin === location.origin) { history.back(); return false }">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      Voltar ao app
+    </a>
+  </header>
 
-  <h2>Resumo</h2>
-  <p>O Finitree (antes "Finanças") não tem servidor e não coleta seus dados. Tudo o que você registra fica no seu aparelho e, se você entrar com o Google, numa planilha criada no <b>seu próprio Google Drive</b>. O desenvolvedor não tem acesso a nada disso.</p>
+  <nav class="crumbs" aria-label="Você está em">
+    <a href="./">finitree</a>
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+    <span>Política de privacidade</span>
+  </nav>
 
-  <h2>Quais dados o app usa</h2>
-  <ul>
-    <li><b>Seus lançamentos financeiros</b> (descrição, valor, categoria, mês etc.), digitados por você ou importados de uma planilha que você indicar.</li>
-    <li><b>Dados básicos da conta Google</b> (nome, e-mail e foto), apenas para mostrar quem está conectado.</li>
-  </ul>
+  <main class="card">
+    <h1>Política de Privacidade</h1>
+    <p class="meta">Finitree · atualizada em novembro de 2026</p>
 
-  <h2>Onde ficam guardados</h2>
-  <ul>
-    <li>No armazenamento local do navegador do seu aparelho, para o app funcionar offline.</li>
-    <li>Se você entrar com o Google: numa planilha chamada “Finitree — dados”, criada no seu Google Drive. Você pode abri-la, baixá-la ou apagá-la quando quiser.</li>
-  </ul>
+    <div class="summary">
+      <p><b>Resumo:</b> o Finitree não tem servidor e não coleta seus dados. O que você registra fica no seu aparelho e, se você entrar com o Google, numa planilha criada no <b>seu próprio Google Drive</b>. O desenvolvedor não tem acesso a nada disso.</p>
+    </div>
 
-  <h2>Permissões do Google</h2>
-  <p>O app pede apenas a permissão <code>drive.file</code>, que dá acesso <b>somente aos arquivos criados pelo próprio app</b>. Ele não consegue ver nem alterar os demais arquivos do seu Drive. O uso das informações recebidas das APIs do Google segue a <a href="https://developers.google.com/terms/api-services-user-data-policy">Política de Dados do Usuário dos Serviços de API do Google</a>, incluindo os requisitos de Uso Limitado.</p>
+    <h2>Quais dados o app usa</h2>
+    <ul>
+      <li><b>Seus lançamentos financeiros</b> (descrição, valor, categoria, mês, cartão etc.), digitados por você ou importados de uma planilha que você indicar.</li>
+      <li><b>Dados básicos da conta Google</b> (nome, e-mail e foto), apenas para mostrar quem está conectado.</li>
+      <li>Os <b>cartões</b> são só apelidos e bancos: o app nunca pede número, validade ou código do cartão.</li>
+    </ul>
 
-  <h2>Compartilhamento</h2>
-  <p>Seus dados não são vendidos, compartilhados nem enviados a terceiros. A comunicação acontece diretamente entre o seu navegador e o Google.</p>
+    <h2>Onde ficam guardados</h2>
+    <ul>
+      <li>No armazenamento local do navegador do seu aparelho, para o app funcionar offline.</li>
+      <li>Se você entrar com o Google: numa planilha chamada “Finitree — dados” no seu Google Drive. Você pode abri-la, baixá-la ou apagá-la quando quiser.</li>
+    </ul>
 
-  <h2>Como apagar seus dados</h2>
-  <ul>
-    <li>No app: <i>Ajustes &amp; backup → Apagar tudo e recomeçar</i> remove os dados do aparelho.</li>
-    <li>No Google Drive: apague a planilha “Finitree — dados”.</li>
-    <li>Para revogar o acesso do app à sua conta: <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
-  </ul>
+    <h2>Permissões do Google</h2>
+    <p>O app pede apenas a permissão <code>drive.file</code>, que dá acesso <b>somente aos arquivos criados pelo próprio app</b>. Ele não consegue ver nem alterar os demais arquivos do seu Drive. O uso das informações recebidas das APIs do Google segue a <a class="link" href="https://developers.google.com/terms/api-services-user-data-policy">Política de Dados do Usuário dos Serviços de API do Google</a>, incluindo os requisitos de Uso Limitado.</p>
 
-  <h2>Contato</h2>
-  <p>Dúvidas: abra uma issue em <a href="https://github.com/Matheusragassi/financas/issues">github.com/Matheusragassi/financas</a>.</p>
+    <h2>Compartilhamento</h2>
+    <p>Seus dados não são vendidos, compartilhados nem enviados a terceiros. A comunicação acontece diretamente entre o seu navegador e o Google.</p>
 
-  <p><a href="./">← Voltar ao app</a></p>
-</main>
+    <h2>Como apagar seus dados</h2>
+    <ul>
+      <li>No app: <i>Minha conta → Apagar dados deste aparelho</i>.</li>
+      <li>No Google Drive: apague a planilha “Finitree — dados” (ou “Finanças — dados”, em contas mais antigas).</li>
+      <li>Para revogar o acesso do app à sua conta: <a class="link" href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+    </ul>
+
+    <h2>Contato</h2>
+    <p>Dúvidas: abra uma issue em <a class="link" href="https://github.com/Matheusragassi/financas/issues">github.com/Matheusragassi/financas</a>.</p>
+  </main>
+
+  <footer>
+    <a href="https://www.matheusragassi.art/" target="_blank" rel="noopener" title="Portfólio de Matheus Ragassi">
+      Pixelated with care by
+      <svg viewBox="0 0 169 39" fill="currentColor" role="img" aria-label="MAVI">
+        <path d="M39 39H26V26H13V39H0V13H13V0H26V13H39V39Z"/><path d="M65 39H52V13H65V39ZM91 39H78V13H91V39ZM78 13H65V0H78V13Z"/><path d="M130 39H117V26H130V39ZM117 26H104V0H117V26ZM143 26H130V0H143V26Z"/><path d="M169 39H156V26H169V39ZM169 13H156V0H169V13Z"/>
+      </svg>
+    </a>
+  </footer>
+</div>
 </body>
 </html>

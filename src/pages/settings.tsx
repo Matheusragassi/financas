@@ -5,14 +5,17 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { InlineMoney } from "@/components/inline-money"
+import { MoneyInput } from "@/components/money-input"
+import { FieldLabel } from "@/components/field-label"
+import { SimpleSelect } from "@/components/simple-select"
+import { CURRENCIES, currencyOf } from "@/lib/currency"
 import { useStore } from "@/lib/store"
 import { downloadJson, readBackup } from "@/lib/backup"
-import { money, monthLabel, parseMoney } from "@/lib/format"
+import { money, monthLabel } from "@/lib/format"
 import { useInstallPrompt } from "@/lib/use-install"
 import { SheetImportDialog } from "@/components/sheet-import-dialog"
 
@@ -45,7 +48,7 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4 md:space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6 md:space-y-8">
       <h2 className="text-2xl font-semibold tracking-tight">Ajustes & backup</h2>
 
 
@@ -83,14 +86,19 @@ export function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Renda</CardTitle>
+          <CardTitle>Moeda e renda</CardTitle>
           <CardDescription>Nome, foto e conta ficam em <a href="#/conta" className="underline underline-offset-2">Minha conta</a>.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-1.5">
-            <Label htmlFor="st-sal">Renda padrão para novos meses</Label>
-            <Input id="st-sal" inputMode="decimal" defaultValue={s.settings.defaultSalary ? String(s.settings.defaultSalary).replace(".", ",") : ""}
-              onBlur={(e) => s.updateSettings({ defaultSalary: parseMoney(e.target.value) })} placeholder="0,00" />
+            <FieldLabel required>Moeda</FieldLabel>
+            <SimpleSelect value={s.settings.currency ?? "BRL"} onChange={(v) => { s.updateSettings({ currency: v }); toast.success(`Moeda: ${currencyOf(v).name}`) }}
+              options={CURRENCIES.map((c) => ({ value: c.code, label: `${c.flag}  ${c.name} (${c.symbol})` }))} />
+            <p className="text-xs text-muted-foreground">Só muda o símbolo e o formato. Os valores não são convertidos.</p>
+          </div>
+          <div className="grid gap-1.5">
+            <FieldLabel htmlFor="st-sal" optional>Renda padrão para novos meses</FieldLabel>
+            <MoneyInput id="st-sal" value={s.settings.defaultSalary} onChange={(v) => s.updateSettings({ defaultSalary: v })} />
           </div>
         </CardContent>
       </Card>
@@ -127,7 +135,7 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:gap-5 md:grid-cols-2">
         <ChipEditor title="Categorias" items={s.settings.categories} value={newCat} setValue={setNewCat}
           onAdd={() => addTo("categories", newCat, () => setNewCat(""))}
           onRemove={(c) => s.updateSettings({ categories: s.settings.categories.filter((x) => x !== c) })} />

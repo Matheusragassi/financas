@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { FieldLabel } from "@/components/field-label"
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
@@ -42,7 +42,7 @@ export function AccountPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4 md:space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6 md:space-y-8">
       {/* Cabeçalho do perfil */}
       <Card className="overflow-hidden pt-0">
         <div className="h-24 bg-[linear-gradient(120deg,var(--chart-1),var(--chart-7)_55%,var(--chart-5))] opacity-80" />
@@ -79,15 +79,15 @@ export function AccountPage() {
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-1.5">
-            <Label htmlFor="acc-first">Nome</Label>
+            <FieldLabel htmlFor="acc-first" required>Nome</FieldLabel>
             <Input id="acc-first" value={first} onChange={(e) => setFirst(e.target.value)} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="acc-last">Sobrenome</Label>
+            <FieldLabel htmlFor="acc-last" optional>Sobrenome</FieldLabel>
             <Input id="acc-last" value={last} onChange={(e) => setLast(e.target.value)} />
           </div>
           <div className="grid gap-1.5 sm:col-span-2">
-            <Label htmlFor="acc-email">E-mail</Label>
+            <FieldLabel htmlFor="acc-email" optional={!p.google}>E-mail</FieldLabel>
             <Input id="acc-email" type="email" value={p.google ? p.email : email} disabled={p.google} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" />
             {p.google && <p className="text-xs text-muted-foreground">Vem da sua conta Google e só pode ser alterado lá.</p>}
           </div>

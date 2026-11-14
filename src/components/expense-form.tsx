@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { MoneyInput } from "@/components/money-input"
+import { FieldLabel } from "@/components/field-label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
@@ -13,7 +15,7 @@ import { CardDialog } from "@/components/card-dialog"
 import { isCreditMethod } from "@/lib/cards"
 import { Plus } from "lucide-react"
 import { useStore, type Scope } from "@/lib/store"
-import { addMonths, money, monthLabel, parseMoney } from "@/lib/format"
+import { addMonths, money, monthLabel } from "@/lib/format"
 import { KIND_LABEL, STATUS_LABEL, type Expense, type ExpenseKind, type ExpenseStatus } from "@/lib/types"
 
 interface Props {
@@ -23,15 +25,14 @@ interface Props {
   expense?: Expense | null
 }
 
-const toInput = (n: number | null | undefined) => (n ? String(n).replace(".", ",") : "")
 
 export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
   const { settings, months, addExpense, updateExpense } = useStore()
   const editing = !!expense
   const [kind, setKind] = useState<ExpenseKind>("single")
   const [description, setDescription] = useState("")
-  const [amount, setAmount] = useState("")
-  const [total, setTotal] = useState("")
+  const [amount, setAmount] = useState(0)
+  const [total, setTotal] = useState(0)
   const [category, setCategory] = useState("")
   const [method, setMethod] = useState("")
   const [m, setM] = useState(month)
@@ -54,8 +55,8 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
     const e = expense
     setKind(e?.kind ?? "single")
     setDescription(e?.description ?? "")
-    setAmount(toInput(e?.amount))
-    setTotal(toInput(e?.totalValue))
+    setAmount(e?.amount ?? 0)
+    setTotal(e?.totalValue ?? 0)
     setCategory(e?.category ?? settings.categories[0] ?? "Outros")
     setMethod(e?.method ?? settings.methods[0] ?? "Outros")
     setM(e?.month ?? month)
@@ -87,13 +88,12 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
 
   // Preenche parcela a partir do total
   const fillFromTotal = () => {
-    const t = parseMoney(total)
-    if (t && nT) setAmount((Math.round((t / nT) * 100) / 100).toFixed(2).replace(".", ","))
+    if (total && nT) setAmount(Math.round((total / nT) * 100) / 100)
   }
 
   function submit(ev: React.FormEvent) {
     ev.preventDefault()
-    const value = parseMoney(amount)
+    const value = amount
     if (!description.trim()) return toast.error("Informe a descrição.")
     if (!value) return toast.error("Informe o valor.")
     if (isInst && (!nT || nC > nT)) return toast.error("Confira as parcelas (atual não pode ser maior que o total).")
@@ -107,7 +107,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
       purchaseDate: kind === "fixed" ? null : purchaseDate || null,
       installmentTotal: isInst ? nT : null,
       installmentCurrent: isInst ? nC : null,
-      totalValue: parseMoney(total) || (isInst ? value * nT : value),
+      totalValue: total || (isInst ? value * nT : value),
       essential,
       status,
       lastInstallment: isInst ? nC === nT : false,
@@ -144,56 +144,56 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="grid gap-1.5 sm:col-span-2">
-              <Label htmlFor="desc">Descrição</Label>
+              <FieldLabel htmlFor="desc" required>Descrição</FieldLabel>
               <Input id="desc" autoFocus value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ex.: Mercado, Netflix, Notebook…" />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="amount">{isInst ? "Valor da parcela" : "Valor"}</Label>
-              <Input id="amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" className="num" />
+              <FieldLabel htmlFor="amount" required>{isInst ? "Valor da parcela" : "Valor"}</FieldLabel>
+              <MoneyInput id="amount" value={amount} onChange={setAmount} />
             </div>
             <div className="grid gap-1.5">
-              <Label>Mês</Label>
+              <FieldLabel required>Mês</FieldLabel>
               <SimpleSelect value={m} onChange={setM} options={monthOptions} />
             </div>
 
             {isInst && (
               <>
                 <div className="grid gap-1.5">
-                  <Label htmlFor="ntotal">Total de parcelas</Label>
-                  <Input id="ntotal" inputMode="numeric" value={nTotal} onChange={(e) => setNTotal(e.target.value.replace(/\D/g, ""))} placeholder="10" />
+                  <FieldLabel htmlFor="ntotal" required>Total de parcelas</FieldLabel>
+                  <Input id="ntotal" inputMode="numeric" className="num" value={nTotal} onChange={(e) => setNTotal(e.target.value.replace(/\D/g, ""))} placeholder="10" />
                 </div>
                 <div className="grid gap-1.5">
-                  <Label htmlFor="ncur">Parcela atual</Label>
-                  <Input id="ncur" inputMode="numeric" value={nCurrent} onChange={(e) => setNCurrent(e.target.value.replace(/\D/g, ""))} placeholder="1" />
+                  <FieldLabel htmlFor="ncur" required>Parcela atual</FieldLabel>
+                  <Input id="ncur" inputMode="numeric" className="num" value={nCurrent} onChange={(e) => setNCurrent(e.target.value.replace(/\D/g, ""))} placeholder="1" />
                 </div>
               </>
             )}
             {kind !== "fixed" && (
               <>
                 <div className="grid gap-1.5">
-                  <Label htmlFor="total">Valor total da compra</Label>
+                  <FieldLabel htmlFor="total" optional>Valor total da compra</FieldLabel>
                   <div className="flex gap-2">
-                    <Input id="total" inputMode="decimal" value={total} onChange={(e) => setTotal(e.target.value)} placeholder="opcional" className="num" />
+                    <MoneyInput id="total" value={total} onChange={setTotal} />
                     {isInst && <Button type="button" variant="outline" onClick={fillFromTotal} title="Calcular parcela">÷</Button>}
                   </div>
                 </div>
                 <div className="grid gap-1.5">
-                  <Label htmlFor="pdate">Data da compra</Label>
+                  <FieldLabel htmlFor="pdate" optional>Data da compra</FieldLabel>
                   <Input id="pdate" type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} />
                 </div>
               </>
             )}
             <div className="grid gap-1.5">
-              <Label>Categoria</Label>
+              <FieldLabel required>Categoria</FieldLabel>
               <SimpleSelect value={category} onChange={setCategory} options={withCurrent(settings.categories, category).map((c) => ({ value: c, label: c }))} />
             </div>
             <div className="grid gap-1.5">
-              <Label>Método de pagamento</Label>
+              <FieldLabel required>Método de pagamento</FieldLabel>
               <SimpleSelect value={method} onChange={setMethod} options={withCurrent(settings.methods, method).map((c) => ({ value: c, label: c }))} />
             </div>
             {isCreditMethod(method) && (
               <div className="grid gap-1.5 sm:col-span-2">
-                <Label>Cartão</Label>
+                <FieldLabel optional>Cartão</FieldLabel>
                 <div className="flex gap-2">
                   {cards.length > 0 && (
                     <SimpleSelect value={cardId || "none"} onChange={(v) => setCardId(v === "none" ? "" : v)}
@@ -206,7 +206,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
               </div>
             )}
             <div className="grid gap-1.5">
-              <Label>Status</Label>
+              <FieldLabel required>Status</FieldLabel>
               <SimpleSelect value={status} onChange={(v) => setStatus(v as ExpenseStatus)} options={(Object.keys(STATUS_LABEL) as ExpenseStatus[]).map((s) => ({ value: s, label: STATUS_LABEL[s] }))} />
             </div>
             <label className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 sm:mt-6">
@@ -214,8 +214,8 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
               <Switch checked={essential} onCheckedChange={setEssential} />
             </label>
             <div className="grid gap-1.5 sm:col-span-2">
-              <Label htmlFor="note">Observação</Label>
-              <Textarea id="note" rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="opcional" />
+              <FieldLabel htmlFor="note" optional>Observação</FieldLabel>
+              <Textarea id="note" rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ex.: comprado na promoção" />
             </div>
           </div>
 
@@ -246,7 +246,8 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="items-center">
+            <span className="mr-auto hidden text-xs text-muted-foreground sm:block"><span className="text-critical">*</span> obrigatório</span>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit">{editing ? "Salvar alterações" : "Adicionar"}</Button>
           </DialogFooter>
