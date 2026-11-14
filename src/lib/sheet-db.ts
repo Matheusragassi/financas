@@ -30,14 +30,14 @@ export async function createDataFile(ownerName: string): Promise<RemoteFile> {
   const sheet = await gfetch<{ spreadsheetId: string }>(SHEETS, {
     method: "POST",
     body: JSON.stringify({
-      properties: { title: `Folia — dados${ownerName ? ` de ${ownerName}` : ""}`, locale: "pt_BR" },
+      properties: { title: `Quest — dados${ownerName ? ` de ${ownerName}` : ""}`, locale: "pt_BR" },
       sheets: ["Lançamentos", "Meses", "Config"].map((title) => ({ properties: { title, gridProperties: { frozenRowCount: 1 } } })),
     }),
   })
   // Marca o arquivo para encontrá-lo em outros aparelhos
   return gfetch<RemoteFile>(`${DRIVE}/${sheet.spreadsheetId}?fields=id,modifiedTime,webViewLink`, {
     method: "PATCH",
-    body: JSON.stringify({ appProperties: { [APP_KEY]: "1" }, description: "Dados do app Folia. Não renomeie as abas." }),
+    body: JSON.stringify({ appProperties: { [APP_KEY]: "1" }, description: "Dados do app Quest. Não renomeie as abas." }),
   })
 }
 

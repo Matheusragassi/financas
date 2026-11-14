@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { FieldLabel } from "@/components/field-label"
 import { MoneyInput } from "@/components/money-input"
 import { SimpleSelect } from "@/components/simple-select"
-import { AppLogo, FoliaWordmark } from "@/components/app-logo"
+import { AppLogo } from "@/components/app-logo"
 import { AuthorCredit } from "@/components/author-credit"
 import { FunSteps } from "@/components/fun-steps"
 import { GoogleIcon } from "@/components/google-icon"
@@ -76,7 +76,7 @@ export function Onboarding() {
           <div className="relative">
           <div className="flex flex-col items-center text-center">
             <AppLogo className="size-16 shadow-[0_14px_40px_-10px_rgba(59,130,246,0.5),inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform duration-500 hover:-rotate-6 hover:scale-105" />
-            <FoliaWordmark className="mt-5 h-6 w-auto" leaf="#3B82F6" />
+            <span className="mt-5 font-brand text-[30px] leading-none font-semibold lowercase tracking-tight">quest</span>
             <p className="mt-1.5 text-sm text-balance text-muted-foreground">
               {view === "guest"
                   ? "Só precisamos de duas informações para começar."
@@ -238,6 +238,13 @@ function Backdrop({ className }: { className?: string }) {
         <div className="aurora-3 -bottom-[22%] left-[18%] h-[65%] w-[60%] bg-[#7DD3FC]/40 dark:bg-[#22D3EE]/45" />
         <div className="aurora-4 bottom-[6%] right-[14%] h-[45%] w-[45%] bg-[#A78BFA]/35 dark:bg-[#A78BFA]/40" />
       </div>
+      {/* grade quadricular sutil */}
+      <div className="absolute inset-0 opacity-[0.6] dark:opacity-[0.5]" style={{
+        backgroundImage: "linear-gradient(to right, color-mix(in srgb, var(--foreground) 6%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in srgb, var(--foreground) 6%, transparent) 1px, transparent 1px)",
+        backgroundSize: "40px 40px",
+        maskImage: "radial-gradient(ellipse 75% 65% at 50% 45%, black 25%, transparent 80%)",
+        WebkitMaskImage: "radial-gradient(ellipse 75% 65% at 50% 45%, black 25%, transparent 80%)",
+      }} />
       {/* vinheta para focar o centro e escurecer as bordas */}
       <div className="absolute inset-0" style={{
         background: "radial-gradient(ellipse 80% 70% at 50% 45%, transparent 35%, color-mix(in srgb, var(--background) 55%, transparent) 78%, var(--background) 100%)",

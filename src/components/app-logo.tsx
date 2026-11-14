@@ -1,55 +1,35 @@
 import { cn } from "@/lib/utils"
 
 /*
- * Folia — "folha" em festa. Logotipo em pixel no grid de 13 px da MAVI:
- * o O é uma folha (e o pingo do I também). A folha-O sozinha é o símbolo da marca.
+ * Quest — finanças como missões. Símbolo em pixel (grid de 13px, sistema MAVI):
+ * um balão de diálogo (a quest que se resolve conversando) com a perna do "Q".
+ * O ponto central é o ponto de interação (azul da marca).
  */
-const F = ["XXX", "XX.", "X.."]
-const O_LEAF = ["gg.", "g.g", ".gg"]
-const L = ["X..", "X..", "XXX"]
-const I = ["g", "X", "X"]
-const A = ["XXX", "XXX", "X.X"]
-
 const B = 13
-interface Px { x: number; y: number; leaf: boolean }
-const WORD_BLOCKS: Px[] = []
-let ox = 0
-for (const g of [F, O_LEAF, L, I, A]) {
-  g.forEach((row, y) => [...row].forEach((c, x) => { if (c !== ".") WORD_BLOCKS.push({ x: x + ox, y, leaf: c === "g" }) }))
-  ox += g[0].length + 1
-}
-const WORD_W = (ox - 1) * B // 17 blocos
-const LEAF_BLOCKS: Px[] = []
-O_LEAF.forEach((row, y) => [...row].forEach((c, x) => { if (c !== ".") LEAF_BLOCKS.push({ x, y, leaf: true }) }))
+// X = traço; o = ponto de interação
+const GRID = ["XXXXX", "X...X", "X.o.X", "X...X", "XX.XX", ".X..."]
+interface Px { x: number; y: number; dot: boolean }
+const BLOCKS: Px[] = []
+GRID.forEach((row, y) => [...row].forEach((c, x) => { if (c !== ".") BLOCKS.push({ x, y, dot: c === "o" }) }))
+const W = GRID[0].length * B
+const H = GRID.length * B
 
-const rects = (blocks: Px[], leaf: string) =>
-  [...blocks].sort((a, b) => Number(a.leaf) - Number(b.leaf)).map((p, i) => (
-    <rect key={i} x={p.x * B} y={p.y * B} width={B + 0.2} height={B + 0.2} fill={p.leaf ? leaf : undefined} />
-  ))
-
-/** Logotipo "FOLIA" (traço herda a cor do texto; folhas na cor da marca) */
-export function FoliaWordmark({ className, leaf = "var(--logo-leaf, #9BE858)" }: { className?: string; leaf?: string }) {
+/** Símbolo da marca (traço herda a cor do texto; ponto na cor da marca) */
+export function QuestMark({ className, stroke = "currentColor", dot = "#3B82F6" }: { className?: string; stroke?: string; dot?: string }) {
   return (
-    <svg viewBox={`0 0 ${WORD_W} ${3 * B}`} className={className} fill="currentColor" shapeRendering="crispEdges" role="img" aria-label="Folia">
-      {rects(WORD_BLOCKS, leaf)}
+    <svg viewBox={`0 0 ${W} ${H}`} className={className} shapeRendering="crispEdges" role="img" aria-label="Quest">
+      {[...BLOCKS].sort((a, b) => Number(a.dot) - Number(b.dot)).map((p, i) => (
+        <rect key={i} x={p.x * B} y={p.y * B} width={B + 0.3} height={B + 0.3} fill={p.dot ? dot : stroke} />
+      ))}
     </svg>
   )
 }
 
-/** Símbolo da marca: a folha-O do logotipo */
-export function FoliaMark({ className, leaf = "currentColor" }: { className?: string; leaf?: string }) {
-  return (
-    <svg viewBox={`0 0 ${3 * B} ${3 * B}`} className={className} shapeRendering="crispEdges" aria-hidden="true">
-      {rects(LEAF_BLOCKS, leaf)}
-    </svg>
-  )
-}
-
-/** Ícone do app: folha branca sobre o verde da Folia */
+/** Ícone do app: símbolo branco sobre o azul da marca, ponto azul vivo */
 export function AppLogo({ className }: { className?: string }) {
   return (
     <span className={cn("relative inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[28%] bg-[linear-gradient(145deg,#5B9BFF,#3B82F6_55%,#2557C7)] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]", className)}>
-      <FoliaMark className="h-[54%] w-auto" leaf="#ffffff" />
+      <QuestMark className="h-[56%] w-auto" stroke="#ffffff" dot="#1E40AF" />
     </span>
   )
 }

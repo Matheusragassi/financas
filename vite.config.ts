@@ -15,8 +15,8 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ["icon.svg", "apple-touch-icon.png"],
       manifest: {
-        name: "Folia — finanças pessoais",
-        short_name: "Folia",
+        name: "Quest — finanças pessoais",
+        short_name: "Quest",
         description: "Gestão financeira pessoal que funciona offline.",
         lang: "pt-BR",
         theme_color: "#3B82F6",

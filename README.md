@@ -1,6 +1,6 @@
-# Finitree
+# Quest
 
-Finitree é um app de gestão financeira pessoal: gastos mês a mês, parcelas, assinaturas, métricas e relatórios.
+Quest é um app de gestão financeira pessoal: gastos mês a mês, parcelas, assinaturas, métricas e relatórios.
 Visual limpo com tema claro/escuro, feito com **React + Vite + TypeScript + [shadcn/ui](https://ui.shadcn.com)**.
 
 - **Funciona offline** (PWA): instale no celular ou no computador pelo navegador ("Adicionar à tela inicial" / ícone de instalar).
@@ -36,7 +36,7 @@ Na primeira vez, confira em **Settings → Pages** que a origem está como **Git
 
 ## Marca
 
-**Finitree** = finanças + árvore. O símbolo é uma árvore em pixel art no grid de 13 px (mesma construção da assinatura MAVI); o bloco verde na copa é o "fruto", o dinheiro que cresce.
+**Quest** = finanças + árvore. O símbolo é uma árvore em pixel art no grid de 13 px (mesma construção da assinatura MAVI); o bloco verde na copa é o "fruto", o dinheiro que cresce.
 
 | Papel | Cor |
 | --- | --- |

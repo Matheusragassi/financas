@@ -66,7 +66,7 @@ export default function App() {
                 <ChevronLeft className="size-4" />
               </button>
             )}
-            <a href="#/dashboard" className="hidden font-brand text-sm font-semibold lowercase tracking-tight text-muted-foreground transition-colors hover:text-foreground sm:inline">folia</a>
+            <a href="#/dashboard" className="hidden font-brand text-sm font-semibold lowercase tracking-tight text-muted-foreground transition-colors hover:text-foreground sm:inline">quest</a>
             <ChevronRight className="hidden size-3.5 text-muted-foreground/60 sm:block" />
             {PARENT[route] && (
               <>
@@ -124,13 +124,15 @@ export default function App() {
   )
 }
 
-/** Brilhos suaves fixos atrás do conteúdo: dão profundidade e fazem o vidro aparecer */
+/** Fundo pontilhado fixo atrás do conteúdo (dá profundidade e faz o vidro aparecer) */
 function AppBackdrop() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      {/* fundo pontilhado sutil (sem luzes) */}
-      <div className="absolute inset-0 opacity-[0.5] dark:opacity-[0.35]" style={{
-        backgroundImage: "radial-gradient(color-mix(in srgb, var(--foreground) 14%, transparent) 1px, transparent 0)",
+      {/* base levemente tonal, mais presente no claro para o pontilhado respirar */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_90%_at_50%_-10%,color-mix(in_srgb,var(--brand)_7%,transparent),transparent_60%)] dark:bg-[radial-gradient(ellipse_120%_90%_at_50%_-10%,color-mix(in_srgb,var(--brand)_6%,transparent),transparent_55%)]" />
+      {/* pontilhado — mais visível no claro */}
+      <div className="absolute inset-0 opacity-[0.9] dark:opacity-[0.4]" style={{
+        backgroundImage: "radial-gradient(color-mix(in srgb, var(--foreground) 22%, transparent) 1px, transparent 1.4px)",
         backgroundSize: "22px 22px",
       }} />
     </div>

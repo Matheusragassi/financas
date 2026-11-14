@@ -35,7 +35,7 @@ export function AppSidebar() {
             <SidebarMenuButton size="lg" className="gap-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0!" render={<a href="#/dashboard" />}>
               <AppLogo className="size-8 shrink-0 transition-transform group-hover/menu-button:scale-105" />
               <div className="flex flex-1 flex-col overflow-hidden text-left leading-tight group-data-[collapsible=icon]:hidden">
-                <span className="font-brand text-[17px] leading-none font-semibold lowercase tracking-tight">folia</span>
+                <span className="font-brand text-[17px] leading-none font-semibold lowercase tracking-tight">quest</span>
                 <span className="truncate text-[11px] text-muted-foreground">{name ? `de ${name}` : "finanças pessoais"}</span>
               </div>
             </SidebarMenuButton>
