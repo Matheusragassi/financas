@@ -1,5 +1,6 @@
 export type ExpenseKind = "fixed" | "installment" | "single" | "subscription" | "extra"
-export type ExpenseStatus = "paid" | "pending" | "cancelled"
+/** billed = lançado na fatura do cartão de crédito (ainda não paga, mas não é uma pendência solta) */
+export type ExpenseStatus = "paid" | "billed" | "pending" | "cancelled"
 
 export interface Expense {
   id: string
@@ -84,6 +85,7 @@ export const KIND_LABEL: Record<ExpenseKind, string> = {
 
 export const STATUS_LABEL: Record<ExpenseStatus, string> = {
   paid: "Pago",
+  billed: "Na fatura",
   pending: "Pendente",
   cancelled: "Cancelado",
 }

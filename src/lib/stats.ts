@@ -31,6 +31,7 @@ export function monthSummary(all: Expense[], months: Month[], monthId: string) {
     total,
     paid: sum(act.filter((e) => e.status === "paid")),
     pending: sum(act.filter((e) => e.status === "pending")),
+    billed: sum(act.filter((e) => e.status === "billed")),
     cancelled: sum(list.filter((e) => e.status === "cancelled")),
     balance: salary - total,
     commitment: salary ? total / salary : 0,

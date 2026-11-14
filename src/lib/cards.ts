@@ -25,6 +25,9 @@ export const NETWORKS = ["Mastercard", "Visa", "Elo", "American Express", "Hiper
 
 export const bankColor = (bank: string) => BANKS.find((b) => b.name === bank)?.color ?? "#64748B"
 
+/** Pode ser cobrado num cartão de crédito? (crédito ou assinatura) */
+export const isCardEligible = (e: { method: string; kind?: string }) => isCreditMethod(e.method) || /assinatura/i.test(e.method) || e.kind === "subscription"
+
 /** O método de pagamento é cartão de crédito? */
 export const isCreditMethod = (method: string) => /cart[aã]o|cr[eé]dito/i.test(method) && !/d[eé]bito/i.test(method)
 

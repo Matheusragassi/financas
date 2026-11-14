@@ -90,10 +90,14 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
           hint={s.commitment > 1 ? "Orçamento excedido" : s.commitment > 0.9 ? "Atenção: perto do limite" : "Dentro do orçamento"}>
           <Meter value={s.commitment} className="mt-1" />
         </StatCard>
-        <StatCard label="Pago / pendente" value={money(s.paid)} icon={CheckCircle2}
-          hint={<span className="flex items-center gap-1"><CircleDashed className="size-3.5" /> {money(s.pending)} a pagar</span>}>
-          <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
-            <div className="h-full rounded-full bg-success" style={{ width: `${s.total ? (s.paid / s.total) * 100 : 0}%` }} />
+        <StatCard label="Pago" value={money(s.paid)} icon={CheckCircle2}
+          hint={<span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-brand" /> {money(s.billed)} na fatura</span>
+            <span className="flex items-center gap-1"><CircleDashed className="size-3" /> {money(s.pending)} pendente</span>
+          </span>}>
+          <div className="mt-1 flex h-2 gap-0.5 overflow-hidden rounded-full bg-foreground/[0.06]">
+            <div className="h-full bg-success" style={{ width: `${s.total ? (s.paid / s.total) * 100 : 0}%` }} />
+            <div className="h-full bg-brand" style={{ width: `${s.total ? (s.billed / s.total) * 100 : 0}%` }} />
           </div>
         </StatCard>
       </div>

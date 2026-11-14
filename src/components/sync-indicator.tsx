@@ -1,9 +1,10 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { COVER_CSS } from "@/lib/covers"
 import { toast } from "sonner"
-import { Cloud, CloudOff, ExternalLink, Loader2, LogOut, RefreshCw, TriangleAlert, Check } from "lucide-react"
+import { Check, Cloud, CloudCheck, CloudOff, Loader2, LogOut, RefreshCw, Sheet, TriangleAlert, UserRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { GoogleIcon } from "@/components/google-icon"
@@ -46,51 +47,97 @@ export function GoogleSignInButton({ className, label = "Entrar com Google", siz
   )
 }
 
+const rtf = new Intl.RelativeTimeFormat("pt-BR", { numeric: "auto" })
+function ago(iso: string | null) {
+  if (!iso) return "ainda não sincronizado"
+  const sec = Math.round((new Date(iso).getTime() - Date.now()) / 1000)
+  if (sec > -45) return "agora mesmo"
+  const min = Math.round(sec / 60)
+  if (min > -60) return rtf.format(min, "minute")
+  const h = Math.round(min / 60)
+  return h > -24 ? rtf.format(h, "hour") : new Date(iso).toLocaleString("pt-BR")
+}
+
+const RING: Record<SyncStatus, string> = {
+  off: "ring-foreground/20", connecting: "ring-brand", syncing: "ring-brand", synced: "ring-success",
+  offline: "ring-warning", "needs-auth": "ring-warning", "needs-scope": "ring-warning", error: "ring-critical", conflict: "ring-critical",
+}
+
 export function SyncIndicator() {
   const { user, status, dirty, error, fileUrl, lastSyncAt, conflict } = useSync()
   const isDemo = useStore((s) => s.isDemo)
+  const counts = { n: useStore((s) => s.expenses.length), m: useStore((s) => s.months.length) }
+  const cover = useStore((s) => s.settings.cover)
+  const [, tick] = useState(0)
+  useEffect(() => { const t = setInterval(() => tick((x) => x + 1), 30_000); return () => clearInterval(t) }, [])
   if (!googleEnabled() || isDemo) return null
   if (!user) return <GoogleSignInButton size="sm" label="Entrar" className="hidden sm:inline-flex" />
 
-  const Icon = status === "offline" ? CloudOff : status === "syncing" || status === "connecting" ? Loader2 : status === "error" || status === "conflict" || status === "needs-auth" || status === "needs-scope" ? TriangleAlert : Cloud
+  const busy = status === "syncing" || status === "connecting"
+  const ok = status === "synced" && !dirty
+  const bad = status === "error" || status === "conflict" || status === "needs-auth" || status === "needs-scope"
+  const Big = status === "offline" ? CloudOff : busy ? Loader2 : bad ? TriangleAlert : CloudCheck
+  const title = dirty && status === "synced" ? "Alterações aguardando envio" : LABEL[status]
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger render={<Button variant="ghost" size="sm" className="gap-2 px-1.5" aria-label={LABEL[status]} />}>
-          <span className="relative">
-            {user.picture
-              ? <img src={user.picture} alt="" referrerPolicy="no-referrer" className="size-6 rounded-full" />
-              : <span className="flex size-6 items-center justify-center rounded-full bg-muted text-xs font-medium">{user.name[0]}</span>}
-            <span className="absolute -right-0.5 -bottom-0.5"><SyncDot status={status} dirty={dirty} /></span>
-          </span>
-          <Icon className={cn("hidden size-4 text-muted-foreground md:block", status === "syncing" && "animate-spin")} />
+        <DropdownMenuTrigger render={<button className="relative rounded-full p-0.5 transition active:scale-95" aria-label={title} />}>
+          {user.picture
+            ? <img src={user.picture} alt="" referrerPolicy="no-referrer" className={cn("size-7 rounded-full ring-2 ring-offset-2 ring-offset-background transition-[box-shadow]", RING[status], busy && "animate-pulse")} />
+            : <span className={cn("flex size-7 items-center justify-center rounded-full bg-muted text-xs font-medium ring-2 ring-offset-2 ring-offset-background", RING[status])}>{user.name[0]}</span>}
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-72">
-          <DropdownMenuGroup>
-            <DropdownMenuLabel className="text-foreground">
-              <div className="font-medium">{user.name}</div>
-              <div className="text-xs font-normal text-muted-foreground">{user.email}</div>
-            </DropdownMenuLabel>
-          </DropdownMenuGroup>
-          <div className="mx-1.5 mb-1 flex items-start gap-2 rounded-md bg-muted/60 p-2 text-xs">
-            <SyncDot status={status} dirty={dirty} />
-            <div>
-              <div className="font-medium">{dirty && status === "synced" ? "Alterações aguardando envio" : LABEL[status]}</div>
-              {error && status === "error" && <div className="text-muted-foreground">{error}</div>}
-              {lastSyncAt && <div className="text-muted-foreground">Última sincronização: {new Date(lastSyncAt).toLocaleString("pt-BR")}</div>}
+        <DropdownMenuContent align="end" sideOffset={8} className="w-80 overflow-hidden p-0">
+          {/* topo com a capa do perfil */}
+          <div className="relative h-14" style={{ background: COVER_CSS[cover ?? "blue"] ?? COVER_CSS.blue }}>
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.18),transparent)]" />
+          </div>
+          <div className="-mt-7 flex items-end gap-3 px-4">
+            {user.picture
+              ? <img src={user.picture} alt="" referrerPolicy="no-referrer" className="size-14 rounded-full ring-4 ring-popover" />
+              : <span className="flex size-14 items-center justify-center rounded-full bg-muted text-lg font-semibold ring-4 ring-popover">{user.name[0]}</span>}
+            <div className="min-w-0 pb-1">
+              <div className="truncate text-sm font-semibold">{user.name}</div>
+              <div className="truncate text-xs text-muted-foreground">{user.email}</div>
             </div>
           </div>
-          <DropdownMenuSeparator />
-          {status === "needs-scope"
-            ? <DropdownMenuItem onClick={() => void grantDrive()}><RefreshCw /> Conceder acesso ao Drive</DropdownMenuItem>
-            : status === "needs-auth"
-            ? <DropdownMenuItem onClick={() => void reconnect()}><RefreshCw /> Reconectar</DropdownMenuItem>
-            : <DropdownMenuItem onClick={() => void syncNow().then(() => useSync.getState().status === "synced" && toast.success("Sincronizado"))}><RefreshCw /> Sincronizar agora</DropdownMenuItem>}
-          {fileUrl && <DropdownMenuItem onClick={() => window.open(fileUrl, "_blank", "noopener")}><ExternalLink /> Abrir planilha de dados</DropdownMenuItem>}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive" onClick={() => { signOut(true); toast("Você saiu da conta", { description: "Os dados continuam salvos no seu Google." }) }}>
-            <LogOut /> Sair da conta
-          </DropdownMenuItem>
+
+          {/* status */}
+          <div className={cn("mx-3 mt-4 flex items-center gap-3 rounded-2xl p-3 ring-1",
+            ok ? "bg-success/8 ring-success/20" : bad ? "bg-critical/8 ring-critical/20" : status === "offline" ? "bg-warning/8 ring-warning/20" : "bg-brand/8 ring-brand/20")}>
+            <span className={cn("relative flex size-10 shrink-0 items-center justify-center rounded-full",
+              ok ? "bg-success/15 text-success" : bad ? "bg-critical/15 text-critical" : status === "offline" ? "bg-warning/15 text-warning" : "bg-brand/15 text-brand")}>
+              {ok && <span className="absolute inset-0 animate-ping rounded-full bg-success/20 [animation-duration:2.4s]" />}
+              <Big className={cn("relative size-5", busy && "animate-spin")} />
+            </span>
+            <div className="min-w-0">
+              <div className="text-sm font-medium">{title}</div>
+              <div className="truncate text-xs text-muted-foreground">
+                {status === "error" && error ? error : `Sincronizado ${ago(lastSyncAt)}`}
+              </div>
+              <div className="mt-0.5 text-[11px] text-muted-foreground">{counts.n} lançamentos · {counts.m} meses</div>
+            </div>
+          </div>
+
+          {/* ações */}
+          <div className="grid grid-cols-2 gap-2 p-3">
+            <button onClick={() => status === "needs-scope" ? void grantDrive() : status === "needs-auth" ? void reconnect() : void syncNow().then(() => useSync.getState().status === "synced" && toast.success("Tudo sincronizado"))}
+              className="flex flex-col items-center gap-1.5 rounded-xl bg-foreground/[0.04] p-3 text-xs font-medium ring-1 ring-foreground/8 transition hover:bg-brand/10 hover:ring-brand/30 active:scale-[0.97]">
+              <RefreshCw className={cn("size-4 text-brand", busy && "animate-spin")} />
+              {status === "needs-scope" ? "Conceder acesso" : status === "needs-auth" ? "Reconectar" : "Sincronizar"}
+            </button>
+            <button disabled={!fileUrl} onClick={() => fileUrl && window.open(fileUrl, "_blank", "noopener")}
+              className="flex flex-col items-center gap-1.5 rounded-xl bg-foreground/[0.04] p-3 text-xs font-medium ring-1 ring-foreground/8 transition hover:bg-brand/10 hover:ring-brand/30 active:scale-[0.97] disabled:opacity-50">
+              <Sheet className="size-4 text-success" /> Abrir planilha
+            </button>
+          </div>
+
+          <DropdownMenuSeparator className="my-0" />
+          <div className="p-1.5">
+            <DropdownMenuItem onClick={() => { window.location.hash = "/conta" }}><UserRound /> Minha conta</DropdownMenuItem>
+            <DropdownMenuItem variant="destructive" onClick={() => { signOut(true); toast("Você saiu da conta", { description: "Os dados continuam salvos no seu Google." }) }}>
+              <LogOut /> Sair da conta
+            </DropdownMenuItem>
+          </div>
         </DropdownMenuContent>
       </DropdownMenu>
 

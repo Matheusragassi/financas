@@ -2,13 +2,14 @@ import { useMemo } from "react"
 import { CalendarCheck, CreditCard, Hourglass, Wallet } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { StatCard } from "@/components/stat-card"
 import { GlassTooltip, HoverCursor, Legend, SERIES } from "@/components/charts"
 import { ChartContainer, ChartTooltip, type ChartConfig } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { useStore } from "@/lib/store"
-import { TablePager, TableScroll, tableCardClass, usePagination } from "@/components/table-pager"
+import { tableCardClass } from "@/components/table-pager"
+import { DataTable } from "@/components/data-table"
+import { CardChip } from "@/components/card-visual"
 import { useSelectedMonth } from "@/lib/use-month"
 import { installmentsOf, projection } from "@/lib/stats"
 import { formatDate, money, moneyCompact, monthLabel, monthShort } from "@/lib/format"
@@ -19,11 +20,24 @@ const cfg = {
 } satisfies ChartConfig
 
 export function Installments() {
-  const { expenses, months } = useStore()
+  const { expenses, months, settings } = useStore()
+  const cards = settings.cards ?? []
+  const cardName = (id?: string) => cards.find((c) => c.id === id)?.name ?? ""
   const month = useSelectedMonth()
   const list = useMemo(() => installmentsOf(expenses, month), [expenses, month])
   const proj = useMemo(() => projection(expenses, months, month, 12), [expenses, months, month])
-  const pg = usePagination(list, "parcelas", 10)
+  const byCard = (() => {
+    const m = new Map<string, { name: string; color: string; owed: number; count: number }>()
+    for (const i of list) {
+      const c = cards.find((x) => x.id === i.expense.cardId)
+      const key = c?.id ?? "none"
+      const cur = m.get(key) ?? { name: c?.name ?? "Sem cartão", color: c?.color ?? "var(--muted-foreground)", owed: 0, count: 0 }
+      cur.owed += i.remainingValue + i.expense.amount
+      cur.count++
+      m.set(key, cur)
+    }
+    return [...m.values()].sort((a, b) => b.owed - a.owed)
+  })()
   const monthly = list.reduce((a, i) => a + i.expense.amount, 0)
   const debt = list.reduce((a, i) => a + i.remainingValue, 0)
   const lastEnd = list.reduce((a, i) => (i.endMonth > a ? i.endMonth : a), month)
@@ -41,6 +55,20 @@ export function Installments() {
         <StatCard label="Terminam este mês" value={String(ending.length)} icon={CalendarCheck} hint={`Libera ${money(ending.reduce((a, i) => a + i.expense.amount, 0))} no próximo mês`} />
         <StatCard label="Livre de parcelas em" value={list.length ? monthLabel(lastEnd) : "—"} icon={Hourglass} hint="Se não houver novas compras" />
       </div>
+
+      {byCard.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {byCard.map((c) => (
+            <div key={c.name} className="flex items-center gap-3 rounded-2xl bg-card/55 px-4 py-2.5 ring-1 ring-foreground/8 backdrop-blur-xl transition hover:ring-brand/30">
+              <span className="h-8 w-1.5 rounded-full" style={{ background: c.color }} />
+              <div>
+                <div className="text-xs text-muted-foreground">{c.name} · {c.count} {c.count === 1 ? "compra" : "compras"}</div>
+                <div className="num text-sm font-semibold">{money(c.owed)} <span className="text-xs font-normal text-muted-foreground">restante</span></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <Card>
         <CardHeader>
@@ -63,47 +91,38 @@ export function Installments() {
       </Card>
 
       <Card className={tableCardClass()}>
-        <TableScroll empty={list.length === 0 && <span>Nenhuma compra parcelada neste mês.</span>}>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="pl-4">Compra</TableHead>
-              <TableHead className="hidden md:table-cell">Data</TableHead>
-              <TableHead>Progresso</TableHead>
-              <TableHead className="hidden sm:table-cell text-right">Parcela</TableHead>
-              <TableHead className="hidden lg:table-cell text-right">Valor total</TableHead>
-              <TableHead className="pr-4 text-right">Restante</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {pg.visible.map((i) => (
-              <TableRow key={i.expense.id}>
-                <TableCell className="max-w-[12rem] pl-4">
-                  <div className="truncate font-medium">{i.expense.description}</div>
-                  <div className="text-xs text-muted-foreground">{i.expense.method} · termina {monthLabel(i.endMonth)}</div>
-                </TableCell>
-                <TableCell className="hidden md:table-cell text-muted-foreground">{formatDate(i.expense.purchaseDate)}</TableCell>
-                <TableCell className="min-w-36">
-                  <div className="flex items-center gap-2">
-                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                      <div className="h-full rounded-full bg-chart-1" style={{ width: `${i.progress * 100}%` }} />
-                    </div>
-                    <span className="num w-12 text-xs text-muted-foreground">{i.expense.installmentCurrent}/{i.expense.installmentTotal}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="num hidden sm:table-cell text-right">{money(i.expense.amount)}</TableCell>
-                <TableCell className="num hidden lg:table-cell text-right text-muted-foreground">{i.expense.totalValue ? money(i.expense.totalValue) : "—"}</TableCell>
-                <TableCell className="pr-4 text-right">
-                  {i.remaining === 0
-                    ? <Badge variant="secondary" className="text-success">Última</Badge>
-                    : <div><div className="num font-medium">{money(i.remainingValue)}</div><div className="text-xs text-muted-foreground">{i.remaining}x</div></div>}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        </TableScroll>
-        <TablePager p={pg} label="compras" />
+        <DataTable
+          id="parcelas"
+          rows={list}
+          rowId={(i) => i.expense.id}
+          label="compras"
+          pageSize={10}
+          search={(i) => `${i.expense.description} ${i.expense.method} ${cardName(i.expense.cardId)}`}
+          searchPlaceholder="Buscar compras…"
+          emptyText="Nenhuma compra parcelada neste mês."
+          initialSort={{ id: "remaining", dir: 1 }}
+          total={{ label: "Total", columnId: "remaining", value: (rows) => <span className="num font-semibold">{money(rows.reduce((a, r) => a + r.remainingValue, 0))}</span> }}
+          columns={[
+            { id: "name", header: "Compra", fixed: true, className: "min-w-48", sortValue: (i) => i.expense.description,
+              cell: (i) => (<div className="min-w-0"><div className="truncate font-medium">{i.expense.description}</div><div className="text-xs text-muted-foreground">termina em {monthLabel(i.endMonth)}</div></div>) },
+            { id: "card", header: "Pagamento", filterValue: (i) => cardName(i.expense.cardId) || i.expense.method, sortValue: (i) => cardName(i.expense.cardId) || i.expense.method,
+              cell: (i) => { const c = cards.find((x) => x.id === i.expense.cardId); return c ? <CardChip card={c} className="whitespace-nowrap" /> : <span className="whitespace-nowrap text-muted-foreground">{i.expense.method}</span> } },
+            { id: "date", header: "Compra em", sortValue: (i) => i.expense.purchaseDate ?? "", cell: (i) => <span className="num whitespace-nowrap text-muted-foreground">{formatDate(i.expense.purchaseDate)}</span> },
+            { id: "progress", header: "Progresso", className: "min-w-40", sortValue: (i) => i.progress,
+              filterValue: (i) => (i.remaining === 0 ? "Última parcela" : i.remaining <= 2 ? "Quase no fim" : "Em andamento"),
+              cell: (i) => (
+                <div className="flex items-center gap-2">
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/[0.06]"><div className="h-full rounded-full bg-chart-1" style={{ width: `${i.progress * 100}%` }} /></div>
+                  <span className="num w-11 text-xs text-muted-foreground">{i.expense.installmentCurrent}/{i.expense.installmentTotal}</span>
+                </div>) },
+            { id: "amount", header: "Parcela", align: "right", sortValue: (i) => i.expense.amount, cell: (i) => <span className="num">{money(i.expense.amount)}</span> },
+            { id: "total", header: "Valor total", align: "right", defaultHidden: true, sortValue: (i) => i.expense.totalValue ?? 0, cell: (i) => <span className="num text-muted-foreground">{i.expense.totalValue ? money(i.expense.totalValue) : "—"}</span> },
+            { id: "remaining", header: "Restante", align: "right", fixed: true, sortValue: (i) => i.remainingValue,
+              cell: (i) => i.remaining === 0
+                ? <Badge variant="secondary" className="text-success">Última</Badge>
+                : <div><div className="num font-medium">{money(i.remainingValue)}</div><div className="text-xs text-muted-foreground">{i.remaining}x</div></div> },
+          ]}
+        />
       </Card>
     </div>
   )

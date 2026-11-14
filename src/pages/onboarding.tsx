@@ -229,9 +229,9 @@ export function Onboarding() {
               <div className="grid gap-1.5">
                 <FieldLabel htmlFor="ob-sal" required>Renda mensal</FieldLabel>
                 <div className="flex gap-2">
-                  <SimpleSelect className="h-10 w-28 shrink-0" value={currency} onChange={setCurrency}
+                  <SimpleSelect className="w-28 shrink-0 data-[size=default]:h-10" value={currency} onChange={setCurrency}
                     options={CURRENCIES.map((c) => ({ value: c.code, label: `${c.flag} ${c.code}` }))} />
-                  <MoneyInput id="ob-sal" className="h-10" currency={currency} value={salary} onChange={setSalary} />
+                  <MoneyInput id="ob-sal" className="h-10" hideFlag currency={currency} value={salary} onChange={setSalary} />
                 </div>
                 <p className="text-xs text-muted-foreground">Usada para calcular saldo e comprometimento. Dá para mudar depois.</p>
               </div>

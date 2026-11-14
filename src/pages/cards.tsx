@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
-import { CreditCard as CardIcon, Link2, MoreHorizontal, Pencil, Plus, Trash2, Wallet } from "lucide-react"
+import { CheckCheck, CreditCard as CardIcon, Link2, MoreHorizontal, Pencil, Plus, Trash2, Wallet } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -14,12 +14,12 @@ import { BarList, Meter } from "@/components/charts"
 import { StatCard } from "@/components/stat-card"
 import { useStore } from "@/lib/store"
 import { useSelectedMonth } from "@/lib/use-month"
-import { cardStats, isCreditMethod } from "@/lib/cards"
+import { cardStats, isCardEligible } from "@/lib/cards"
 import { money, monthLabel, percent } from "@/lib/format"
 import type { CreditCard } from "@/lib/types"
 
 export function CardsPage() {
-  const { expenses, settings, assignCard, removeCard } = useStore()
+  const { expenses, settings, assignCard, removeCard, payInvoice } = useStore()
   const cards = settings.cards ?? []
   const month = useSelectedMonth()
   const [editing, setEditing] = useState<CreditCard | null>(null)
@@ -28,7 +28,7 @@ export function CardsPage() {
   const [target, setTarget] = useState("")
 
   const stats = useMemo(() => cardStats(expenses, cards, month), [expenses, cards, month])
-  const unlinked = useMemo(() => expenses.filter((e) => isCreditMethod(e.method) && (!e.cardId || !cards.some((c) => c.id === e.cardId))), [expenses, cards])
+  const unlinked = useMemo(() => expenses.filter((e) => isCardEligible(e) && (!e.cardId || !cards.some((c) => c.id === e.cardId))), [expenses, cards])
   const linkTarget = target || cards[0]?.id || ""
   const totalOwed = stats.reduce((a, s) => a + s.owed, 0)
   const totalMonth = stats.reduce((a, s) => a + s.month, 0)
@@ -59,7 +59,7 @@ export function CardsPage() {
                 Informe só o banco (e a bandeira, se quiser). Assim você vê quanto deve em cada cartão e qual está usando mais.
               </p>
             </div>
-            {unlinked.length > 0 && <p className="text-xs text-muted-foreground">Você tem <b>{unlinked.length}</b> gastos no crédito esperando um cartão.</p>}
+            {unlinked.length > 0 && <p className="text-xs text-muted-foreground">Você tem <b>{unlinked.length}</b> gastos no crédito e assinaturas esperando um cartão.</p>}
             <Button className="mt-1 bg-brand text-brand-foreground hover:bg-brand/90" onClick={() => setCreating(true)}><Plus /> Adicionar primeiro cartão</Button>
           </CardContent>
         </Card>
@@ -69,7 +69,7 @@ export function CardsPage() {
             <div className="flex flex-col gap-3 rounded-2xl border border-brand/25 bg-brand/8 p-4 sm:flex-row sm:items-center">
               <Link2 className="size-5 shrink-0 text-brand" />
               <div className="flex-1 text-sm">
-                <b>{unlinked.length} gastos no crédito</b> ainda não estão ligados a um cartão.
+                <b>{unlinked.length} gastos no crédito e assinaturas</b> ainda não estão ligados a um cartão.
                 <span className="block text-xs text-muted-foreground">Se todos são do mesmo cartão, vincule de uma vez. Dá para ajustar um a um em Lançamentos.</span>
               </div>
               <div className="flex gap-2">
@@ -94,6 +94,16 @@ export function CardsPage() {
                   <div className="num text-xl font-semibold">{money(s.month)}</div>
                 </CardVisual>
                 <div className="space-y-2 px-1 pb-1 text-sm">
+                  {(() => {
+                    const open = expenses.filter((e) => e.month === month && e.status === "billed" && e.cardId === s.card!.id)
+                    const value = open.reduce((a, e) => a + e.amount, 0)
+                    return open.length > 0 ? (
+                      <Button size="sm" className="mb-1 w-full bg-brand text-brand-foreground hover:bg-brand/90"
+                        onClick={() => { const n = payInvoice(month, s.card!.id); toast.success(`Fatura de ${s.card!.name} paga`, { description: `${n} lançamentos marcados como pagos` }) }}>
+                        <CheckCheck /> Pagar fatura · {money(value)}
+                      </Button>
+                    ) : s.month > 0 ? <p className="mb-1 flex items-center justify-center gap-1.5 rounded-lg bg-success/10 py-1.5 text-xs font-medium text-success"><CheckCheck className="size-3.5" /> Fatura paga</p> : null
+                  })()}
                   <Row label="Parcelas futuras" value={money(s.future)} />
                   <Row label="Total devido" value={money(s.owed)} strong />
                   {s.card!.limit ? (

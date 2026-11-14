@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { addMonths, uid } from "./format"
 import { currencyOf } from "./currency"
+import { openStatus } from "./status"
 import type { Backup, CreditCard, Expense, ExpenseStatus, Month, Settings } from "./types"
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -44,6 +45,8 @@ interface State {
   assignCard: (ids: string[], cardId: string | undefined) => number
   /** Troca a moeda; com `rate`, converte todos os valores (lançamentos, rendas e limites) */
   changeCurrency: (code: string, rate?: number) => void
+  /** Marca como pagos os lançamentos "na fatura" de um cartão num mês */
+  payInvoice: (month: string, cardId: string | null) => number
 }
 
 /** Itens do mês que ainda não foram levados para o mês seguinte */
@@ -95,11 +98,12 @@ export const useStore = create<State>()(
 
       importBackup: (b, opts) =>
         set({
+          ...{},
           initialized: true,
           isDemo: !!opts?.demo,
           settings: { ...DEFAULT_SETTINGS, ...b.settings },
           months: sortMonths(b.months),
-          expenses: b.expenses.map((e) => ({ ...e, id: e.id || uid() })),
+          expenses: b.expenses.map((e) => ({ ...e, id: e.id || uid(), status: e.status === "pending" ? openStatus(e.method) : e.status })),
           selectedMonth: null,
         }),
       exportBackup: () => {
@@ -142,13 +146,13 @@ export const useStore = create<State>()(
               month: addMonths(e.month, k),
               installmentCurrent: i,
               lastInstallment: i === e.installmentTotal,
-              status: k === 0 ? e.status : "pending",
+              status: k === 0 ? e.status : openStatus(e.method),
             })
           }
         } else {
           const n = Math.max(1, opts?.repeat ?? 1)
           for (let k = 0; k < n; k++)
-            items.push({ ...e, id: uid(), groupId, month: addMonths(e.month, k), status: k === 0 ? e.status : "pending" })
+            items.push({ ...e, id: uid(), groupId, month: addMonths(e.month, k), status: k === 0 ? e.status : openStatus(e.method) })
         }
         set((s) => ({
           expenses: [...s.expenses, ...items],
@@ -212,8 +216,17 @@ export const useStore = create<State>()(
         })),
       assignCard: (ids, cardId) => {
         const set_ = new Set(ids)
-        set((s) => ({ expenses: s.expenses.map((e) => (set_.has(e.id) ? { ...e, cardId } : e)) }))
+        set((s) => ({ expenses: s.expenses.map((e) => (set_.has(e.id) ? { ...e, cardId, status: e.status === "pending" && cardId ? "billed" : e.status } : e)) }))
         return set_.size
+      },
+
+      payInvoice: (month, cardId) => {
+        const cards = get().settings.cards ?? []
+        const match = (e: Expense) => e.month === month && e.status === "billed" &&
+          (cardId ? e.cardId === cardId : !e.cardId || !cards.some((c) => c.id === e.cardId))
+        const n = get().expenses.filter(match).length
+        set((s) => ({ expenses: s.expenses.map((e) => (match(e) ? { ...e, status: "paid" } : e)) }))
+        return n
       },
 
       changeCurrency: (code, rate) =>
@@ -247,7 +260,7 @@ export const useStore = create<State>()(
             month: next,
             installmentCurrent: ic,
             lastInstallment: e.kind === "installment" ? ic === e.installmentTotal : false,
-            status: "pending",
+            status: openStatus(e.method),
           }
         })
         const prevSalary = months.find((m) => m.id === from)?.salary ?? settings.defaultSalary
@@ -261,7 +274,13 @@ export const useStore = create<State>()(
     }),
     {
       name: "financas-store",
-      version: 1,
+      version: 2,
+      // v2: gastos pendentes no cartão de crédito passam a "Na fatura"
+      migrate: (persisted, version) => {
+        const p = persisted as Partial<State>
+        if (version < 2 && p.expenses) p.expenses = p.expenses.map((e) => (e.status === "pending" ? { ...e, status: openStatus(e.method) } : e))
+        return p as State
+      },
       partialize: (s) => ({ ...s, selectedMonth: s.selectedMonth }),
       // Versões antigas não marcavam a demonstração: reconhece pelos dados fictícios
       merge: (persisted, current) => {

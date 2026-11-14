@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react"
 import { CalendarRange, Flame, Leaf, Sigma } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StatCard } from "@/components/stat-card"
 import { BarList, Donut, SERIES, SimpleBars, TrendChart } from "@/components/charts"
@@ -10,7 +9,8 @@ import { active, average, groupSum, history, topN } from "@/lib/stats"
 import { money, monthLabel, percent } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { cardTotals } from "@/lib/cards"
-import { TablePager, TableScroll, tableCardClass, usePagination } from "@/components/table-pager"
+import { tableCardClass } from "@/components/table-pager"
+import { DataTable } from "@/components/data-table"
 
 export function Reports() {
   const { expenses, months, settings } = useStore()
@@ -31,7 +31,6 @@ export function Reports() {
   const subs = groupSum(list.filter((e) => e.kind === "subscription" || e.method === "Assinatura"), (e) => e.description.trim())
   const byCard = cardTotals(expenses, settings.cards ?? [], inRange)
   const histDesc = useMemo(() => [...hist].reverse(), [hist])
-  const pg = usePagination(histDesc, "relatorio-mensal", 10)
   const overBudget = withData.filter((h) => h.commitment > 1).length
 
   return (
@@ -100,36 +99,29 @@ export function Reports() {
       </div>
 
       <Card className={tableCardClass()}>
-        <CardHeader className="py-4"><CardTitle>Tabela mensal</CardTitle></CardHeader>
-        <TableScroll empty={histDesc.length === 0 && <span>Sem meses no período.</span>}>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="pl-4">Mês</TableHead>
-              <TableHead className="text-right">Renda</TableHead>
-              <TableHead className="text-right">Gastos</TableHead>
-              <TableHead className="hidden md:table-cell text-right">Fixos</TableHead>
-              <TableHead className="hidden md:table-cell text-right">Variáveis</TableHead>
-              <TableHead className="hidden sm:table-cell text-right">Comprometido</TableHead>
-              <TableHead className="pr-4 text-right">Saldo</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {pg.visible.map((h) => (
-              <TableRow key={h.month}>
-                <TableCell className="pl-4 font-medium">{monthLabel(h.month)}</TableCell>
-                <TableCell className="num text-right text-muted-foreground">{money(h.salary)}</TableCell>
-                <TableCell className="num text-right">{money(h.total)}</TableCell>
-                <TableCell className="num hidden md:table-cell text-right text-muted-foreground">{money(h.fixed)}</TableCell>
-                <TableCell className="num hidden md:table-cell text-right text-muted-foreground">{money(h.variable)}</TableCell>
-                <TableCell className={cn("num hidden sm:table-cell text-right", h.commitment > 1 && "text-critical")}>{percent(h.commitment)}</TableCell>
-                <TableCell className={cn("num pr-4 text-right font-medium", h.balance < 0 ? "text-critical" : "text-success")}>{money(h.balance)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        </TableScroll>
-        <TablePager p={pg} label="meses" />
+        <CardHeader className="border-b border-foreground/8 py-4"><CardTitle>Tabela mensal</CardTitle></CardHeader>
+        <DataTable
+          id="relatorio-mensal"
+          rows={histDesc}
+          rowId={(h) => h.month}
+          label="meses"
+          pageSize={10}
+          search={(h) => monthLabel(h.month)}
+          searchPlaceholder="Buscar mês…"
+          emptyText="Sem meses no período."
+          total={{ label: "Total do período", columnId: "total", value: (rows) => <span className="num font-semibold">{money(rows.reduce((a, r) => a + r.total, 0))}</span> }}
+          columns={[
+            { id: "month", header: "Mês", fixed: true, sortValue: (h) => h.month, filterValue: (h) => h.month.slice(0, 4), cell: (h) => <span className="font-medium whitespace-nowrap">{monthLabel(h.month)}</span> },
+            { id: "salary", header: "Renda", align: "right", sortValue: (h) => h.salary, cell: (h) => <span className="num text-muted-foreground">{money(h.salary)}</span> },
+            { id: "total", header: "Gastos", align: "right", sortValue: (h) => h.total, cell: (h) => <span className="num">{money(h.total)}</span> },
+            { id: "fixed", header: "Fixos", align: "right", sortValue: (h) => h.fixed, cell: (h) => <span className="num text-muted-foreground">{money(h.fixed)}</span> },
+            { id: "variable", header: "Variáveis", align: "right", sortValue: (h) => h.variable, cell: (h) => <span className="num text-muted-foreground">{money(h.variable)}</span> },
+            { id: "commitment", header: "Comprometido", align: "right", sortValue: (h) => h.commitment,
+              filterValue: (h) => (h.commitment > 1 ? "Acima da renda" : h.commitment > 0.9 ? "No limite" : "Dentro da renda"),
+              cell: (h) => <span className={cn("num", h.commitment > 1 && "text-critical")}>{percent(h.commitment)}</span> },
+            { id: "balance", header: "Saldo", align: "right", sortValue: (h) => h.balance, cell: (h) => <span className={cn("num font-medium", h.balance < 0 ? "text-critical" : "text-success")}>{money(h.balance)}</span> },
+          ]}
+        />
       </Card>
     </div>
   )

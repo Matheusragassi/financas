@@ -29,7 +29,7 @@ export function AppSidebar() {
   const { setOpenMobile } = useSidebar()
   return (
     <Sidebar collapsible="icon" variant="sidebar" className="border-r border-sidebar-border">
-      <SidebarHeader className="px-3 pt-3">
+      <SidebarHeader className="px-3 pt-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="group-data-[collapsible=icon]:p-0!" render={<a href="#/dashboard" />}>
@@ -64,7 +64,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="gap-3 px-3 pb-3">
+      <SidebarFooter className="gap-3 px-3 pb-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
         <ConnectionPill online={online} google={!!googleUser} />
         <NavUser />
         <AuthorCredit className="px-2.5 group-data-[collapsible=icon]:hidden" />

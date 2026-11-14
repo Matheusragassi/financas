@@ -12,7 +12,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { SimpleSelect } from "@/components/simple-select"
 import { CardDialog } from "@/components/card-dialog"
-import { isCreditMethod } from "@/lib/cards"
+import { isCardEligible } from "@/lib/cards"
+import { openStatus } from "@/lib/status"
 import { Plus } from "lucide-react"
 import { useStore, type Scope } from "@/lib/store"
 import { addMonths, money, monthLabel } from "@/lib/format"
@@ -44,7 +45,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
   const [note, setNote] = useState("")
   const [spread, setSpread] = useState(true)
   const [repeat, setRepeat] = useState("1")
-  const [scope, setScope] = useState<Scope>("this")
+  const [scope, setScope] = useState<Scope>("all")
   const [cardId, setCardId] = useState("")
   const [newCard, setNewCard] = useState(false)
   const cards = settings.cards ?? []
@@ -60,7 +61,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
     setCategory(e?.category ?? settings.categories[0] ?? "Outros")
     setMethod(e?.method ?? settings.methods[0] ?? "Outros")
     setM(e?.month ?? month)
-    setStatus(e?.status ?? "pending")
+    setStatus(e?.status ?? openStatus(e?.method ?? settings.methods[0] ?? ""))
     setEssential(e?.essential ?? false)
     setPurchaseDate(e?.purchaseDate ?? new Date().toISOString().slice(0, 10))
     setNTotal(e?.installmentTotal ? String(e.installmentTotal) : "")
@@ -68,7 +69,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
     setNote(e?.note ?? "")
     setSpread(true)
     setRepeat("1")
-    setScope("this")
+    setScope("all")
     setCardId(e ? e.cardId ?? "" : lastCardId || (settings.cards?.[0]?.id ?? ""))
   }, [open, expense, month, settings.categories, settings.methods]) // eslint-disable-line
 
@@ -112,7 +113,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
       status,
       lastInstallment: isInst ? nC === nT : false,
       note: note.trim() || undefined,
-      cardId: isCreditMethod(method) && cardId ? cardId : undefined,
+      cardId: isCardEligible({ method, kind }) && cardId ? cardId : undefined,
     }
     if (editing && expense) {
       const n = updateExpense(expense.id, data, scope)
@@ -189,9 +190,9 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
             </div>
             <div className="grid gap-1.5">
               <FieldLabel required>Método de pagamento</FieldLabel>
-              <SimpleSelect value={method} onChange={setMethod} options={withCurrent(settings.methods, method).map((c) => ({ value: c, label: c }))} />
+              <SimpleSelect value={method} onChange={(v) => { setMethod(v); if (!editing && status !== "paid" && status !== "cancelled") setStatus(openStatus(v)) }} options={withCurrent(settings.methods, method).map((c) => ({ value: c, label: c }))} />
             </div>
-            {isCreditMethod(method) && (
+            {isCardEligible({ method, kind }) && (
               <div className="grid gap-1.5 sm:col-span-2">
                 <FieldLabel optional>Cartão</FieldLabel>
                 <div className="flex gap-2">
@@ -238,11 +239,11 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
             <div className="grid gap-1.5 rounded-lg bg-muted/60 p-3">
               <Label>Aplicar alterações em</Label>
               <SimpleSelect value={scope} onChange={(v) => setScope(v as Scope)} options={[
-                { value: "this", label: "Somente este mês" },
+                { value: "all", label: "Todos os meses deste item (padrão)" },
                 { value: "future", label: "Este e os meses seguintes" },
-                { value: "all", label: "Todos os meses deste item" },
+                { value: "this", label: "Somente este mês" },
               ]} />
-              <p className="text-xs text-muted-foreground">Útil para atualizar o preço de uma assinatura ou conta fixa de uma vez.</p>
+              <p className="text-xs text-muted-foreground">As mudanças descem em cascata para todos os meses do mesmo item. Escolha “Somente este mês” para uma exceção.</p>
             </div>
           )}
 

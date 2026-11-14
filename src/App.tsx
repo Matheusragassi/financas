@@ -1,6 +1,8 @@
 import { ChevronLeft, ChevronRight, Plus, Sparkles, LogOut } from "lucide-react"
 import { useEffect, useState } from "react"
-import { setCurrency } from "@/lib/format"
+import { setCurrency, addMonths, currentMonthId, monthLabel } from "@/lib/format"
+import { carryCandidates } from "@/lib/store"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
@@ -41,6 +43,7 @@ export default function App() {
   const month = useSelectedMonth()
   const [adding, setAdding] = useState(false)
   const currency = useStore((s) => s.settings.currency ?? "BRL")
+  useAutoMonths(initialized && !isDemo)
   setCurrency(currency)
   useEffect(() => setCurrency(currency), [currency])
 
@@ -122,4 +125,29 @@ function AppBackdrop() {
       <div className="absolute top-[55%] left-[8%] size-[380px] rounded-full bg-brand/18 blur-[120px] dark:bg-brand/12" />
     </div>
   )
+}
+
+/** Ao abrir o app num mês novo, cria os meses que faltam (fixos, assinaturas e parcelas seguem sozinhos) */
+function useAutoMonths(enabled: boolean) {
+  useEffect(() => {
+    if (!enabled) return
+    const st = useStore.getState()
+    const now = currentMonthId()
+    const withData = [...new Set(st.expenses.map((e) => e.month))].sort()
+    const last = withData.filter((m) => m < now).at(-1)
+    if (!last || st.expenses.some((e) => e.month === now)) return
+    const created: string[] = []
+    let from = last
+    for (let guard = 0; from < now && guard < 24; guard++) {
+      if (!carryCandidates(useStore.getState().expenses, from).length) { from = addMonths(from, 1); continue }
+      const r = useStore.getState().generateNextMonth(from)
+      created.push(r.month)
+      from = r.month
+    }
+    if (created.length) {
+      useStore.getState().setSelectedMonth(now)
+      toast.success(created.length === 1 ? `${monthLabel(created[0])} criado automaticamente` : `${created.length} meses criados automaticamente`,
+        { description: "Fixos, assinaturas e parcelas já estão lançados. Confira e ajuste o que mudou." })
+    }
+  }, [enabled])
 }

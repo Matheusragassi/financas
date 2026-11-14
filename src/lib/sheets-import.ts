@@ -1,5 +1,6 @@
 import { currentMonthId } from "./format"
 import { DEFAULT_SETTINGS } from "./store"
+import { isCreditMethod } from "./cards"
 import type { Backup, Expense, ExpenseKind } from "./types"
 
 /**
@@ -149,7 +150,7 @@ function parseTab(doc: Document, monthId: string, currentMonth: string) {
     const status = cancelled || /cancel/.test(st) ? "cancelled"
       : st === "true" || /^pago/.test(st) ? "paid"
       : st === "false" || /pend|aberto/.test(st) ? "pending"
-      : monthId < currentMonth ? "paid" : "pending"
+      : monthId < currentMonth ? "paid" : isCreditMethod(get(r, "method")) ? "billed" : "pending"
     expenses.push(mk({
       kind, description: desc, category: get(r, "category").trim() || "Outros", amount,
       essential: get(r, "essential") === "TRUE" || /^sim/.test(norm(get(r, "essential"))),
