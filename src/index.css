@@ -205,3 +205,16 @@
 }
 *::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--foreground) 28%, transparent); background-clip: padding-box; }
 *::-webkit-scrollbar-corner { background: transparent; }
+
+/* Aurora/waves: luzes coloridas que se movem e se misturam (sem interação de mouse) */
+@keyframes aurora-1 { 0%,100% { transform: translate(-8%, -6%) scale(1.15) rotate(0deg) } 50% { transform: translate(12%, 8%) scale(1.35) rotate(18deg) } }
+@keyframes aurora-2 { 0%,100% { transform: translate(10%, 4%) scale(1.2) rotate(0deg) } 50% { transform: translate(-12%, -8%) scale(1.4) rotate(-22deg) } }
+@keyframes aurora-3 { 0%,100% { transform: translate(-4%, 10%) scale(1.1) rotate(0deg) } 50% { transform: translate(8%, -12%) scale(1.3) rotate(14deg) } }
+@keyframes aurora-4 { 0%,100% { transform: translate(6%, -10%) scale(1.25) } 50% { transform: translate(-10%, 10%) scale(1.1) } }
+.aurora-1 { animation: aurora-1 22s ease-in-out infinite }
+.aurora-2 { animation: aurora-2 26s ease-in-out infinite }
+.aurora-3 { animation: aurora-3 30s ease-in-out infinite }
+.aurora-4 { animation: aurora-4 24s ease-in-out infinite }
+@media (prefers-reduced-motion: reduce) {
+  .aurora-1, .aurora-2, .aurora-3, .aurora-4 { animation: none }
+}
