@@ -101,7 +101,7 @@ export function Installments() {
           searchPlaceholder="Buscar compras…"
           emptyText="Nenhuma compra parcelada neste mês."
           initialSort={{ id: "remaining", dir: 1 }}
-          total={{ label: "Total", columnId: "remaining", value: (rows) => <span className="num font-semibold">{money(rows.reduce((a, r) => a + r.remainingValue, 0))}</span> }}
+          total={{ label: "Total", value: (rows) => <span className="num font-semibold">{money(rows.reduce((a, r) => a + r.remainingValue, 0))}</span> }}
           columns={[
             { id: "name", header: "Compra", fixed: true, className: "min-w-48", sortValue: (i) => i.expense.description,
               cell: (i) => (<div className="min-w-0"><div className="truncate font-medium">{i.expense.description}</div><div className="text-xs text-muted-foreground">termina em {monthLabel(i.endMonth)}</div></div>) },

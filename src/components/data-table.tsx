@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import {
-  ArrowDown, ArrowUp, ArrowUpDown, Columns3, EyeOff, Eye, Filter, Search, X,
-} from "lucide-react"
+import { ArrowDown, ArrowUp, ChevronsUpDown, Columns3, Eye, EyeOff, Filter, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel,
-  DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger,
+  DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { TablePager, TableScroll, usePagination } from "@/components/table-pager"
 import { cn } from "@/lib/utils"
 
@@ -16,9 +16,9 @@ export interface Column<T> {
   id: string
   header: string
   cell: (row: T) => React.ReactNode
-  /** Habilita ordenação */
+  /** Habilita ordenação (clique no cabeçalho) */
   sortValue?: (row: T) => string | number
-  /** Habilita filtro rápido por valores da coluna */
+  /** Habilita filtro rápido por valores da coluna (no painel de Filtros) */
   filterValue?: (row: T) => string
   align?: "left" | "right" | "center"
   className?: string
@@ -42,8 +42,9 @@ interface Props<T> {
   bulkActions?: (ids: string[], clear: () => void) => React.ReactNode
   rowActions?: (row: T) => React.ReactNode
   rowClassName?: (row: T) => string | undefined
-  /** Linha de total: rótulo + valor posicionado sob a coluna indicada */
-  total?: { label: string; columnId: string; value: (rows: T[]) => React.ReactNode }
+  /** Barra de total fixa no rodapé da tabela */
+  total?: { label: string; value: (rows: T[]) => React.ReactNode }
+  /** Controles extra na barra (ex.: CSV). Deixe-os como ícone (size="icon-sm"). */
   toolbar?: (filtered: T[]) => React.ReactNode
   onFilteredChange?: (filtered: T[]) => void
   emptyText?: string
@@ -64,10 +65,10 @@ export function DataTable<T>(props: Props<T>) {
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
   useEffect(() => save(`table-cols:${id}`, hiddenCols), [id, hiddenCols])
-  // Funções podem mudar a cada render do pai; usamos sempre a versão mais recente sem refazer o filtro
   const fns = useRef({ columns, search, rowId })
   fns.current = { columns, search, rowId }
   const visibleCols = columns.filter((c) => !hiddenCols.includes(c.id))
+  const filterCols = columns.filter((c) => c.filterValue)
 
   const filtered = useMemo(() => {
     const { columns, search, rowId } = fns.current
@@ -100,8 +101,8 @@ export function DataTable<T>(props: Props<T>) {
   const allPageSelected = pg.visible.length > 0 && pg.visible.every((r) => selected.has(rowId(r)))
   const toggle = (rid: string) => setSelected((s) => { const n = new Set(s); if (n.has(rid)) n.delete(rid); else n.add(rid); return n })
   const clear = () => setSelected(new Set())
-  const activeFilters = Object.entries(filters).filter(([, v]) => v.length > 0)
-  const totalColIndex = total ? visibleCols.findIndex((c) => c.id === total.columnId) : -1
+  const filterCount = Object.values(filters).reduce((a, v) => a + v.length, 0)
+  const cycleSort = (cid: string) => setSort((s) => (!s || s.id !== cid ? { id: cid, dir: 1 } : s.dir === 1 ? { id: cid, dir: -1 } : null))
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -115,25 +116,39 @@ export function DataTable<T>(props: Props<T>) {
             {q && <button onClick={() => setQ("")} aria-label="Limpar busca" className="absolute top-1/2 right-2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:text-foreground"><X className="size-3.5" /></button>}
           </div>
         )}
-        {activeFilters.map(([cid, vals]) => (
-          <span key={cid} className="flex h-7 items-center gap-1 rounded-full bg-brand/10 pr-1 pl-2.5 text-xs text-foreground ring-1 ring-brand/25">
-            <Filter className="size-3 text-brand" />
-            {columns.find((c) => c.id === cid)?.header}: {vals.length === 1 ? vals[0] : `${vals.length} valores`}
-            <button onClick={() => setFilters((f) => ({ ...f, [cid]: [] }))} aria-label="Remover filtro" className="rounded-full p-0.5 hover:bg-foreground/10"><X className="size-3" /></button>
-          </span>
-        ))}
-        {(activeFilters.length > 0 || q || sort) && (
-          <Button variant="ghost" size="sm" onClick={() => { setFilters({}); setQ(""); setSort(props.initialSort ?? null) }}>Limpar</Button>
-        )}
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1.5">
           {hiddenRows.length > 0 && (
-            <Button variant="outline" size="sm" onClick={() => setShowHidden((v) => !v)}>
-              {showHidden ? <EyeOff /> : <Eye />} {showHidden ? "Esconder" : "Mostrar"} ocultas ({hiddenRows.length})
-            </Button>
+            <IconBtn label={showHidden ? "Esconder ocultas" : `Mostrar ${hiddenRows.length} ocultas`} onClick={() => setShowHidden((v) => !v)} active={showHidden}>
+              {showHidden ? <EyeOff /> : <Eye />}
+            </IconBtn>
           )}
           {props.toolbar?.(filtered)}
+          {filterCols.length > 0 && (
+            <Popover>
+              <PopoverTrigger render={
+                <Button variant="outline" size="sm" className={cn("gap-1.5", filterCount > 0 && "border-brand/40 text-foreground")} />
+              }>
+                <Filter className={cn("size-4", filterCount > 0 && "text-brand")} />
+                <span className="hidden sm:inline">Filtros</span>
+                {filterCount > 0 && <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold text-brand-foreground">{filterCount}</span>}
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-72 p-0">
+                <div className="flex items-center justify-between px-3 py-2.5">
+                  <span className="text-sm font-medium">Filtros</span>
+                  {filterCount > 0 && <button onClick={() => setFilters({})} className="text-xs text-muted-foreground hover:text-foreground">Limpar tudo</button>}
+                </div>
+                <div className="max-h-[60vh] overflow-y-auto border-t border-foreground/8">
+                  {filterCols.map((c) => (
+                    <FilterGroup key={c.id} col={c} rows={rows} value={filters[c.id] ?? []} onChange={(v) => setFilters((f) => ({ ...f, [c.id]: v }))} />
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
           <DropdownMenu>
-            <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}><Columns3 /> <span className="hidden sm:inline">Colunas</span></DropdownMenuTrigger>
+            <DropdownMenuTrigger render={
+              <Tooltip><TooltipTrigger render={<Button variant="outline" size="icon-sm" aria-label="Colunas" />}><Columns3 /></TooltipTrigger><TooltipContent>Colunas</TooltipContent></Tooltip>
+            } />
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuGroup>
                 <DropdownMenuLabel>Colunas visíveis</DropdownMenuLabel>
@@ -161,7 +176,7 @@ export function DataTable<T>(props: Props<T>) {
         </div>
       )}
 
-      <TableScroll empty={filtered.length === 0 && <span>{props.emptyText ?? "Nada encontrado."}{(q || activeFilters.length > 0) && <span className="mt-1 block text-xs">Tente limpar a busca ou os filtros.</span>}</span>}
+      <TableScroll empty={filtered.length === 0 && <span>{props.emptyText ?? "Nada encontrado."}{(q || filterCount > 0) && <span className="mt-1 block text-xs">Tente limpar a busca ou os filtros.</span>}</span>}
         className="[&_td]:border-r [&_td]:border-foreground/6 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-foreground/6 [&_th:last-child]:border-r-0 [&_tr]:border-foreground/6">
         <Table>
           <TableHeader>
@@ -172,12 +187,21 @@ export function DataTable<T>(props: Props<T>) {
                     onCheckedChange={(v) => setSelected((s) => { const n = new Set(s); pg.visible.forEach((r) => (v ? n.add(rowId(r)) : n.delete(rowId(r)))); return n })} />
                 </TableHead>
               )}
-              {visibleCols.map((c) => (
-                <TableHead key={c.id} className={cn("px-2", c.align === "right" && "text-right", c.className)}>
-                  <ColumnMenu col={c} rows={rows} sort={sort} setSort={setSort} filter={filters[c.id] ?? []}
-                    setFilter={(v) => setFilters((f) => ({ ...f, [c.id]: v }))} hide={c.fixed ? undefined : () => setHiddenCols((h) => [...h, c.id])} />
-                </TableHead>
-              ))}
+              {visibleCols.map((c) => {
+                const dir = sort?.id === c.id ? sort.dir : 0
+                return (
+                  <TableHead key={c.id} className={cn("px-3", c.align === "right" && "text-right", c.className)}>
+                    {c.sortValue ? (
+                      <button onClick={() => cycleSort(c.id)}
+                        className={cn("group/sort -mx-1.5 inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium transition-colors hover:bg-foreground/5 hover:text-foreground",
+                          c.align === "right" && "flex-row-reverse", dir && "text-foreground")}>
+                        {c.header}
+                        {dir === 1 ? <ArrowUp className="size-3.5 text-brand" /> : dir === -1 ? <ArrowDown className="size-3.5 text-brand" /> : <ChevronsUpDown className="size-3 opacity-0 transition-opacity group-hover/sort:opacity-40" />}
+                      </button>
+                    ) : <span className="font-medium">{c.header}</span>}
+                  </TableHead>
+                )
+              })}
               {rowActions && <TableHead className="w-10" />}
             </TableRow>
           </TableHeader>
@@ -196,76 +220,52 @@ export function DataTable<T>(props: Props<T>) {
               )
             })}
           </TableBody>
-          {total && filtered.length > 0 && totalColIndex >= 0 && (
-            <TableFooter>
-              <TableRow className="hover:bg-transparent">
-                {selectable && <TableCell />}
-                {visibleCols.map((c, i) => (
-                  <TableCell key={c.id} className={cn("px-3 font-medium", c.align === "right" && "text-right")}>
-                    {i === 0 && i !== totalColIndex ? total.label : i === totalColIndex ? total.value(filtered) : null}
-                  </TableCell>
-                ))}
-                {rowActions && <TableCell />}
-              </TableRow>
-            </TableFooter>
-          )}
         </Table>
       </TableScroll>
+
+      {/* Total fixo no rodapé (não acompanha colunas) */}
+      {total && (
+        <div className="flex items-center justify-between gap-3 border-t border-foreground/10 bg-foreground/[0.02] px-4 py-2.5 text-sm">
+          <span className="font-medium text-muted-foreground">{total.label}</span>
+          <span className="num font-semibold">{total.value(filtered)}</span>
+        </div>
+      )}
       <TablePager p={pg} label={props.label} />
     </div>
   )
 }
 
-function ColumnMenu<T>({ col, rows, sort, setSort, filter, setFilter, hide }: {
-  col: Column<T>; rows: T[]; sort: { id: string; dir: 1 | -1 } | null; setSort: (s: { id: string; dir: 1 | -1 } | null) => void
-  filter: string[]; setFilter: (v: string[]) => void; hide?: () => void
-}) {
+function IconBtn({ children, label, onClick, active }: { children: React.ReactNode; label: string; onClick: () => void; active?: boolean }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<Button variant="outline" size="icon-sm" aria-label={label} onClick={onClick} className={active ? "border-brand/40 text-brand" : undefined} />}>{children}</TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+function FilterGroup<T>({ col, rows, value, onChange }: { col: Column<T>; rows: T[]; value: string[]; onChange: (v: string[]) => void }) {
   const values = useMemo(() => {
-    if (!col.filterValue) return []
     const m = new Map<string, number>()
     rows.forEach((r) => { const v = col.filterValue!(r); m.set(v, (m.get(v) ?? 0) + 1) })
     return [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 40)
   }, [rows, col])
-  const sorted = sort?.id === col.id ? sort.dir : 0
-  const interactive = col.sortValue || col.filterValue || hide
-  if (!interactive) return <span className="px-1 font-medium">{col.header}</span>
+  if (values.length === 0) return null
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={
-        <button className={cn("group/col inline-flex h-8 items-center gap-1.5 rounded-md px-1.5 font-medium transition-colors hover:bg-foreground/5 hover:text-foreground data-popup-open:bg-foreground/5",
-          col.align === "right" && "flex-row-reverse", (sorted || filter.length) && "text-foreground")} />
-      }>
-        {col.header}
-        {filter.length > 0 && <span className="size-1.5 rounded-full bg-brand" />}
-        {sorted === 1 ? <ArrowUp className="size-3.5 text-brand" /> : sorted === -1 ? <ArrowDown className="size-3.5 text-brand" /> : <ArrowUpDown className="size-3 opacity-0 transition-opacity group-hover/col:opacity-50" />}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align={col.align === "right" ? "end" : "start"} className="w-52">
-        {col.sortValue && (
-          <>
-            <DropdownMenuItem onClick={() => setSort({ id: col.id, dir: 1 })}><ArrowUp /> Crescente</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setSort({ id: col.id, dir: -1 })}><ArrowDown /> Decrescente</DropdownMenuItem>
-            {sorted !== 0 && <DropdownMenuItem onClick={() => setSort(null)}><X /> Sem ordenação</DropdownMenuItem>}
-          </>
-        )}
-        {col.filterValue && values.length > 0 && (
-          <>
-            {col.sortValue && <DropdownMenuSeparator />}
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger><Filter /> Filtrar {filter.length > 0 && <span className="ml-auto text-xs text-brand">{filter.length}</span>}</DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="max-h-72 w-56 overflow-y-auto">
-                {values.map(([v, n]) => (
-                  <DropdownMenuCheckboxItem key={v} checked={filter.includes(v)}
-                    onCheckedChange={(on) => setFilter(on ? [...filter, v] : filter.filter((x) => x !== v))}>
-                    <span className="truncate">{v || "—"}</span><span className="ml-auto pl-2 text-xs text-muted-foreground">{n}</span>
-                  </DropdownMenuCheckboxItem>
-                ))}
-                {filter.length > 0 && (<><DropdownMenuSeparator /><DropdownMenuItem onClick={() => setFilter([])}><X /> Limpar filtro</DropdownMenuItem></>)}
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          </>
-        )}
-        {hide && (<><DropdownMenuSeparator /><DropdownMenuItem onClick={hide}><EyeOff /> Ocultar coluna</DropdownMenuItem></>)}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="border-b border-foreground/6 px-1 py-2 last:border-b-0">
+      <div className="flex items-center justify-between px-2 pb-1">
+        <span className="text-xs font-medium text-muted-foreground">{col.header}</span>
+        {value.length > 0 && <button onClick={() => onChange([])} className="text-[11px] text-muted-foreground hover:text-foreground">limpar</button>}
+      </div>
+      <div className="max-h-48 overflow-y-auto">
+        {values.map(([v, n]) => (
+          <label key={v} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-foreground/[0.04]">
+            <Checkbox checked={value.includes(v)} onCheckedChange={(on) => onChange(on ? [...value, v] : value.filter((x) => x !== v))} />
+            <span className="truncate">{v || "—"}</span>
+            <span className="num ml-auto text-xs text-muted-foreground">{n}</span>
+          </label>
+        ))}
+      </div>
+    </div>
   )
 }

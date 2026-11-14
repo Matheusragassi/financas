@@ -1,3 +1,6 @@
+import { FoliaWordmark } from "@/components/app-logo"
+import { DashboardSkeleton, TableSkeleton } from "@/components/skeletons"
+import { useHydrated } from "@/lib/use-hydrated"
 import { ChevronLeft, ChevronRight, Plus, Sparkles, LogOut } from "lucide-react"
 import { useEffect, useState } from "react"
 import { setCurrency, addMonths, currentMonthId, monthLabel } from "@/lib/format"
@@ -42,6 +45,7 @@ export default function App() {
   const route = useRoute()
   const month = useSelectedMonth()
   const [adding, setAdding] = useState(false)
+  const hydrated = useHydrated()
   const currency = useStore((s) => s.settings.currency ?? "BRL")
   useAutoMonths(initialized && !isDemo)
   setCurrency(currency)
@@ -63,7 +67,7 @@ export default function App() {
                 <ChevronLeft className="size-4" />
               </button>
             )}
-            <a href="#/dashboard" className="hidden font-brand font-semibold tracking-tight text-muted-foreground transition-colors hover:text-foreground sm:inline">finitree</a>
+            <a href="#/dashboard" className="hidden items-center text-muted-foreground transition-colors hover:text-foreground sm:inline-flex" aria-label="Folia"><FoliaWordmark className="h-2.5 w-auto" /></a>
             <ChevronRight className="hidden size-3.5 text-muted-foreground/60 sm:block" />
             {PARENT[route] && (
               <>
@@ -93,13 +97,19 @@ export default function App() {
           </div>
         )}
         <main key={currency} className="relative mx-auto w-full max-w-7xl flex-1 px-4 pt-5 pb-28 md:px-8 md:pt-8 md:pb-12">
-          {route === "dashboard" && <Dashboard onAdd={() => setAdding(true)} />}
-          {route === "lancamentos" && <Expenses />}
-          {route === "parcelas" && <Installments />}
-          {route === "relatorios" && <Reports />}
-          {route === "ajustes" && <SettingsPage />}
-          {route === "conta" && <AccountPage />}
-          {route === "cartoes" && <CardsPage />}
+          <div key={route} className="animate-in fade-in-0 duration-300">
+            {!hydrated ? (route === "lancamentos" || route === "parcelas" || route === "relatorios" ? <TableSkeleton /> : <DashboardSkeleton />) : (
+              <>
+                {route === "dashboard" && <Dashboard onAdd={() => setAdding(true)} />}
+                {route === "lancamentos" && <Expenses />}
+                {route === "parcelas" && <Installments />}
+                {route === "relatorios" && <Reports />}
+                {route === "ajustes" && <SettingsPage />}
+                {route === "conta" && <AccountPage />}
+                {route === "cartoes" && <CardsPage />}
+              </>
+            )}
+          </div>
         </main>
         <Button
           size="icon-lg"

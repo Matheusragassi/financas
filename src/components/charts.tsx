@@ -56,8 +56,9 @@ const trendConfig = {
 export function TrendChart({ data, height = 280 }: { data: TrendRow[]; height?: number }) {
   const [hover, setHover] = useState<number | null>(null)
   const dim = (i: number) => (hover == null || hover === i ? 1 : 0.35)
+  const fadeKey = `${data[0]?.month}-${data.length}`
   return (
-    <div>
+    <div key={fadeKey} className="animate-in fade-in-0 duration-500">
       <ChartContainer config={trendConfig} className="w-full" style={{ height }}>
         <ComposedChart data={data} margin={{ left: 4, right: 8, top: 8 }} barCategoryGap="24%"
           onMouseMove={(s) => setHover(typeof s?.activeTooltipIndex === "number" ? s.activeTooltipIndex : s?.activeTooltipIndex != null ? Number(s.activeTooltipIndex) : null)}
@@ -66,10 +67,10 @@ export function TrendChart({ data, height = 280 }: { data: TrendRow[]; height?: 
           <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={10} tickFormatter={monthShort} minTickGap={8} />
           <YAxis tickLine={false} axisLine={false} width={64} tickFormatter={(v) => moneyCompact(v)} />
           <ChartTooltip cursor={HoverCursor} content={<GlassTooltip config={trendConfig} labelFmt={monthLabel} showTotal />} />
-          <Bar dataKey="fixed" stackId="a" fill="var(--color-fixed)" stroke="var(--card)" strokeWidth={2} animationDuration={600}>
+          <Bar dataKey="fixed" stackId="a" fill="var(--color-fixed)" stroke="var(--card)" strokeWidth={2} animationDuration={500} animationEasing="ease-out">
             {data.map((_, i) => <Cell key={i} fillOpacity={dim(i)} style={{ transition: "fill-opacity 200ms" }} />)}
           </Bar>
-          <Bar dataKey="variable" stackId="a" fill="var(--color-variable)" radius={[6, 6, 0, 0]} stroke="var(--card)" strokeWidth={2} animationDuration={600}>
+          <Bar dataKey="variable" stackId="a" fill="var(--color-variable)" radius={[6, 6, 0, 0]} stroke="var(--card)" strokeWidth={2} animationDuration={500} animationEasing="ease-out">
             {data.map((_, i) => <Cell key={i} fillOpacity={dim(i)} style={{ transition: "fill-opacity 200ms" }} />)}
           </Bar>
           <Line dataKey="salary" type="stepAfter" stroke="var(--color-salary)" strokeWidth={2} strokeDasharray="5 4" dot={false}
@@ -103,15 +104,16 @@ export function Legend({ items }: { items: { label: string; color: string; dashe
 /** Rosca interativa: fatia sob o mouse cresce; centro mostra nome e valor */
 export function Donut({ data, total }: { data: { name: string; value: number }[]; total: number }) {
   const [active, setActive] = useState<number | null>(null)
+  const fadeKey = data.map((d) => d.name).join("|")
   const config = Object.fromEntries(data.map((d, i) => [d.name, { label: d.name, color: SERIES[i] }])) as ChartConfig
   const cur = active != null ? data[active] : null
   return (
-    <div className="grid items-center gap-5 sm:grid-cols-[200px_1fr]">
+    <div key={fadeKey} className="grid items-center gap-5 animate-in fade-in-0 duration-500 sm:grid-cols-[200px_1fr]">
       <div className="relative mx-auto size-48">
         <ChartContainer config={config} className="size-full">
           <PieChart>
             <Pie data={data} dataKey="value" nameKey="name" innerRadius={58} outerRadius={86} strokeWidth={3} stroke="var(--card)" paddingAngle={1.5} cornerRadius={4}
-              animationDuration={700}
+              animationDuration={600} animationEasing="ease-out"
               shape={(props, index) => <Sector {...props} outerRadius={(props.outerRadius ?? 86) + (index === active ? 7 : 0)} style={{ transition: "all 200ms" }} />}
               onMouseEnter={(_, i) => setActive(i)} onMouseLeave={() => setActive(null)}>
               {data.map((d, i) => <Cell key={d.name} fill={SERIES[i]} fillOpacity={active == null || active === i ? 1 : 0.35} style={{ transition: "fill-opacity 200ms", cursor: "pointer" }} />)}
@@ -176,7 +178,7 @@ export function SimpleBars({ data, dataKey, label, color = SERIES[0], height = 2
         <XAxis dataKey={xKey} tickLine={false} axisLine={false} tickMargin={10} tickFormatter={xFmt} minTickGap={8} />
         <YAxis tickLine={false} axisLine={false} width={64} tickFormatter={(v) => moneyCompact(v)} />
         <ChartTooltip cursor={HoverCursor} content={<GlassTooltip config={config} labelFmt={xKey === "month" ? monthLabel : undefined} />} />
-        <Bar dataKey={dataKey} fill={color} radius={[6, 6, 6, 6]} animationDuration={600}>
+        <Bar dataKey={dataKey} fill={color} radius={[6, 6, 6, 6]} animationDuration={500} animationEasing="ease-out">
           {data.map((d, i) => (
             <Cell key={i} fill={signed ? (Number(d[dataKey]) < 0 ? "var(--critical)" : "var(--success)") : color}
               fillOpacity={hover == null || hover === i ? 1 : 0.35} style={{ transition: "fill-opacity 200ms" }} />

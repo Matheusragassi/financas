@@ -105,7 +105,7 @@ export async function resolveConflict(keep: "local" | "remote") {
 }
 
 /* Última conta usada neste aparelho (para "Continuar como …" na tela inicial). Não guarda tokens. */
-const LAST_KEY = "finitree-last-account"
+const LAST_KEY = "folia-last-account"
 export function lastAccount(): GoogleUser | null {
   try { return JSON.parse(localStorage.getItem(LAST_KEY) ?? "null") } catch { return null }
 }

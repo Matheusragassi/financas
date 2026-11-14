@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { FieldLabel } from "@/components/field-label"
 import { MoneyInput } from "@/components/money-input"
 import { SimpleSelect } from "@/components/simple-select"
-import { AppLogo } from "@/components/app-logo"
+import { AppLogo, FoliaWordmark } from "@/components/app-logo"
 import { AuthorCredit } from "@/components/author-credit"
 import { FunSteps } from "@/components/fun-steps"
 import { GoogleIcon } from "@/components/google-icon"
@@ -124,8 +124,8 @@ export function Onboarding() {
           </div>
           <div className="relative">
           <div className="flex flex-col items-center text-center">
-            <AppLogo className="size-16 shadow-[0_14px_40px_-8px_rgba(59,130,246,0.65),inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform duration-500 hover:-rotate-6 hover:scale-105" />
-            <h1 className="mt-5 font-brand text-[28px] leading-none font-semibold tracking-tight">finitree</h1>
+            <AppLogo className="size-16 shadow-[0_14px_40px_-8px_rgba(52,211,153,0.6),inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform duration-500 hover:-rotate-6 hover:scale-105" />
+            <FoliaWordmark className="mt-5 h-6 w-auto" />
             <p className="mt-1.5 text-sm text-balance text-muted-foreground">
               {view === "guest"
                   ? "Só precisamos de duas informações para começar."

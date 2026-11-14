@@ -8,7 +8,7 @@ import { useStore } from "@/lib/store"
 import { useOnline } from "@/lib/use-online"
 import { AuthorCredit } from "@/components/author-credit"
 import { NavUser } from "@/components/nav-user"
-import { AppLogo } from "@/components/app-logo"
+import { AppLogo, FoliaWordmark } from "@/components/app-logo"
 import { useSync } from "@/lib/sync"
 
 const NAV: { route: Route; label: string; icon: typeof LayoutDashboard }[] = [
@@ -29,14 +29,14 @@ export function AppSidebar() {
   const { setOpenMobile } = useSidebar()
   return (
     <Sidebar collapsible="icon" variant="sidebar" className="border-r border-sidebar-border">
-      <SidebarHeader className="px-3 pt-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
+      <SidebarHeader className="px-3 pt-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className="group-data-[collapsible=icon]:p-0!" render={<a href="#/dashboard" />}>
-              <AppLogo className="size-8 transition-transform group-hover/menu-button:scale-105" />
-              <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
-                <span className="truncate font-brand text-[15px] font-semibold tracking-tight">finitree</span>
-                <span className="truncate text-xs text-muted-foreground">{name ? `de ${name}` : "finanças pessoais"}</span>
+            <SidebarMenuButton size="lg" className="gap-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0!" render={<a href="#/dashboard" />}>
+              <AppLogo className="size-8 shrink-0 transition-transform group-hover/menu-button:scale-105" />
+              <div className="flex flex-1 flex-col gap-1.5 overflow-hidden text-left group-data-[collapsible=icon]:hidden">
+                <FoliaWordmark className="h-[17px] w-[96px] shrink-0" />
+                <span className="truncate text-[11px] leading-none text-muted-foreground">{name ? `de ${name}` : "finanças pessoais"}</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -64,7 +64,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="gap-3 px-3 pb-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
+      <SidebarFooter className="gap-3 px-3 pb-3 group-data-[collapsible=icon]:px-0">
         <ConnectionPill online={online} google={!!googleUser} />
         <NavUser />
         <AuthorCredit className="px-2.5 group-data-[collapsible=icon]:hidden" />

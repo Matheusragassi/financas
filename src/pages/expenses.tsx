@@ -5,6 +5,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Switch } from "@/components/ui/switch"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -120,13 +121,13 @@ export function Expenses() {
           onFilteredChange={setFiltered}
           emptyText="Nenhum lançamento encontrado."
           rowClassName={(e) => (e.status === "cancelled" ? "opacity-55" : undefined)}
-          total={{ label: "Total (sem cancelados)", columnId: "amount", value: (list) => <span className="num font-semibold">{money(list.filter((e) => e.status !== "cancelled").reduce((a, e) => a + e.amount, 0))}</span> }}
+          total={{ label: "Total (sem cancelados)", value: (list) => <span className="num font-semibold">{money(list.filter((e) => e.status !== "cancelled").reduce((a, e) => a + e.amount, 0))}</span> }}
           toolbar={(list) => (
             <>
               <label className="flex h-8 items-center gap-2 rounded-lg px-2 text-xs text-muted-foreground hover:bg-foreground/[0.04]">
                 <Switch checked={allMonths} onCheckedChange={setAllMonths} size="sm" /> Todos os meses
               </label>
-              <Button variant="outline" size="sm" onClick={() => exportCsv(list)}><Download /> <span className="hidden sm:inline">CSV</span></Button>
+              <Tooltip><TooltipTrigger render={<Button variant="outline" size="icon-sm" aria-label="Exportar CSV" onClick={() => exportCsv(list)} />}><Download /></TooltipTrigger><TooltipContent>Exportar CSV</TooltipContent></Tooltip>
             </>
           )}
           bulkActions={(sel, clear) => (
@@ -167,7 +168,6 @@ export function Expenses() {
           )}
         />
       </Card>
-      <p className="text-xs text-muted-foreground">Dica: clique no título de uma coluna para ordenar, filtrar ou ocultar. Clique no valor para mudar o preço (vale para todos os meses do item) e no status para alternar entre pago e em aberto.</p>
 
       <ExpenseForm open={!!editing} onOpenChange={(o) => !o && setEditing(null)} month={month} expense={editing} />
 

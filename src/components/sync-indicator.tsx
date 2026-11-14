@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import { COVER_CSS } from "@/lib/covers"
 import { toast } from "sonner"
 import { Check, Cloud, CloudCheck, CloudOff, Loader2, LogOut, RefreshCw, Sheet, TriangleAlert, UserRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -59,15 +58,14 @@ function ago(iso: string | null) {
 }
 
 const RING: Record<SyncStatus, string> = {
-  off: "ring-foreground/20", connecting: "ring-brand", syncing: "ring-brand", synced: "ring-success",
-  offline: "ring-warning", "needs-auth": "ring-warning", "needs-scope": "ring-warning", error: "ring-critical", conflict: "ring-critical",
+  off: "ring-foreground/15", connecting: "ring-brand/50", syncing: "ring-brand/50", synced: "ring-success/60",
+  offline: "ring-warning/60", "needs-auth": "ring-warning/60", "needs-scope": "ring-warning/60", error: "ring-critical/60", conflict: "ring-critical/60",
 }
 
 export function SyncIndicator() {
   const { user, status, dirty, error, fileUrl, lastSyncAt, conflict } = useSync()
   const isDemo = useStore((s) => s.isDemo)
   const counts = { n: useStore((s) => s.expenses.length), m: useStore((s) => s.months.length) }
-  const cover = useStore((s) => s.settings.cover)
   const [, tick] = useState(0)
   useEffect(() => { const t = setInterval(() => tick((x) => x + 1), 30_000); return () => clearInterval(t) }, [])
   if (!googleEnabled() || isDemo) return null
@@ -83,38 +81,33 @@ export function SyncIndicator() {
       <DropdownMenu>
         <DropdownMenuTrigger render={<button className="relative rounded-full p-0.5 transition active:scale-95" aria-label={title} />}>
           {user.picture
-            ? <img src={user.picture} alt="" referrerPolicy="no-referrer" className={cn("size-7 rounded-full ring-2 ring-offset-2 ring-offset-background transition-[box-shadow]", RING[status], busy && "animate-pulse")} />
-            : <span className={cn("flex size-7 items-center justify-center rounded-full bg-muted text-xs font-medium ring-2 ring-offset-2 ring-offset-background", RING[status])}>{user.name[0]}</span>}
+            ? <img src={user.picture} alt="" referrerPolicy="no-referrer" className={cn("size-7 rounded-full ring-2 ring-offset-1 ring-offset-background transition-[box-shadow]", RING[status])} />
+            : <span className={cn("flex size-7 items-center justify-center rounded-full bg-muted text-xs font-medium ring-2 ring-offset-1 ring-offset-background", RING[status])}>{user.name[0]}</span>}
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" sideOffset={8} className="w-80 overflow-hidden p-0">
-          {/* topo com a capa do perfil */}
-          <div className="relative h-14" style={{ background: COVER_CSS[cover ?? "blue"] ?? COVER_CSS.blue }}>
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.18),transparent)]" />
-          </div>
-          <div className="-mt-7 flex items-end gap-3 px-4">
+        <DropdownMenuContent align="end" sideOffset={8} className="w-72 overflow-hidden p-0">
+          {/* header enxuto */}
+          <div className="flex items-center gap-3 px-3.5 pt-3.5 pb-3">
             {user.picture
-              ? <img src={user.picture} alt="" referrerPolicy="no-referrer" className="size-14 rounded-full ring-4 ring-popover" />
-              : <span className="flex size-14 items-center justify-center rounded-full bg-muted text-lg font-semibold ring-4 ring-popover">{user.name[0]}</span>}
-            <div className="min-w-0 pb-1">
+              ? <img src={user.picture} alt="" referrerPolicy="no-referrer" className="size-10 shrink-0 rounded-full" />
+              : <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold">{user.name[0]}</span>}
+            <div className="min-w-0">
               <div className="truncate text-sm font-semibold">{user.name}</div>
               <div className="truncate text-xs text-muted-foreground">{user.email}</div>
             </div>
           </div>
 
           {/* status */}
-          <div className={cn("mx-3 mt-4 flex items-center gap-3 rounded-2xl p-3 ring-1",
-            ok ? "bg-success/8 ring-success/20" : bad ? "bg-critical/8 ring-critical/20" : status === "offline" ? "bg-warning/8 ring-warning/20" : "bg-brand/8 ring-brand/20")}>
-            <span className={cn("relative flex size-10 shrink-0 items-center justify-center rounded-full",
+          <div className={cn("mx-3 flex items-center gap-2.5 rounded-xl p-2.5 ring-1",
+            ok ? "bg-success/8 ring-success/15" : bad ? "bg-critical/8 ring-critical/15" : status === "offline" ? "bg-warning/8 ring-warning/15" : "bg-brand/8 ring-brand/15")}>
+            <span className={cn("flex size-8 shrink-0 items-center justify-center rounded-full",
               ok ? "bg-success/15 text-success" : bad ? "bg-critical/15 text-critical" : status === "offline" ? "bg-warning/15 text-warning" : "bg-brand/15 text-brand")}>
-              {ok && <span className="absolute inset-0 animate-ping rounded-full bg-success/20 [animation-duration:2.4s]" />}
-              <Big className={cn("relative size-5", busy && "animate-spin")} />
+              <Big className={cn("size-4", busy && "animate-spin")} />
             </span>
             <div className="min-w-0">
-              <div className="text-sm font-medium">{title}</div>
-              <div className="truncate text-xs text-muted-foreground">
-                {status === "error" && error ? error : `Sincronizado ${ago(lastSyncAt)}`}
+              <div className="text-[13px] font-medium">{title}</div>
+              <div className="truncate text-[11px] text-muted-foreground">
+                {status === "error" && error ? error : `${ago(lastSyncAt)} · ${counts.n} lançamentos`}
               </div>
-              <div className="mt-0.5 text-[11px] text-muted-foreground">{counts.n} lançamentos · {counts.m} meses</div>
             </div>
           </div>
 

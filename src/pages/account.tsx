@@ -18,7 +18,6 @@ import { useStore } from "@/lib/store"
 import { signOut, syncNow, useSync } from "@/lib/sync"
 import { googleEnabled } from "@/lib/config"
 import { resizeImage } from "@/lib/image"
-import { COVERS } from "@/lib/covers"
 
 
 export function AccountPage() {
@@ -47,41 +46,29 @@ export function AccountPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 md:space-y-8">
       {/* Cabeçalho do perfil */}
-      <Card className="gap-0 overflow-hidden py-0">
-        <div className="group/cover relative h-28 sm:h-32" style={{ background: COVERS.find((c) => c.id === settings.cover)?.css ?? COVERS[0].css }}>
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),transparent_60%)]" />
-          <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-black/25 p-1.5 opacity-0 backdrop-blur-md transition-opacity group-hover/cover:opacity-100 focus-within:opacity-100">
-            {COVERS.map((c) => (
-              <button key={c.id} onClick={() => updateSettings({ cover: c.id })} aria-label={`Capa ${c.name}`} title={c.name}
-                className={`size-5 rounded-full ring-2 transition ${ (settings.cover ?? COVERS[0].id) === c.id ? "ring-white" : "ring-white/0 hover:ring-white/60"}`}
-                style={{ background: c.css }} />
-            ))}
-          </div>
-        </div>
-        <CardContent className="flex flex-col items-center gap-4 pb-6 sm:flex-row sm:items-end">
-          <div className="group relative -mt-12 shrink-0">
-            <UserAvatar className="size-24 text-2xl ring-4 ring-card" />
+      <Card>
+        <CardContent className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-left">
+          <div className="group relative shrink-0">
+            <UserAvatar className="size-16 text-xl ring-1 ring-foreground/10" />
             <button
               onClick={() => fileRef.current?.click()}
               className="absolute inset-0 flex items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
               aria-label="Alterar foto"
             >
-              <Camera className="size-6" />
+              <Camera className="size-5" />
             </button>
             <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => { void onPhoto(e.target.files?.[0]); e.target.value = "" }} />
           </div>
-          <div className="min-w-0 flex-1 pt-1 text-center sm:pt-4 sm:text-left">
-            <h2 className="truncate text-xl font-semibold tracking-tight">{p.fullName}</h2>
+          <div className="min-w-0 flex-1">
+            <h2 className="truncate text-lg font-semibold tracking-tight">{p.fullName}</h2>
             <p className="truncate text-sm text-muted-foreground">{p.email || "Nenhum e-mail vinculado"}</p>
-            {p.google && <Badge variant="secondary" className="mt-2 gap-1"><GoogleIcon className="size-3" /> Conta Google</Badge>}
+            {p.google && <Badge variant="secondary" className="mt-1.5 gap-1"><GoogleIcon className="size-2.5" /> Conta Google</Badge>}
           </div>
           <div className="flex flex-wrap justify-center gap-2">
             <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}><Camera /> Alterar foto</Button>
-            {settings.photo && p.googlePhoto && <Button size="sm" variant="ghost" onClick={() => updateSettings({ photo: undefined })}>Usar foto do Google</Button>}
-            {settings.photo && !p.googlePhoto && <Button size="sm" variant="ghost" onClick={() => updateSettings({ photo: undefined })}>Remover</Button>}
+            {settings.photo && <Button size="sm" variant="ghost" onClick={() => updateSettings({ photo: undefined })}>{p.googlePhoto ? "Usar foto do Google" : "Remover"}</Button>}
           </div>
         </CardContent>
-        <p className="border-t border-foreground/6 px-5 py-2 text-center text-[11px] text-muted-foreground sm:text-left">Dica: passe o mouse na capa para escolher outra cor.</p>
       </Card>
 
       {/* Dados pessoais */}
@@ -173,13 +160,13 @@ export function AccountPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><ShieldCheck className="size-4" /> Senha e segurança</CardTitle>
           <CardDescription>
-            O Finitree não guarda senhas. O acesso é feito pela sua conta Google, protegida pela senha e pela verificação em duas etapas do próprio Google.
+            O Folia não guarda senhas. O acesso é feito pela sua conta Google, protegida pela senha e pela verificação em duas etapas do próprio Google.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-2 sm:grid-cols-3">
           <SecurityLink icon={KeyRound} title="Alterar senha" desc="Troque a senha da sua conta Google" href="https://myaccount.google.com/signinoptions/password" />
           <SecurityLink icon={LifeBuoy} title="Esqueci a senha" desc="Recupere o acesso à conta Google" href="https://accounts.google.com/signin/recovery" />
-          <SecurityLink icon={ShieldCheck} title="Acessos do app" desc="Veja ou revogue o acesso do Finitree" href="https://myaccount.google.com/permissions" />
+          <SecurityLink icon={ShieldCheck} title="Acessos do app" desc="Veja ou revogue o acesso do Folia" href="https://myaccount.google.com/permissions" />
         </CardContent>
       </Card>}
 
@@ -197,7 +184,7 @@ export function AccountPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Apagar todos os dados deste aparelho?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  {p.google ? "A planilha no seu Google Drive não é apagada: para excluí-la de vez, apague o arquivo “Finitree — dados” no Drive." : "Sem conta Google conectada, isso não pode ser desfeito."}
+                  {p.google ? "A planilha no seu Google Drive não é apagada: para excluí-la de vez, apague o arquivo “Folia — dados” no Drive." : "Sem conta Google conectada, isso não pode ser desfeito."}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

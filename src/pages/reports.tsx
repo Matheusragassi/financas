@@ -109,7 +109,7 @@ export function Reports() {
           search={(h) => monthLabel(h.month)}
           searchPlaceholder="Buscar mês…"
           emptyText="Sem meses no período."
-          total={{ label: "Total do período", columnId: "total", value: (rows) => <span className="num font-semibold">{money(rows.reduce((a, r) => a + r.total, 0))}</span> }}
+          total={{ label: "Total do período", value: (rows) => <span className="num font-semibold">{money(rows.reduce((a, r) => a + r.total, 0))}</span> }}
           columns={[
             { id: "month", header: "Mês", fixed: true, sortValue: (h) => h.month, filterValue: (h) => h.month.slice(0, 4), cell: (h) => <span className="font-medium whitespace-nowrap">{monthLabel(h.month)}</span> },
             { id: "salary", header: "Renda", align: "right", sortValue: (h) => h.salary, cell: (h) => <span className="num text-muted-foreground">{money(h.salary)}</span> },

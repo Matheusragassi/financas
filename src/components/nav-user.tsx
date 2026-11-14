@@ -18,7 +18,7 @@ export function NavUser() {
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger render={<SidebarMenuButton size="lg" className="data-popup-open:bg-sidebar-accent group-data-[collapsible=icon]:p-0!" />}>
+          <DropdownMenuTrigger render={<SidebarMenuButton size="lg" className="data-popup-open:bg-sidebar-accent gap-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0!" />}>
             <span className="relative">
               <UserAvatar className="size-8" />
             </span>

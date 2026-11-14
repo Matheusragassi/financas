@@ -282,7 +282,7 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="flex size-full flex-col bg-sidebar group-data-[peek=true]:rounded-xl group-data-[peek=true]:shadow-2xl group-data-[peek=true]:ring-1 group-data-[peek=true]:ring-sidebar-border group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border"
+          className="flex size-full flex-col bg-sidebar group-data-[peek=true]:shadow-2xl group-data-[peek=true]:border-r group-data-[peek=true]:border-sidebar-border group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border"
         >
           {children}
         </div>
@@ -449,7 +449,7 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sidebar-group"
       data-sidebar="group"
-      className={cn("relative flex w-full min-w-0 flex-col px-3 py-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2", className)}
+      className={cn("relative flex w-full min-w-0 flex-col px-3 py-2 group-data-[collapsible=icon]:px-0", className)}
       {...props}
     />
   )

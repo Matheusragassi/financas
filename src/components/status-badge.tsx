@@ -14,8 +14,8 @@ export function StatusBadge({ status, onClick }: { status: ExpenseStatus; onClic
   return (
     <button type="button" onClick={onClick} disabled={!onClick || status === "cancelled"}
       title={onClick ? (status === "paid" ? "Marcar como em aberto" : "Marcar como pago") : undefined}
-      className={cn("inline-flex h-6 items-center gap-1 rounded-full px-2 text-xs font-medium whitespace-nowrap ring-1 transition hover:brightness-110 active:scale-95", cls)}>
-      <Icon className="size-3" /> {STATUS_LABEL[status]}
+      className={cn("inline-flex h-[18px] items-center gap-1 rounded-full px-1.5 text-[11px] font-medium whitespace-nowrap ring-1 transition hover:brightness-110 active:scale-95", cls)}>
+      <Icon className="size-2.5" /> {STATUS_LABEL[status]}
     </button>
   )
 }

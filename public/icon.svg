@@ -1,19 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#5B9BFF"/>
-      <stop offset=".55" stop-color="#3B82F6"/>
-      <stop offset="1" stop-color="#2557C7"/>
+      <stop offset="0" stop-color="#5EE3B0"/><stop offset=".55" stop-color="#34D399"/><stop offset="1" stop-color="#0b9e6f"/>
     </linearGradient>
     <linearGradient id="s" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#fff" stop-opacity=".22"/>
-      <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
   </defs>
   <rect width="512" height="512" rx="143" fill="url(#g)"/>
   <rect width="512" height="512" rx="143" fill="url(#s)"/>
-  <g transform="translate(207 126) scale(2.5)" shape-rendering="crispEdges">
-    <path d="M0 0h13v13H0zM13 13h13v13H13zM0 26h39v13H0zM0 39h13v13H0zM0 52h39v13H0zM26 65h13v13H26zM0 78h39v13H0zM13 91h13v13H13z" fill="#fff"/>
-    <rect x="26" y="0" width="13" height="13" fill="#9BE858"/>
+  <g transform="translate(159 159) scale(5.0)" shape-rendering="crispEdges" fill="#fff">
+    <rect x="0" y="0" width="13.2" height="13.2"/><rect x="13" y="0" width="13.2" height="13.2"/>
+    <rect x="0" y="13" width="13.2" height="13.2"/><rect x="26" y="13" width="13.2" height="13.2"/>
+    <rect x="13" y="26" width="13.2" height="13.2"/><rect x="26" y="26" width="13.2" height="13.2"/>
   </g>
 </svg>

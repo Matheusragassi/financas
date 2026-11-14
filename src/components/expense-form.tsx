@@ -49,7 +49,6 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
   const [cardId, setCardId] = useState("")
   const [newCard, setNewCard] = useState(false)
   const cards = settings.cards ?? []
-  const lastCardId = useStore((st) => [...st.expenses].reverse().find((x) => x.cardId)?.cardId ?? "")
 
   useEffect(() => {
     if (!open) return
@@ -70,7 +69,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
     setSpread(true)
     setRepeat("1")
     setScope("all")
-    setCardId(e ? e.cardId ?? "" : lastCardId || (settings.cards?.[0]?.id ?? ""))
+    setCardId(e?.cardId ?? "")
   }, [open, expense, month, settings.categories, settings.methods]) // eslint-disable-line
 
   const monthOptions = useMemo(() => {
@@ -197,8 +196,8 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
                 <FieldLabel optional>Cartão</FieldLabel>
                 <div className="flex gap-2">
                   {cards.length > 0 && (
-                    <SimpleSelect value={cardId || "none"} onChange={(v) => setCardId(v === "none" ? "" : v)}
-                      options={[...cards.map((c) => ({ value: c.id, label: `${c.name} · ${c.bank}` })), { value: "none", label: "Não informar" }]} />
+                    <SimpleSelect value={cardId} placeholder="Selecione um cartão" onChange={(v) => setCardId(v === "none" ? "" : v)}
+                      options={[...cards.map((c) => ({ value: c.id, label: `${c.name} · ${c.bank}` })), { value: "none", label: "Sem cartão" }]} />
                   )}
                   <Button type="button" variant="outline" className={cards.length ? "" : "w-full"} onClick={() => setNewCard(true)}>
                     <Plus /> {cards.length ? "Novo" : "Cadastrar cartão"}
