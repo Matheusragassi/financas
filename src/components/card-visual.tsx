@@ -1,14 +1,28 @@
-import { Nfc } from "lucide-react"
-import { inkOn } from "@/lib/cards"
+import { CreditCard as CardIcon, Nfc } from "lucide-react"
+import { bankMonogram, inkOn } from "@/lib/cards"
 import type { CreditCard } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-/** Selo pequeno: bolinha na cor do cartão + nome */
+/** Selo do banco: monograma (iniciais) sobre a cor da marca */
+export function BankBadge({ card, className }: { card: CreditCard; className?: string }) {
+  const mono = bankMonogram(card.bank)
+  return (
+    <span
+      className={cn("flex size-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold ring-1 ring-white/20", className)}
+      style={{ background: `color-mix(in srgb, ${card.color} 85%, black)`, color: inkOn(card.color) }}
+      aria-hidden="true"
+    >
+      {mono || <CardIcon className="size-3.5 opacity-90" />}
+    </span>
+  )
+}
+
+/** Selo pequeno: monograma do banco + nome */
 export function CardChip({ card, className }: { card?: CreditCard | null; className?: string }) {
   if (!card) return null
   return (
     <span className={cn("inline-flex max-w-full items-center gap-1.5", className)}>
-      <span className="size-2.5 shrink-0 rounded-[3px] ring-1 ring-foreground/10" style={{ background: card.color }} />
+      <BankBadge card={card} className="size-4 rounded-[4px] text-[8px]" />
       <span className="truncate">{card.name}</span>
     </span>
   )
@@ -26,9 +40,12 @@ export function CardVisual({ card, className, children }: { card: CreditCard; cl
       <div aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.18),transparent_45%)]" />
       <div className="relative flex h-full flex-col">
         <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <div className="truncate text-[11px] font-medium tracking-wide uppercase opacity-80">{card.bank}</div>
-            <div className="truncate text-base font-semibold">{card.name}</div>
+          <div className="flex min-w-0 items-center gap-2">
+            <BankBadge card={card} />
+            <div className="min-w-0">
+              <div className="truncate text-[11px] font-medium tracking-wide uppercase opacity-80">{card.bank}</div>
+              <div className="truncate text-base font-semibold">{card.name}</div>
+            </div>
           </div>
           <Nfc className="size-5 shrink-0 opacity-70" />
         </div>

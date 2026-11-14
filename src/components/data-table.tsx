@@ -174,7 +174,7 @@ export function DataTable<T>(props: Props<T>) {
       )}
 
       <TableScroll empty={filtered.length === 0 && <span>{props.emptyText ?? "Nada encontrado."}{(q || filterCount > 0) && <span className="mt-1 block text-xs">Tente limpar a busca ou os filtros.</span>}</span>}
-        className="[&_td]:border-r [&_td]:border-foreground/6 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-foreground/6 [&_th:last-child]:border-r-0 [&_tr]:border-foreground/6">
+        className="[&_td]:border-r [&_td]:border-foreground/6 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-foreground/6 [&_th:last-child]:border-r-0 [&_tr]:border-foreground/6 [&_tbody_tr:last-child_td]:border-b [&_tbody_tr:last-child_td]:border-foreground/6">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">

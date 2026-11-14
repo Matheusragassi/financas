@@ -25,6 +25,14 @@ export const NETWORKS = ["Mastercard", "Visa", "Elo", "American Express", "Hiper
 
 export const bankColor = (bank: string) => BANKS.find((b) => b.name === bank)?.color ?? "#64748B"
 
+/** Monograma do banco (iniciais) — marcador visual original, não a logo da marca */
+const MONOGRAM: Record<string, string> = {
+  "Nubank": "Nu", "Itaú": "It", "Inter": "in", "Bradesco": "Bra", "Santander": "Sa",
+  "Banco do Brasil": "BB", "Caixa": "CX", "C6 Bank": "C6", "Mercado Pago": "MP",
+  "PicPay": "PP", "BTG Pactual": "BTG", "XP": "XP", "Neon": "Ne", "Banestes": "Be", "Sicredi": "Si",
+}
+export const bankMonogram = (bank: string) => MONOGRAM[bank] ?? (bank && bank !== "Outro" ? bank.replace(/[^A-Za-zÀ-ú]/g, "").slice(0, 2) : "")
+
 /** Pode ser cobrado num cartão de crédito? (crédito ou assinatura) */
 export const isCardEligible = (e: { method: string; kind?: string }) => isCreditMethod(e.method) || /assinatura/i.test(e.method) || e.kind === "subscription"
 
