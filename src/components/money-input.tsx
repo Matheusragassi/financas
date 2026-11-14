@@ -26,9 +26,9 @@ export const MoneyInput = forwardRef<HTMLInputElement, {
       "group/money flex h-9 w-full items-center gap-2 rounded-lg border border-input bg-transparent px-2.5 transition-[color,box-shadow,border-color] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 dark:bg-input/30",
       className,
     )}>
-      <span className="flex shrink-0 items-center gap-1.5 border-r border-border pr-2 text-xs text-muted-foreground select-none">
-        <span className="text-sm leading-none">{c.flag}</span>
-        <span className="font-medium">{c.symbol}</span>
+      <span className="flex h-5 shrink-0 items-center gap-1.5 border-r border-border pr-2 text-xs leading-none text-muted-foreground select-none">
+        <span className="flex size-4 items-center justify-center text-[15px] leading-none" aria-hidden="true">{c.flag}</span>
+        <span className="font-medium leading-none">{c.symbol}</span>
       </span>
       <input
         ref={ref}

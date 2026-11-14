@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { addMonths, uid } from "./format"
+import { currencyOf } from "./currency"
 import type { Backup, CreditCard, Expense, ExpenseStatus, Month, Settings } from "./types"
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -41,6 +42,8 @@ interface State {
   removeCard: (id: string) => void
   /** Vincula lançamentos a um cartão; retorna quantos */
   assignCard: (ids: string[], cardId: string | undefined) => number
+  /** Troca a moeda; com `rate`, converte todos os valores (lançamentos, rendas e limites) */
+  changeCurrency: (code: string, rate?: number) => void
 }
 
 /** Itens do mês que ainda não foram levados para o mês seguinte */
@@ -212,6 +215,24 @@ export const useStore = create<State>()(
         set((s) => ({ expenses: s.expenses.map((e) => (set_.has(e.id) ? { ...e, cardId } : e)) }))
         return set_.size
       },
+
+      changeCurrency: (code, rate) =>
+        set((s) => {
+          if (!rate || rate === 1) return { settings: { ...s.settings, currency: code } }
+          const dec = currencyOf(code).decimals
+          const conv = (v: number) => Math.round(v * rate * 10 ** dec) / 10 ** dec
+          const convN = (v: number | null | undefined) => (v == null ? v ?? null : conv(v))
+          return {
+            settings: {
+              ...s.settings,
+              currency: code,
+              defaultSalary: conv(s.settings.defaultSalary || 0),
+              cards: s.settings.cards?.map((c) => ({ ...c, limit: c.limit ? conv(c.limit) : c.limit })),
+            },
+            months: s.months.map((m) => ({ ...m, salary: conv(m.salary) })),
+            expenses: s.expenses.map((e) => ({ ...e, amount: conv(e.amount), totalValue: convN(e.totalValue) as number | null })),
+          }
+        }),
 
       generateNextMonth: (from) => {
         const next = addMonths(from, 1)

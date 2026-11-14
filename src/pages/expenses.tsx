@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import {
   ArrowUpDown, Check, CreditCard as CreditCardIcon, CircleDashed, Copy, Download, MoreHorizontal, Pencil, Search, ShieldCheck, Trash2, X, Ban, Filter,
@@ -27,6 +27,8 @@ import { downloadCsv } from "@/lib/backup"
 import { KIND_LABEL, STATUS_LABEL, type Expense, type ExpenseKind, type ExpenseStatus } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { CardChip } from "@/components/card-visual"
+import { TablePager, TableScroll, tableCardClass, usePagination } from "@/components/table-pager"
+import { Inbox } from "lucide-react"
 
 type SortKey = "description" | "amount" | "category" | "default"
 
@@ -68,6 +70,8 @@ export function Expenses() {
     })
   }, [base, q, cat, method, status, kind, card, sort, allMonths]) // eslint-disable-line
 
+  const pg = usePagination(rows, "lancamentos", 20)
+  useEffect(() => pg.setPage(0), [q, cat, method, status, kind, card, allMonths, month]) // eslint-disable-line
   const visibleTotal = rows.filter((e) => e.status !== "cancelled").reduce((a, e) => a + e.amount, 0)
   const filtersOn = [cat, method, status, kind, card].filter((f) => f !== "all").length
   const allChecked = rows.length > 0 && rows.every((r) => selected.has(r.id))
@@ -86,7 +90,7 @@ export function Expenses() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex min-h-[calc(100dvh-13rem)] flex-col gap-4 md:min-h-[calc(100dvh-11rem)]">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-sm text-muted-foreground">{allMonths ? "Todos os meses" : "Lançamentos de"}</p>
@@ -149,7 +153,8 @@ export function Expenses() {
         </div>
       )}
 
-      <Card className="py-0">
+      <Card className={tableCardClass(true)}>
+        <TableScroll empty={rows.length === 0 && (<><Inbox className="size-8 opacity-40" /><span>Nenhum lançamento encontrado.</span>{(filtersOn > 0 || q) && <span className="text-xs">Tente limpar a busca ou os filtros.</span>}</>)}>
         <Table>
           <TableHeader>
             <TableRow>
@@ -166,10 +171,7 @@ export function Expenses() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rows.length === 0 && (
-              <TableRow><TableCell colSpan={8} className="h-32 text-center text-muted-foreground">Nenhum lançamento encontrado.</TableCell></TableRow>
-            )}
-            {rows.map((e) => (
+            {pg.visible.map((e) => (
               <TableRow key={e.id} data-state={selected.has(e.id) ? "selected" : undefined} className={cn(e.status === "cancelled" && "opacity-55")}>
                 <TableCell className="pl-4"><Checkbox checked={selected.has(e.id)} onCheckedChange={() => toggle(e.id)} aria-label="Selecionar" /></TableCell>
                 <TableCell className="max-w-[14rem] sm:max-w-xs">
@@ -228,6 +230,8 @@ export function Expenses() {
             </TableFooter>
           )}
         </Table>
+        </TableScroll>
+        <TablePager p={pg} label="lançamentos" />
       </Card>
       <p className="text-xs text-muted-foreground">Dica: clique no valor para atualizar o preço na hora; clique no status para alternar entre pago e pendente.</p>
 

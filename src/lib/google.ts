@@ -2,7 +2,7 @@ import { GOOGLE_CLIENT_ID, GOOGLE_SCOPES } from "./config"
 
 /* Login Google 100% no navegador (Google Identity Services, fluxo de token). */
 
-interface TokenResponse { access_token?: string; expires_in?: number; error?: string; error_description?: string }
+interface TokenResponse { access_token?: string; expires_in?: number; scope?: string; error?: string; error_description?: string }
 interface TokenClient { requestAccessToken: (o?: { prompt?: string; login_hint?: string }) => void; callback: (r: TokenResponse) => void }
 declare global {
   interface Window {
@@ -11,6 +11,7 @@ declare global {
         oauth2: {
           initTokenClient: (cfg: { client_id: string; scope: string; callback: (r: TokenResponse) => void; error_callback?: (e: { type: string }) => void }) => TokenClient
           revoke: (token: string, done?: () => void) => void
+          hasGrantedAllScopes: (r: TokenResponse, ...scopes: string[]) => boolean
         }
       }
     }
@@ -18,6 +19,10 @@ declare global {
 }
 
 export class AuthError extends Error {}
+/** O usuário entrou, mas não marcou a permissão do Google Drive na tela do Google */
+export class ScopeError extends AuthError {}
+export const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file"
+export const SCOPE_MESSAGE = "Falta a permissão do Google Drive. Na tela do Google, marque a caixa “Ver, editar, criar e excluir arquivos do Google Drive usados com este app”."
 
 const TOKEN_KEY = "financas-google-token"
 let scriptPromise: Promise<void> | null = null
@@ -57,6 +62,9 @@ export async function requestToken(prompt: "" | "consent" | "select_account" = "
       const p = pending; pending = null
       if (!p) return
       if (r.error || !r.access_token) return p.reject(new AuthError(r.error_description || r.error || "Login cancelado"))
+      // Consentimento granular: a pessoa pode ter desmarcado o Drive
+      const granted = window.google!.accounts.oauth2.hasGrantedAllScopes?.(r, DRIVE_SCOPE) ?? (r.scope ? r.scope.split(" ").includes(DRIVE_SCOPE) : true)
+      if (!granted) return p.reject(new ScopeError(SCOPE_MESSAGE))
       localStorage.setItem(TOKEN_KEY, JSON.stringify({ token: r.access_token, exp: Date.now() + (r.expires_in ?? 3600) * 1000 }))
       p.resolve(r.access_token)
     },
@@ -87,6 +95,14 @@ export async function gfetch<T = unknown>(url: string, init: RequestInit = {}): 
     headers: { Authorization: `Bearer ${token}`, ...(init.body ? { "Content-Type": "application/json" } : {}), ...init.headers },
   })
   if (res.status === 401) { localStorage.removeItem(TOKEN_KEY); throw new AuthError("Sessão do Google expirada") }
+  if (res.status === 403) {
+    let msg = ""
+    try { msg = (await res.clone().json()).error?.message ?? "" } catch { /* sem corpo */ }
+    if (/insufficient authentication scopes|insufficientPermissions|ACCESS_TOKEN_SCOPE_INSUFFICIENT/i.test(msg)) {
+      localStorage.removeItem(TOKEN_KEY)
+      throw new ScopeError(SCOPE_MESSAGE)
+    }
+  }
   if (!res.ok) {
     let msg = `Erro ${res.status} do Google`
     try { msg = (await res.json()).error?.message ?? msg } catch { /* sem corpo */ }

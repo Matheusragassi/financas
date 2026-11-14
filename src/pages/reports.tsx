@@ -10,6 +10,7 @@ import { active, average, groupSum, history, topN } from "@/lib/stats"
 import { money, monthLabel, percent } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { cardTotals } from "@/lib/cards"
+import { TablePager, TableScroll, tableCardClass, usePagination } from "@/components/table-pager"
 
 export function Reports() {
   const { expenses, months, settings } = useStore()
@@ -29,6 +30,8 @@ export function Reports() {
   const byItem = groupSum(list, (e) => e.description.trim()).slice(0, 10)
   const subs = groupSum(list.filter((e) => e.kind === "subscription" || e.method === "Assinatura"), (e) => e.description.trim())
   const byCard = cardTotals(expenses, settings.cards ?? [], inRange)
+  const histDesc = useMemo(() => [...hist].reverse(), [hist])
+  const pg = usePagination(histDesc, "relatorio-mensal", 10)
   const overBudget = withData.filter((h) => h.commitment > 1).length
 
   return (
@@ -96,8 +99,9 @@ export function Reports() {
         </Card>
       </div>
 
-      <Card className="py-0">
-        <CardHeader className="pt-4"><CardTitle>Tabela mensal</CardTitle></CardHeader>
+      <Card className={tableCardClass()}>
+        <CardHeader className="py-4"><CardTitle>Tabela mensal</CardTitle></CardHeader>
+        <TableScroll empty={histDesc.length === 0 && <span>Sem meses no período.</span>}>
         <Table>
           <TableHeader>
             <TableRow>
@@ -111,7 +115,7 @@ export function Reports() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {[...hist].reverse().map((h) => (
+            {pg.visible.map((h) => (
               <TableRow key={h.month}>
                 <TableCell className="pl-4 font-medium">{monthLabel(h.month)}</TableCell>
                 <TableCell className="num text-right text-muted-foreground">{money(h.salary)}</TableCell>
@@ -124,6 +128,8 @@ export function Reports() {
             ))}
           </TableBody>
         </Table>
+        </TableScroll>
+        <TablePager p={pg} label="meses" />
       </Card>
     </div>
   )

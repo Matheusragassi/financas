@@ -11,8 +11,7 @@ import {
 import { InlineMoney } from "@/components/inline-money"
 import { MoneyInput } from "@/components/money-input"
 import { FieldLabel } from "@/components/field-label"
-import { SimpleSelect } from "@/components/simple-select"
-import { CURRENCIES, currencyOf } from "@/lib/currency"
+import { CurrencyField } from "@/components/currency-field"
 import { useStore } from "@/lib/store"
 import { downloadJson, readBackup } from "@/lib/backup"
 import { money, monthLabel } from "@/lib/format"
@@ -92,9 +91,8 @@ export function SettingsPage() {
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-1.5">
             <FieldLabel required>Moeda</FieldLabel>
-            <SimpleSelect value={s.settings.currency ?? "BRL"} onChange={(v) => { s.updateSettings({ currency: v }); toast.success(`Moeda: ${currencyOf(v).name}`) }}
-              options={CURRENCIES.map((c) => ({ value: c.code, label: `${c.flag}  ${c.name} (${c.symbol})` }))} />
-            <p className="text-xs text-muted-foreground">Só muda o símbolo e o formato. Os valores não são convertidos.</p>
+            <CurrencyField />
+
           </div>
           <div className="grid gap-1.5">
             <FieldLabel htmlFor="st-sal" optional>Renda padrão para novos meses</FieldLabel>

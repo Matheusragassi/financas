@@ -8,6 +8,7 @@ import { GlassTooltip, HoverCursor, Legend, SERIES } from "@/components/charts"
 import { ChartContainer, ChartTooltip, type ChartConfig } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { useStore } from "@/lib/store"
+import { TablePager, TableScroll, tableCardClass, usePagination } from "@/components/table-pager"
 import { useSelectedMonth } from "@/lib/use-month"
 import { installmentsOf, projection } from "@/lib/stats"
 import { formatDate, money, moneyCompact, monthLabel, monthShort } from "@/lib/format"
@@ -22,6 +23,7 @@ export function Installments() {
   const month = useSelectedMonth()
   const list = useMemo(() => installmentsOf(expenses, month), [expenses, month])
   const proj = useMemo(() => projection(expenses, months, month, 12), [expenses, months, month])
+  const pg = usePagination(list, "parcelas", 10)
   const monthly = list.reduce((a, i) => a + i.expense.amount, 0)
   const debt = list.reduce((a, i) => a + i.remainingValue, 0)
   const lastEnd = list.reduce((a, i) => (i.endMonth > a ? i.endMonth : a), month)
@@ -60,7 +62,8 @@ export function Installments() {
         </CardContent>
       </Card>
 
-      <Card className="py-0">
+      <Card className={tableCardClass()}>
+        <TableScroll empty={list.length === 0 && <span>Nenhuma compra parcelada neste mês.</span>}>
         <Table>
           <TableHeader>
             <TableRow>
@@ -73,8 +76,7 @@ export function Installments() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {list.length === 0 && <TableRow><TableCell colSpan={6} className="h-28 text-center text-muted-foreground">Nenhuma compra parcelada neste mês.</TableCell></TableRow>}
-            {list.map((i) => (
+            {pg.visible.map((i) => (
               <TableRow key={i.expense.id}>
                 <TableCell className="max-w-[12rem] pl-4">
                   <div className="truncate font-medium">{i.expense.description}</div>
@@ -100,6 +102,8 @@ export function Installments() {
             ))}
           </TableBody>
         </Table>
+        </TableScroll>
+        <TablePager p={pg} label="compras" />
       </Card>
     </div>
   )

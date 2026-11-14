@@ -19,6 +19,7 @@ const LABEL: Record<SyncStatus, string> = {
   synced: "Tudo salvo no Google",
   offline: "Offline · salva quando a internet voltar",
   "needs-auth": "Sessão expirou · toque para reconectar",
+  "needs-scope": "Falta a permissão do Google Drive",
   error: "Erro ao sincronizar",
   conflict: "Conflito entre aparelhos",
 }
@@ -51,7 +52,7 @@ export function SyncIndicator() {
   if (!googleEnabled() || isDemo) return null
   if (!user) return <GoogleSignInButton size="sm" label="Entrar" className="hidden sm:inline-flex" />
 
-  const Icon = status === "offline" ? CloudOff : status === "syncing" || status === "connecting" ? Loader2 : status === "error" || status === "conflict" || status === "needs-auth" ? TriangleAlert : Cloud
+  const Icon = status === "offline" ? CloudOff : status === "syncing" || status === "connecting" ? Loader2 : status === "error" || status === "conflict" || status === "needs-auth" || status === "needs-scope" ? TriangleAlert : Cloud
   return (
     <>
       <DropdownMenu>
@@ -80,7 +81,9 @@ export function SyncIndicator() {
             </div>
           </div>
           <DropdownMenuSeparator />
-          {status === "needs-auth"
+          {status === "needs-scope"
+            ? <DropdownMenuItem onClick={() => void grantDrive()}><RefreshCw /> Conceder acesso ao Drive</DropdownMenuItem>
+            : status === "needs-auth"
             ? <DropdownMenuItem onClick={() => void reconnect()}><RefreshCw /> Reconectar</DropdownMenuItem>
             : <DropdownMenuItem onClick={() => void syncNow().then(() => useSync.getState().status === "synced" && toast.success("Sincronizado"))}><RefreshCw /> Sincronizar agora</DropdownMenuItem>}
           {fileUrl && <DropdownMenuItem onClick={() => window.open(fileUrl, "_blank", "noopener")}><ExternalLink /> Abrir planilha de dados</DropdownMenuItem>}
@@ -110,5 +113,33 @@ export function SyncIndicator() {
         </DialogContent>
       </Dialog>
     </>
+  )
+}
+
+/** Pede de novo a permissão do Drive e sincroniza (puxa os dados do Google) */
+export async function grantDrive() {
+  try {
+    await signIn({ consent: true })
+    toast.success("Acesso ao Drive concedido", { description: "Seus dados foram sincronizados." })
+  } catch (e) { toast.error((e as Error).message) }
+}
+
+/** Faixa no topo do app quando a sincronização precisa de ação */
+export function SyncAlert() {
+  const { status, error, user } = useSync()
+  const [busy, setBusy] = useState(false)
+  if (!user || (status !== "needs-scope" && status !== "error")) return null
+  return (
+    <div className="relative z-10 flex flex-wrap items-center gap-3 border-b border-warning/25 bg-warning/10 px-4 py-2.5 text-sm md:px-6">
+      <TriangleAlert className="size-4 shrink-0 text-warning" />
+      <div className="min-w-0 flex-1">
+        <span className="font-medium">{status === "needs-scope" ? "Seus dados não estão sendo salvos no Google." : "Não foi possível sincronizar."}</span>{" "}
+        <span className="text-muted-foreground">{status === "needs-scope" ? "Falta a permissão do Google Drive." : error}</span>
+      </div>
+      <Button size="sm" disabled={busy} className="bg-brand text-brand-foreground hover:bg-brand/90"
+        onClick={async () => { setBusy(true); try { status === "needs-scope" ? await grantDrive() : await syncNow() } finally { setBusy(false) } }}>
+        {busy ? <Loader2 className="animate-spin" /> : <RefreshCw />} {status === "needs-scope" ? "Conceder acesso" : "Tentar de novo"}
+      </Button>
+    </div>
   )
 }

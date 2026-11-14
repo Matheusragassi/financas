@@ -7,6 +7,10 @@ import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { startSync } from "@/lib/sync"
 import { registerSW } from "virtual:pwa-register"
+import { polyfillCountryFlagEmojis } from "country-flag-emoji-polyfill"
+
+// Bandeiras em emoji também no Windows (fonte embutida, funciona offline)
+polyfillCountryFlagEmojis("Twemoji Country Flags", "./TwemojiCountryFlags.woff2")
 
 // Atualiza o app sozinho quando sai uma versão nova (recarrega ao ativar)
 registerSW({

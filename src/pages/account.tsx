@@ -6,17 +6,26 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { FieldLabel } from "@/components/field-label"
+import { CurrencyField } from "@/components/currency-field"
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { UserAvatar, useProfile } from "@/components/user-avatar"
 import { GoogleIcon } from "@/components/google-icon"
-import { GoogleSignInButton, SyncDot } from "@/components/sync-indicator"
+import { GoogleSignInButton, SyncDot, grantDrive } from "@/components/sync-indicator"
 import { SignOutDialog } from "@/components/sign-out-dialog"
 import { useStore } from "@/lib/store"
 import { signOut, syncNow, useSync } from "@/lib/sync"
 import { googleEnabled } from "@/lib/config"
 import { resizeImage } from "@/lib/image"
+
+const COVERS = [
+  { id: "blue", name: "Blue Period", css: "linear-gradient(120deg,#2557C7,#3B82F6 45%,#7DD3FC)" },
+  { id: "aurora", name: "Aurora", css: "linear-gradient(120deg,#3B82F6,#34D399 55%,#9BE858)" },
+  { id: "dusk", name: "Crepúsculo", css: "linear-gradient(120deg,#6D28D9,#A78BFA 50%,#FF8E56)" },
+  { id: "sunset", name: "Outono", css: "linear-gradient(120deg,#FF8E56,#F4607A 60%,#A78BFA)" },
+  { id: "night", name: "Noite", css: "linear-gradient(120deg,#0F172A,#101827 50%,#3B82F6)" },
+]
 
 export function AccountPage() {
   const p = useProfile()
@@ -44,10 +53,19 @@ export function AccountPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 md:space-y-8">
       {/* Cabeçalho do perfil */}
-      <Card className="overflow-hidden pt-0">
-        <div className="h-24 bg-[linear-gradient(120deg,var(--chart-1),var(--chart-7)_55%,var(--chart-5))] opacity-80" />
-        <CardContent className="-mt-12 flex flex-col items-center gap-3 text-center sm:flex-row sm:items-end sm:text-left">
-          <div className="group relative">
+      <Card className="gap-0 overflow-hidden py-0">
+        <div className="group/cover relative h-28 sm:h-32" style={{ background: COVERS.find((c) => c.id === settings.cover)?.css ?? COVERS[0].css }}>
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),transparent_60%)]" />
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-black/25 p-1.5 opacity-0 backdrop-blur-md transition-opacity group-hover/cover:opacity-100 focus-within:opacity-100">
+            {COVERS.map((c) => (
+              <button key={c.id} onClick={() => updateSettings({ cover: c.id })} aria-label={`Capa ${c.name}`} title={c.name}
+                className={`size-5 rounded-full ring-2 transition ${ (settings.cover ?? COVERS[0].id) === c.id ? "ring-white" : "ring-white/0 hover:ring-white/60"}`}
+                style={{ background: c.css }} />
+            ))}
+          </div>
+        </div>
+        <CardContent className="flex flex-col items-center gap-4 pb-6 sm:flex-row sm:items-end">
+          <div className="group relative -mt-12 shrink-0">
             <UserAvatar className="size-24 text-2xl ring-4 ring-card" />
             <button
               onClick={() => fileRef.current?.click()}
@@ -58,17 +76,18 @@ export function AccountPage() {
             </button>
             <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => { void onPhoto(e.target.files?.[0]); e.target.value = "" }} />
           </div>
-          <div className="flex-1 sm:pb-1">
-            <h2 className="text-xl font-semibold tracking-tight">{p.fullName}</h2>
-            <p className="text-sm text-muted-foreground">{p.email || "Nenhum e-mail vinculado"}</p>
-            {p.google && <Badge variant="secondary" className="mt-1.5 gap-1"><GoogleIcon className="size-3" /> Conta Google</Badge>}
+          <div className="min-w-0 flex-1 pt-1 text-center sm:pt-4 sm:text-left">
+            <h2 className="truncate text-xl font-semibold tracking-tight">{p.fullName}</h2>
+            <p className="truncate text-sm text-muted-foreground">{p.email || "Nenhum e-mail vinculado"}</p>
+            {p.google && <Badge variant="secondary" className="mt-2 gap-1"><GoogleIcon className="size-3" /> Conta Google</Badge>}
           </div>
-          <div className="flex flex-wrap justify-center gap-2 sm:pb-1">
+          <div className="flex flex-wrap justify-center gap-2">
             <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}><Camera /> Alterar foto</Button>
             {settings.photo && p.googlePhoto && <Button size="sm" variant="ghost" onClick={() => updateSettings({ photo: undefined })}>Usar foto do Google</Button>}
             {settings.photo && !p.googlePhoto && <Button size="sm" variant="ghost" onClick={() => updateSettings({ photo: undefined })}>Remover</Button>}
           </div>
         </CardContent>
+        <p className="border-t border-foreground/6 px-5 py-2 text-center text-[11px] text-muted-foreground sm:text-left">Dica: passe o mouse na capa para escolher outra cor.</p>
       </Card>
 
       {/* Dados pessoais */}
@@ -97,6 +116,18 @@ export function AccountPage() {
         </CardContent>
       </Card>
 
+      {/* Preferências */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Preferências</CardTitle>
+          <CardDescription>Moeda usada em todo o app e na sua planilha.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-1.5 sm:max-w-sm">
+          <FieldLabel required>Moeda</FieldLabel>
+          <CurrencyField />
+        </CardContent>
+      </Card>
+
       {/* Conta Google */}
       {googleEnabled() && (
         <Card>
@@ -114,12 +145,14 @@ export function AccountPage() {
                 <div className="flex items-center gap-3 rounded-lg bg-muted/60 p-3 text-sm">
                   <SyncDot status={sync.status} dirty={sync.dirty} />
                   <div className="flex-1">
-                    <div className="font-medium">{sync.status === "synced" && !sync.dirty ? "Tudo salvo no Google" : sync.status === "offline" ? "Offline · salva quando a internet voltar" : sync.status === "needs-auth" ? "Sessão expirada · toque em Sincronizar" : sync.status === "error" ? sync.error : "Sincronizando…"}</div>
+                    <div className="font-medium">{sync.status === "synced" && !sync.dirty ? "Tudo salvo no Google" : sync.status === "offline" ? "Offline · salva quando a internet voltar" : sync.status === "needs-auth" ? "Sessão expirada · toque em Sincronizar" : sync.status === "needs-scope" ? "Falta a permissão do Google Drive" : sync.status === "error" ? sync.error : "Sincronizando…"}</div>
                     {sync.lastSyncAt && <div className="text-xs text-muted-foreground">Última sincronização: {new Date(sync.lastSyncAt).toLocaleString("pt-BR")}</div>}
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" onClick={() => void syncNow()}><RefreshCw /> Sincronizar agora</Button>
+                  {sync.status === "needs-scope"
+                    ? <Button className="bg-brand text-brand-foreground hover:bg-brand/90" onClick={() => void grantDrive()}><RefreshCw /> Conceder acesso ao Drive</Button>
+                    : <Button variant="outline" onClick={() => void syncNow()}><RefreshCw /> Sincronizar agora</Button>}
                   {sync.fileUrl && <Button variant="outline" onClick={() => window.open(sync.fileUrl!, "_blank", "noopener")}><ExternalLink /> Abrir planilha de dados</Button>}
                   <AlertDialog>
                     <AlertDialogTrigger render={<Button variant="ghost" />}><Unlink /> Desvincular</AlertDialogTrigger>

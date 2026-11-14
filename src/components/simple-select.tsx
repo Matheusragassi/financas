@@ -19,7 +19,7 @@ export function SimpleSelect({
       <SelectTrigger id={id} size={size} className={cn("w-full", className)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent alignItemWithTrigger={false} sideOffset={6} align="start" className="max-h-72">
         {options.map((o) => (
           <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
         ))}

@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import { AuthError, fetchUser, hasValidToken, requestToken, signOutGoogle, type GoogleUser } from "./google"
+import { AuthError, ScopeError, fetchUser, hasValidToken, requestToken, signOutGoogle, type GoogleUser } from "./google"
 import { createDataFile, findDataFile, getFileMeta, getRemoteRev, readData, writeData } from "./sheet-db"
 import { useStore } from "./store"
 import { googleEnabled } from "./config"
@@ -14,7 +14,7 @@ import { currentMonthId } from "./format"
  * - Ao abrir/voltar ao app, puxa a versão da planilha se ela mudou em outro aparelho.
  */
 
-export type SyncStatus = "off" | "connecting" | "syncing" | "synced" | "offline" | "needs-auth" | "error" | "conflict"
+export type SyncStatus = "off" | "connecting" | "syncing" | "synced" | "offline" | "needs-auth" | "needs-scope" | "error" | "conflict"
 
 interface SyncState {
   user: GoogleUser | null
@@ -43,6 +43,8 @@ let timer: ReturnType<typeof setTimeout> | undefined
 let running: Promise<void> | null = null
 
 const localBackup = () => useStore.getState().exportBackup()
+/** Este aparelho não tem lançamentos: nesse caso os dados do Google sempre prevalecem */
+const localIsEmpty = () => useStore.getState().expenses.length === 0
 const hasLocalData = () => { const s = useStore.getState(); return s.initialized && !s.isDemo && (s.expenses.length > 0 || s.months.length > 0) }
 
 function applyRemote(b: Backup) {
@@ -52,7 +54,8 @@ function applyRemote(b: Backup) {
 }
 
 function fail(e: unknown) {
-  if (e instanceof AuthError) set({ status: "needs-auth", error: e.message })
+  if (e instanceof ScopeError) set({ status: "needs-scope", error: e.message })
+  else if (e instanceof AuthError) set({ status: "needs-auth", error: e.message })
   else if (!navigator.onLine) set({ status: "offline", error: "" })
   else set({ status: "error", error: (e as Error).message })
 }
@@ -77,11 +80,11 @@ export function syncNow(): Promise<void> {
       set({ status: "syncing" })
       const rev = await getRemoteRev(s.fileId)
       const remoteChanged = rev !== (s.remoteVersion ?? "")
-      if (remoteChanged && !s.dirty) {
+      if (remoteChanged && (!s.dirty || localIsEmpty())) {
         const remote = await readData(s.fileId)
         applyRemote(remote)
         set({ remoteVersion: remote.rev ?? rev, status: "synced", lastSyncAt: new Date().toISOString(), error: "" })
-      } else if (remoteChanged && s.dirty) {
+      } else if (remoteChanged) {
         set({ status: "conflict", conflict: await readData(s.fileId) })
       } else if (s.dirty) {
         await push()
@@ -109,11 +112,11 @@ export function lastAccount(): GoogleUser | null {
 export function forgetLastAccount() { try { localStorage.removeItem(LAST_KEY) } catch { /* sem armazenamento */ } }
 
 /** Login + localiza (ou cria) a planilha de dados. `hint` pula a escolha de conta. */
-export async function signIn(opts?: { hint?: string; chooseAccount?: boolean }) {
+export async function signIn(opts?: { hint?: string; chooseAccount?: boolean; consent?: boolean }) {
   set({ status: "connecting", error: "" })
   try {
     const hint = opts?.hint ?? get().user?.email
-    await requestToken(opts?.chooseAccount || !hint ? "select_account" : "", hint)
+    await requestToken(opts?.consent ? "consent" : opts?.chooseAccount || !hint ? "select_account" : "", hint)
     const user = await fetchUser()
     try { localStorage.setItem(LAST_KEY, JSON.stringify({ name: user.name, email: user.email, picture: user.picture })) } catch { /* sem armazenamento */ }
     const sameUser = get().user?.email === user.email
@@ -127,9 +130,9 @@ export async function signIn(opts?: { hint?: string; chooseAccount?: boolean }) 
       if (remoteEmpty && hasLocalData()) {
         set({ dirty: true })
         await push()
-      } else if (!remoteEmpty && sameUser && get().dirty && (remote.rev ?? "") !== (get().remoteVersion ?? "")) {
+      } else if (!remoteEmpty && sameUser && get().dirty && !localIsEmpty() && (remote.rev ?? "") !== (get().remoteVersion ?? "")) {
         set({ status: "conflict", conflict: remote })
-      } else if (!remoteEmpty && (!sameUser || !get().dirty)) {
+      } else if (!remoteEmpty && (!sameUser || !get().dirty || localIsEmpty())) {
         applyRemote(remote)
         set({ remoteVersion: remote.rev ?? "", dirty: false, status: "synced", lastSyncAt: new Date().toISOString() })
       } else {
@@ -151,9 +154,9 @@ export async function signIn(opts?: { hint?: string; chooseAccount?: boolean }) 
 }
 
 /** Reconecta sem perguntar (usa o consentimento já dado) */
-export async function reconnect() {
+export async function reconnect(consent = false) {
   try {
-    await requestToken("", get().user?.email)
+    await requestToken(consent ? "consent" : "", get().user?.email)
     await syncNow()
   } catch (e) { fail(e) }
 }

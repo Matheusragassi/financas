@@ -59,6 +59,8 @@ export interface Settings {
   cards?: CreditCard[]
   /** Código ISO da moeda (padrão BRL) */
   currency?: string
+  /** Capa do perfil (id do gradiente) */
+  cover?: string
 }
 
 export interface Backup {

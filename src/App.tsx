@@ -2,12 +2,11 @@ import { ChevronLeft, ChevronRight, Plus, Sparkles, LogOut } from "lucide-react"
 import { useEffect, useState } from "react"
 import { setCurrency } from "@/lib/format"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { MonthPicker } from "@/components/month-picker"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { SyncIndicator } from "@/components/sync-indicator"
+import { SyncAlert, SyncIndicator } from "@/components/sync-indicator"
 import { ExpenseForm } from "@/components/expense-form"
 import { useStore } from "@/lib/store"
 import { navigate, useRoute, type Route } from "@/lib/use-route"
@@ -52,9 +51,8 @@ export default function App() {
       <AppBackdrop />
       <AppSidebar />
       <SidebarInset>
-        <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b border-foreground/6 px-4 glass-subtle md:rounded-t-2xl md:px-6">
+        <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b border-foreground/6 px-4 glass-subtle md:px-6">
           <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-1 hidden h-4! self-center sm:block" />
           <nav aria-label="Você está em" className="flex min-w-0 items-center gap-1.5 text-sm">
             {route !== "dashboard" && (
               <button onClick={() => history.length > 1 ? history.back() : navigate("dashboard")} aria-label="Voltar"
@@ -81,6 +79,7 @@ export default function App() {
             </Button>
           </div>
         </header>
+        <SyncAlert />
         {isDemo && (
           <div className="flex flex-wrap items-center gap-2 border-b bg-brand/10 px-3 py-2 text-sm md:px-4">
             <Sparkles className="size-4 text-brand" />

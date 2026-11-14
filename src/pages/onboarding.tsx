@@ -19,6 +19,7 @@ import { currentMonthId } from "@/lib/format"
 import { CURRENCIES } from "@/lib/currency"
 import { googleEnabled } from "@/lib/config"
 import { forgetLastAccount, lastAccount, signIn, useSync } from "@/lib/sync"
+import { ScopeError } from "@/lib/google"
 import { cn } from "@/lib/utils"
 
 type View = "home" | "guest"
@@ -27,6 +28,8 @@ export function Onboarding() {
   const { importBackup, startEmpty } = useStore()
   const user = useSync((s) => s.user)
   const syncStatus = useSync((s) => s.status)
+  const fileId = useSync((s) => s.fileId)
+  const syncError = useSync((s) => s.error)
   const fileRef = useRef<HTMLInputElement>(null)
   const [view, setView] = useState<View>("home")
   const [name, setName] = useState("")
@@ -36,9 +39,9 @@ export function Onboarding() {
   const [busy, setBusy] = useState(false)
 
   const [last, setLast] = useState(lastAccount)
-  async function google(opts?: { hint?: string; chooseAccount?: boolean }) {
+  async function google(opts?: { hint?: string; chooseAccount?: boolean; consent?: boolean }) {
     setBusy(true)
-    try { await signIn(opts) } catch (e) { toast.error((e as Error).message) } finally { setBusy(false) }
+    try { await signIn(opts) } catch (e) { if (!(e instanceof ScopeError)) toast.error((e as Error).message) } finally { setBusy(false) }
   }
   async function onFile(f?: File) {
     if (!f) return
@@ -59,8 +62,9 @@ export function Onboarding() {
 
   // Já conectado ao Google (ex.: voltou depois): entra direto
   useEffect(() => {
-    if (user && syncStatus !== "connecting") startEmpty(0, user.name.split(" ")[0], currentMonthId())
-  }, [user, syncStatus, startEmpty])
+    // Só entra no app quando o Google respondeu de verdade (planilha encontrada/criada)
+    if (user && fileId && syncStatus !== "connecting") startEmpty(0, user.name.split(" ")[0], currentMonthId())
+  }, [user, fileId, syncStatus, startEmpty])
 
   const rootRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
@@ -141,6 +145,17 @@ export function Onboarding() {
                 ]}
                 quips={["Coando o café ☕", "Abrindo a porta para você…", "Ajeitando os gráficos 📊"]}
               />
+            </div>
+          )}
+
+          {/* Faltou a permissão do Drive */}
+          {syncStatus === "needs-scope" && !busy && (
+            <div className="mt-6 space-y-3 rounded-2xl bg-warning/10 p-4 text-sm ring-1 ring-warning/30 animate-in fade-in-0">
+              <p className="font-medium">Falta só uma permissão</p>
+              <p className="text-xs text-muted-foreground">{syncError} Sem ela não conseguimos guardar seus dados na sua conta.</p>
+              <Button className="w-full bg-brand text-brand-foreground hover:bg-brand/90" onClick={() => google({ consent: true })}>
+                <GoogleIcon className="size-4" /> Conceder acesso ao Google Drive
+              </Button>
             </div>
           )}
 

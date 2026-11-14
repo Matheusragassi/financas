@@ -6,14 +6,11 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
 import { UserAvatar, useProfile } from "@/components/user-avatar"
 import { SignOutDialog } from "@/components/sign-out-dialog"
-import { SyncDot } from "@/components/sync-indicator"
-import { useSync } from "@/lib/sync"
 import { navigate } from "@/lib/use-route"
 
 export function NavUser() {
   const p = useProfile()
   const { isMobile, setOpenMobile } = useSidebar()
-  const { status, dirty } = useSync()
   const [leaving, setLeaving] = useState(false)
   const go = (r: Parameters<typeof navigate>[0]) => { navigate(r); setOpenMobile(false) }
 
@@ -24,7 +21,6 @@ export function NavUser() {
           <DropdownMenuTrigger render={<SidebarMenuButton size="lg" className="data-popup-open:bg-sidebar-accent group-data-[collapsible=icon]:p-0!" />}>
             <span className="relative">
               <UserAvatar className="size-8" />
-              {p.google && <span className="absolute -right-0.5 -bottom-0.5"><SyncDot status={status} dirty={dirty} /></span>}
             </span>
             <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
               <span className="truncate text-sm font-medium">{p.isDemo ? "Demonstração" : p.fullName}</span>
