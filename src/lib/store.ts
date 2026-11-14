@@ -214,6 +214,17 @@ export const useStore = create<State>()(
         return { month: next, added: items.length }
       },
     }),
-    { name: "financas-store", version: 1, partialize: (s) => ({ ...s, selectedMonth: s.selectedMonth }) }
+    {
+      name: "financas-store",
+      version: 1,
+      partialize: (s) => ({ ...s, selectedMonth: s.selectedMonth }),
+      // Versões antigas não marcavam a demonstração: reconhece pelos dados fictícios
+      merge: (persisted, current) => {
+        const p = { ...current, ...(persisted as Partial<State>) }
+        if (!p.isDemo && p.initialized && p.settings?.ownerName === "Demo" && p.expenses?.some((e) => e.groupId?.startsWith("demo-")))
+          p.isDemo = true
+        return p
+      },
+    }
   )
 )

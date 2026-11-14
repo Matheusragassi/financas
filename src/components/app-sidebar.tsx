@@ -1,4 +1,4 @@
-import { LayoutDashboard, ListChecks, CreditCard, BarChart3, Settings, Wallet, WifiOff } from "lucide-react"
+import { LayoutDashboard, ListChecks, CreditCard, BarChart3, Settings, Wallet, WifiOff, UserRound } from "lucide-react"
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, useSidebar,
@@ -7,6 +7,7 @@ import { useRoute, type Route } from "@/lib/use-route"
 import { useStore } from "@/lib/store"
 import { useOnline } from "@/lib/use-online"
 import { AuthorCredit } from "@/components/author-credit"
+import { NavUser } from "@/components/nav-user"
 import { useSync } from "@/lib/sync"
 
 const NAV: { route: Route; label: string; icon: typeof Wallet }[] = [
@@ -15,6 +16,7 @@ const NAV: { route: Route; label: string; icon: typeof Wallet }[] = [
   { route: "parcelas", label: "Parcelas", icon: CreditCard },
   { route: "relatorios", label: "Relatórios", icon: BarChart3 },
   { route: "ajustes", label: "Ajustes & backup", icon: Settings },
+  { route: "conta", label: "Minha conta", icon: UserRound },
 ]
 
 export function AppSidebar() {
@@ -66,6 +68,7 @@ export function AppSidebar() {
           {online ? <span className="size-2 rounded-full bg-success" /> : <WifiOff className="size-3.5" />}
           {!online ? "Offline · tudo continua funcionando" : googleUser ? "Online · salvo na sua conta Google" : "Online · dados salvos neste aparelho"}
         </div>
+        <NavUser />
         <AuthorCredit className="px-2 pb-1 group-data-[collapsible=icon]:hidden" />
       </SidebarFooter>
       <SidebarRail />

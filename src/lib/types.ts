@@ -30,7 +30,12 @@ export interface Month {
 }
 
 export interface Settings {
+  /** Primeiro nome */
   ownerName: string
+  lastName?: string
+  email?: string
+  /** Foto de perfil (data URL reduzida) */
+  photo?: string
   defaultSalary: number
   categories: string[]
   methods: string[]

@@ -15,9 +15,7 @@ import { downloadJson, readBackup } from "@/lib/backup"
 import { money, monthLabel, parseMoney } from "@/lib/format"
 import { useInstallPrompt } from "@/lib/use-install"
 import { SheetImportDialog } from "@/components/sheet-import-dialog"
-import { GoogleSignInButton } from "@/components/sync-indicator"
-import { googleEnabled } from "@/lib/config"
-import { signOut, syncNow, useSync } from "@/lib/sync"
+
 
 export function SettingsPage() {
   const s = useStore()
@@ -50,7 +48,6 @@ export function SettingsPage() {
     <div className="mx-auto max-w-4xl space-y-4 md:space-y-6">
       <h2 className="text-2xl font-semibold tracking-tight">Ajustes & backup</h2>
 
-      {googleEnabled() && !s.isDemo && <GoogleAccountCard />}
 
       <Card>
         <CardHeader>
@@ -85,12 +82,11 @@ export function SettingsPage() {
       <SheetImportDialog open={sheetOpen} onOpenChange={setSheetOpen} defaultUrl={s.settings.sheetUrl ?? ""} />
 
       <Card>
-        <CardHeader><CardTitle>Perfil</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Renda</CardTitle>
+          <CardDescription>Nome, foto e conta ficam em <a href="#/conta" className="underline underline-offset-2">Minha conta</a>.</CardDescription>
+        </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <div className="grid gap-1.5">
-            <Label htmlFor="st-name">Nome</Label>
-            <Input id="st-name" value={s.settings.ownerName} onChange={(e) => s.updateSettings({ ownerName: e.target.value })} />
-          </div>
           <div className="grid gap-1.5">
             <Label htmlFor="st-sal">Renda padrão para novos meses</Label>
             <Input id="st-sal" inputMode="decimal" defaultValue={s.settings.defaultSalary ? String(s.settings.defaultSalary).replace(".", ",") : ""}
@@ -184,35 +180,6 @@ function ChipEditor({ title, items, value, setValue, onAdd, onRemove }: {
           <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder="Adicionar…" />
           <Button type="submit" variant="outline" size="icon" aria-label="Adicionar"><Plus /></Button>
         </form>
-      </CardContent>
-    </Card>
-  )
-}
-
-function GoogleAccountCard() {
-  const { user, fileUrl, lastSyncAt } = useSync()
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Conta Google</CardTitle>
-        <CardDescription>
-          {user
-            ? "Seus dados são salvos automaticamente numa planilha no seu Google Drive. Entre com a mesma conta em outro aparelho para ver tudo lá."
-            : "Entre com o Google para salvar tudo automaticamente na sua conta e acessar de qualquer aparelho."}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-wrap items-center gap-2">
-        {user ? (
-          <>
-            <div className="mr-auto text-sm">
-              <div className="font-medium">{user.email}</div>
-              {lastSyncAt && <div className="text-xs text-muted-foreground">Última sincronização: {new Date(lastSyncAt).toLocaleString("pt-BR")}</div>}
-            </div>
-            <Button variant="outline" onClick={() => void syncNow()}><RefreshCw /> Sincronizar</Button>
-            {fileUrl && <Button variant="outline" onClick={() => window.open(fileUrl, "_blank", "noopener")}>Abrir planilha</Button>}
-            <Button variant="ghost" onClick={() => signOut(true)}>Sair</Button>
-          </>
-        ) : <GoogleSignInButton />}
       </CardContent>
     </Card>
   )
