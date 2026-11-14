@@ -1,0 +1,70 @@
+import { LayoutDashboard, ListChecks, CreditCard, BarChart3, Settings, Wallet, WifiOff } from "lucide-react"
+import {
+  Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
+  SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, useSidebar,
+} from "@/components/ui/sidebar"
+import { useRoute, type Route } from "@/lib/use-route"
+import { useStore } from "@/lib/store"
+import { useOnline } from "@/lib/use-online"
+
+const NAV: { route: Route; label: string; icon: typeof Wallet }[] = [
+  { route: "dashboard", label: "Visão geral", icon: LayoutDashboard },
+  { route: "lancamentos", label: "Lançamentos", icon: ListChecks },
+  { route: "parcelas", label: "Parcelas", icon: CreditCard },
+  { route: "relatorios", label: "Relatórios", icon: BarChart3 },
+  { route: "ajustes", label: "Ajustes & backup", icon: Settings },
+]
+
+export function AppSidebar() {
+  const route = useRoute()
+  const name = useStore((s) => s.settings.ownerName)
+  const online = useOnline()
+  const { setOpenMobile } = useSidebar()
+  return (
+    <Sidebar collapsible="icon" variant="inset">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" render={<a href="#/dashboard" />}>
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <Wallet className="size-4" />
+              </div>
+              <div className="grid flex-1 text-left leading-tight">
+                <span className="truncate font-semibold">Finanças</span>
+                <span className="truncate text-xs text-muted-foreground">{name ? `de ${name}` : "Controle pessoal"}</span>
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Menu</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {NAV.map((n) => (
+                <SidebarMenuItem key={n.route}>
+                  <SidebarMenuButton
+                    isActive={route === n.route}
+                    tooltip={n.label}
+                    render={<a href={`#/${n.route}`} onClick={() => setOpenMobile(false)} />}
+                  >
+                    <n.icon />
+                    <span>{n.label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
+          {online ? <span className="size-2 rounded-full bg-success" /> : <WifiOff className="size-3.5" />}
+          {online ? "Online · dados salvos neste aparelho" : "Offline · tudo continua funcionando"}
+        </div>
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+  )
+}
