@@ -28,7 +28,7 @@ export function AppSidebar() {
   const googleUser = useSync((s) => s.user)
   const { setOpenMobile } = useSidebar()
   return (
-    <Sidebar collapsible="icon" variant="sidebar" className="border-r border-sidebar-border">
+    <Sidebar collapsible="icon" variant="sidebar">
       <SidebarHeader className="px-3 pt-3">
         <SidebarMenu>
           <SidebarMenuItem>

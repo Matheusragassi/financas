@@ -187,13 +187,13 @@ export function DataTable<T>(props: Props<T>) {
               {visibleCols.map((c) => {
                 const dir = sort?.id === c.id ? sort.dir : 0
                 return (
-                  <TableHead key={c.id} className={cn("px-3", c.align === "right" && "text-right", c.className)}>
+                  <TableHead key={c.id} className={cn(c.sortValue ? "p-0" : "px-3", c.align === "right" && "text-right", c.className)}>
                     {c.sortValue ? (
                       <button onClick={() => cycleSort(c.id)}
-                        className={cn("group/sort -mx-1.5 flex h-7 w-full items-center gap-2 rounded-md px-1.5 font-medium transition-colors hover:bg-foreground/5 hover:text-foreground",
+                        className={cn("group/sort flex h-full min-h-10 w-full items-center gap-2 px-3 font-medium transition-colors hover:bg-foreground/[0.06] hover:text-foreground",
                           c.align === "right" ? "flex-row-reverse" : "justify-between", dir && "text-foreground")}>
                         <span className="truncate">{c.header}</span>
-                        <span className={cn("flex size-5 shrink-0 items-center justify-center rounded transition-colors", dir ? "text-brand" : "text-muted-foreground/50 group-hover/sort:text-muted-foreground")}>
+                        <span className={cn("flex size-5 shrink-0 items-center justify-center transition-colors", dir ? "text-brand" : "text-muted-foreground/50 group-hover/sort:text-muted-foreground")}>
                           {dir === 1 ? <ArrowUp className="size-3.5" /> : dir === -1 ? <ArrowDown className="size-3.5" /> : <ChevronsUpDown className="size-3.5" />}
                         </span>
                       </button>

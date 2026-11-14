@@ -188,3 +188,20 @@
   .animate-drift-a, .animate-drift-b, .animate-drift-c { animation: none }
   .tilt-card { transform: none !important }
 }
+
+/* Scrollbar fina e sutil (afeta a página, dropdowns e áreas roláveis) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--foreground) 16%, transparent) transparent;
+}
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--foreground) 16%, transparent);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  transition: background .2s;
+}
+*::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--foreground) 28%, transparent); background-clip: padding-box; }
+*::-webkit-scrollbar-corner { background: transparent; }

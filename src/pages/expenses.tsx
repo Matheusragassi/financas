@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from "react"
 import { toast } from "sonner"
 import {
-  Ban, Check, CircleDashed, Copy, CreditCard as CreditCardIcon, Download, MoreHorizontal, Pencil, ShieldCheck, Trash2,
+  Ban, Check, CircleDashed, Copy, CreditCard as CreditCardIcon, Download, MoreHorizontal, Pencil, Plus, ShieldCheck, Trash2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -32,6 +32,7 @@ export function Expenses() {
   const cardOf = useCallback((id?: string) => cards.find((c) => c.id === id), [cards])
   const month = useSelectedMonth()
   const [editing, setEditing] = useState<Expense | null>(null)
+  const [adding, setAdding] = useState(false)
   const [removing, setRemoving] = useState<Expense | null>(null)
   const [allMonths, setAllMonths] = useState(false)
   const [filtered, setFiltered] = useState<Expense[]>([])
@@ -123,10 +124,11 @@ export function Expenses() {
           total={{ label: "Total (sem cancelados)", value: (list) => <span className="num font-semibold">{money(list.filter((e) => e.status !== "cancelled").reduce((a, e) => a + e.amount, 0))}</span> }}
           toolbar={(list) => (
             <>
-              <label className="flex h-8 items-center gap-2 rounded-lg px-2 text-xs text-muted-foreground hover:bg-foreground/[0.04]">
-                <Switch checked={allMonths} onCheckedChange={setAllMonths} size="sm" /> Todos os meses
+              <label className="flex h-8 cursor-pointer items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground hover:bg-foreground/[0.04]">
+                <Switch checked={allMonths} onCheckedChange={setAllMonths} /> Todos os meses
               </label>
               <Button variant="outline" size="icon-sm" aria-label="Exportar CSV" title="Exportar CSV" onClick={() => exportCsv(list)}><Download /></Button>
+              <Button size="sm" className="bg-brand text-brand-foreground hover:bg-brand/90" onClick={() => setAdding(true)}><Plus /> <span className="hidden sm:inline">Novo gasto</span></Button>
             </>
           )}
           bulkActions={(sel, clear) => (
@@ -169,6 +171,7 @@ export function Expenses() {
       </Card>
 
       <ExpenseForm open={!!editing} onOpenChange={(o) => !o && setEditing(null)} month={month} expense={editing} />
+      <ExpenseForm open={adding} onOpenChange={setAdding} month={month} />
 
       <AlertDialog open={!!removing} onOpenChange={(o) => !o && setRemoving(null)}>
         <AlertDialogContent>

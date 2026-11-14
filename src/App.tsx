@@ -128,10 +128,13 @@ export default function App() {
 function AppBackdrop() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <div className="absolute -top-56 left-[20%] size-[640px] rounded-full bg-brand/28 blur-[130px] dark:bg-brand/20" />
-      <div className="absolute top-[28%] -right-40 size-[540px] rounded-full bg-[#A78BFA]/26 blur-[130px] dark:bg-[#A78BFA]/14" />
-      <div className="absolute -bottom-56 left-[35%] size-[580px] rounded-full bg-[#7DD3FC]/30 blur-[140px] dark:bg-[#7DD3FC]/12" />
-      <div className="absolute top-[55%] left-[8%] size-[380px] rounded-full bg-brand/18 blur-[120px] dark:bg-brand/12" />
+      {/* fundo pontilhado sutil */}
+      <div className="absolute inset-0 opacity-[0.5] dark:opacity-[0.35]" style={{
+        backgroundImage: "radial-gradient(color-mix(in srgb, var(--foreground) 14%, transparent) 1px, transparent 0)",
+        backgroundSize: "22px 22px",
+      }} />
+      {/* leve brilho de marca no topo, bem contido */}
+      <div className="absolute -top-40 left-1/2 size-[680px] -translate-x-1/2 rounded-full bg-brand/8 blur-[140px] dark:bg-brand/10" />
     </div>
   )
 }

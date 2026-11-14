@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { MoneyInput } from "@/components/money-input"
@@ -48,6 +49,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
   const [scope, setScope] = useState<Scope>("all")
   const [cardId, setCardId] = useState("")
   const [newCard, setNewCard] = useState(false)
+  const [confirmClose, setConfirmClose] = useState(false)
   const cards = settings.cards ?? []
 
   useEffect(() => {
@@ -86,11 +88,6 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
   const isInst = kind === "installment"
   const remainingMonths = isInst && nT ? Math.max(0, nT - nC) : 0
 
-  // Preenche parcela a partir do total
-  const fillFromTotal = () => {
-    if (total && nT) setAmount(Math.round((total / nT) * 100) / 100)
-  }
-
   function submit(ev: React.FormEvent) {
     ev.preventDefault()
     const value = amount
@@ -121,11 +118,21 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
       const n = addExpense(data, { spread: isInst && spread, repeat: isInst ? 1 : parseInt(repeat) || 1 })
       toast.success(n > 1 ? `${n} lançamentos criados` : "Lançamento adicionado", { description: `${data.description} · ${money(value)}` })
     }
+    close(true)
+  }
+
+  // fechamento com aviso de descarte
+  const isDirty = () => {
+    if (editing) return false
+    return description.trim() !== "" || amount > 0 || total > 0 || note.trim() !== "" || nTotal !== "" || cardId !== ""
+  }
+  const close = (force = false) => {
+    if (!force && isDirty()) { setConfirmClose(true); return }
     onOpenChange(false)
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(o) => (o ? onOpenChange(true) : close())}>
       <DialogContent className="max-h-[92dvh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{editing ? "Editar lançamento" : "Novo lançamento"}</DialogTitle>
@@ -160,7 +167,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
               <>
                 <div className="grid gap-1.5">
                   <FieldLabel htmlFor="ntotal" required>Total de parcelas</FieldLabel>
-                  <Input id="ntotal" inputMode="numeric" className="num" value={nTotal} onChange={(e) => setNTotal(e.target.value.replace(/\D/g, ""))} placeholder="10" />
+                  <Input id="ntotal" inputMode="numeric" className="num" value={nTotal} onChange={(e) => { const nv = e.target.value.replace(/\D/g, ""); setNTotal(nv); const t = parseInt(nv) || 0; if (total && t) setAmount(Math.round((total / t) * 100) / 100) }} placeholder="10" />
                 </div>
                 <div className="grid gap-1.5">
                   <FieldLabel htmlFor="ncur" required>Parcela atual</FieldLabel>
@@ -173,8 +180,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
                 <div className="grid gap-1.5">
                   <FieldLabel htmlFor="total" optional>Valor total da compra</FieldLabel>
                   <div className="flex gap-2">
-                    <MoneyInput id="total" value={total} onChange={setTotal} />
-                    {isInst && <Button type="button" variant="outline" onClick={fillFromTotal} title="Calcular parcela">÷</Button>}
+                    <MoneyInput id="total" value={total} onChange={(v) => { setTotal(v); if (isInst && nT) setAmount(Math.round((v / nT) * 100) / 100) }} />
                   </div>
                 </div>
                 <div className="grid gap-1.5">
@@ -248,12 +254,24 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
 
           <DialogFooter className="items-center">
             <span className="mr-auto hidden text-xs text-muted-foreground sm:block"><span className="text-critical">*</span> obrigatório</span>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+            <Button type="button" variant="outline" onClick={() => close()}>Cancelar</Button>
             <Button type="submit">{editing ? "Salvar alterações" : "Adicionar"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
       <CardDialog open={newCard} onOpenChange={setNewCard} onSaved={setCardId} />
+      <AlertDialog open={confirmClose} onOpenChange={setConfirmClose}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Descartar este lançamento?</AlertDialogTitle>
+            <AlertDialogDescription>Você preencheu dados que ainda não foram salvos. Se fechar agora, eles serão perdidos.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Continuar editando</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={() => { setConfirmClose(false); onOpenChange(false) }}>Descartar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   )
 }
