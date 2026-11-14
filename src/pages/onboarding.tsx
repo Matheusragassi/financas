@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { ArrowLeft, ArrowRight, CloudCheck, Loader2, ShieldCheck, Sparkles, UserRound, WifiOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -66,62 +66,13 @@ export function Onboarding() {
     if (user && fileId && syncStatus !== "connecting") startEmpty(0, user.name.split(" ")[0], currentMonthId())
   }, [user, fileId, syncStatus, startEmpty])
 
-  const rootRef = useRef<HTMLDivElement>(null)
-  const cardRef = useRef<HTMLDivElement>(null)
-  // Posição alvo (mouse) e atual (suavizada): a luz "desliza" até o cursor
-  const target = useRef({ x: 0.5, y: 0.4, on: 0 })
-  const current = useRef({ x: 0.5, y: 0.4, on: 0 })
-  useEffect(() => {
-    const el = rootRef.current
-    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
-    let raf = 0
-    const tick = () => {
-      const t = target.current, c = current.current
-      c.x += (t.x - c.x) * 0.08
-      c.y += (t.y - c.y) * 0.08
-      c.on += (t.on - c.on) * 0.06
-      const r = el.getBoundingClientRect()
-      el.style.setProperty("--mx", `${c.x * r.width}px`)
-      el.style.setProperty("--my", `${c.y * r.height}px`)
-      el.style.setProperty("--rx", `${(c.y - 0.5) * -3}deg`)
-      el.style.setProperty("--ry", `${(c.x - 0.5) * 3.5}deg`)
-      el.style.setProperty("--spot", c.on.toFixed(3))
-      const cr = cardRef.current?.getBoundingClientRect()
-      if (cr) { el.style.setProperty("--card-x", `${cr.left - r.left}px`); el.style.setProperty("--card-y", `${cr.top - r.top}px`) }
-      raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [])
-  const onMove = useCallback((e: React.PointerEvent) => {
-    const el = rootRef.current
-    if (!el || e.pointerType === "touch") return
-    const r = el.getBoundingClientRect()
-    target.current = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height, on: 1 }
-  }, [])
-  const onLeave = useCallback(() => { target.current = { x: 0.5, y: 0.4, on: 0 } }, [])
-
   return (
-    <div ref={rootRef} onPointerMove={onMove} onPointerLeave={onLeave}
-      style={{ "--mx": "50%", "--my": "40%", "--rx": "0deg", "--ry": "0deg", "--spot": "0" } as React.CSSProperties}
-      className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-background px-4 py-10 [perspective:1200px]">
+    <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-background px-4 py-10">
       <Backdrop />
       <div className="absolute top-3 right-3 rounded-full glass"><ThemeToggle /></div>
 
       <main className="relative w-full max-w-[400px]">
-        <div ref={cardRef} className="relative rounded-[28px] p-7 sm:p-8">
-          {/* placa de vidro inclinada (decorativa); o conteúdo fica parado para os cliques serem confiáveis */}
-          <div aria-hidden className="tilt-card pointer-events-none absolute inset-0 rounded-[28px] glass"
-            style={{ transform: "rotateX(var(--rx)) rotateY(var(--ry))" }}>
-            <div className="absolute -inset-px rounded-[28px]" style={{
-              opacity: "var(--spot)",
-              padding: 1,
-              background: "radial-gradient(260px circle at calc(var(--mx) - var(--card-x, 0px)) calc(var(--my) - var(--card-y, 0px)), color-mix(in srgb, #3B82F6 70%, white), transparent 70%)",
-              WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-              WebkitMaskComposite: "xor",
-              maskComposite: "exclude",
-            }} />
-          </div>
+        <div className="relative rounded-[28px] glass p-7 sm:p-8">
           <div className="relative">
           <div className="flex flex-col items-center text-center">
             <AppLogo className="size-16 shadow-[0_14px_40px_-10px_rgba(59,130,246,0.5),inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform duration-500 hover:-rotate-6 hover:scale-105" />
@@ -277,37 +228,24 @@ function Pill({ icon: Icon, children }: { icon: typeof WifiOff; children: React.
 
 /** Fundo: brilhos em Blue Period que flutuam, luz difusa que segue o mouse e grade fina que acende perto dele */
 function Backdrop({ className }: { className?: string }) {
-  const grid = (alpha: number, size = 22) => ({
-    backgroundImage: `linear-gradient(to right, color-mix(in srgb, var(--foreground) ${alpha}%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in srgb, var(--foreground) ${alpha}%, transparent) 1px, transparent 1px)`,
-    backgroundSize: `${size}px ${size}px`,
-  })
+  // Waves de cor que se movem e se misturam (paleta MAVI), sobre fundo escuro, com granulado
   return (
-    <div aria-hidden className={cn("pointer-events-none absolute inset-0", className)}>
-      <div className="animate-drift-a absolute -top-40 left-1/2 size-[680px] rounded-full bg-brand/22 blur-[130px] dark:bg-brand/18" />
-      <div className="animate-drift-b absolute -bottom-48 -left-24 size-[440px] rounded-full bg-[#6D28D9]/14 blur-[120px]" />
-      <div className="animate-drift-c absolute -right-24 bottom-10 size-[380px] rounded-full bg-[#7DD3FC]/14 blur-[120px]" />
-      {/* grade de base, bem discreta */}
-      <div className="absolute inset-0 opacity-50 dark:opacity-40" style={{
-        ...grid(4),
-        maskImage: "radial-gradient(ellipse 55% 50% at 50% 45%, black 10%, transparent 75%)",
-        WebkitMaskImage: "radial-gradient(ellipse 55% 50% at 50% 45%, black 10%, transparent 75%)",
-      }} />
-      {/* luz difusa que segue o cursor */}
+    <div aria-hidden className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}>
+      {/* camada das waves: blobs coloridos somando luz (screen no escuro), bem desfocados */}
+      <div className="absolute inset-0 blur-[70px] [&>div]:absolute [&>div]:rounded-[45%] dark:[&>div]:mix-blend-screen">
+        <div className="aurora-1 -top-[20%] left-[8%] h-[65%] w-[55%] bg-[#3B82F6]/45 dark:bg-[#3B82F6]/55" />
+        <div className="aurora-2 top-[10%] -right-[12%] h-[70%] w-[55%] bg-[#6D28D9]/40 dark:bg-[#6D28D9]/55" />
+        <div className="aurora-3 -bottom-[22%] left-[18%] h-[65%] w-[60%] bg-[#7DD3FC]/40 dark:bg-[#22D3EE]/45" />
+        <div className="aurora-4 bottom-[6%] right-[14%] h-[45%] w-[45%] bg-[#A78BFA]/35 dark:bg-[#A78BFA]/40" />
+      </div>
+      {/* vinheta para focar o centro e escurecer as bordas */}
       <div className="absolute inset-0" style={{
-        opacity: "var(--spot)",
-        background: "radial-gradient(700px circle at var(--mx) var(--my), color-mix(in srgb, #3B82F6 13%, transparent), color-mix(in srgb, #3B82F6 4%, transparent) 40%, transparent 70%)",
+        background: "radial-gradient(ellipse 80% 70% at 50% 45%, transparent 35%, color-mix(in srgb, var(--background) 55%, transparent) 78%, var(--background) 100%)",
       }} />
-      {/* grade que acende suavemente perto do cursor */}
-      <div className="absolute inset-0" style={{
-        opacity: "calc(var(--spot) * 0.9)",
-        ...grid(10),
-        maskImage: "radial-gradient(240px circle at var(--mx) var(--my), rgba(0,0,0,0.9), rgba(0,0,0,0.35) 40%, transparent 75%)",
-        WebkitMaskImage: "radial-gradient(240px circle at var(--mx) var(--my), rgba(0,0,0,0.9), rgba(0,0,0,0.35) 40%, transparent 75%)",
-      }} />
-      {/* textura de ruído (grain) sutil por cima */}
-      <div className="absolute inset-0 opacity-[0.035] mix-blend-overlay dark:opacity-[0.06]" style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-        backgroundSize: "160px 160px",
+      {/* granulado (grain) por cima de tudo */}
+      <div className="absolute inset-0 opacity-[0.06] mix-blend-overlay dark:opacity-[0.11]" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+        backgroundSize: "150px 150px",
       }} />
     </div>
   )
