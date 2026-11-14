@@ -9,6 +9,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { InlineMoney } from "@/components/inline-money"
+import { DataTable } from "@/components/data-table"
 import { MoneyInput } from "@/components/money-input"
 import { FieldLabel } from "@/components/field-label"
 import { CurrencyField } from "@/components/currency-field"
@@ -21,6 +22,7 @@ import { SheetImportDialog } from "@/components/sheet-import-dialog"
 
 export function SettingsPage() {
   const s = useStore()
+  const months = [...s.months].reverse()
   const fileRef = useRef<HTMLInputElement>(null)
   const install = useInstallPrompt()
   const [newCat, setNewCat] = useState("")
@@ -101,36 +103,42 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
+      <Card className="gap-0 overflow-hidden py-0">
+        <CardHeader className="border-b border-foreground/10 py-4">
           <CardTitle>Renda por mês</CardTitle>
           <CardDescription>Clique no valor para alterar a renda de um mês específico.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <ul className="grid gap-x-6 gap-y-1 sm:grid-cols-2">
-            {[...s.months].reverse().map((m) => (
-              <li key={m.id} className="flex items-center justify-between gap-2 border-b py-1.5 text-sm last:border-0">
-                <span>{monthLabel(m.id)}</span>
-                <div className="flex items-center gap-1">
-                  <InlineMoney value={m.salary} onSave={(v) => { s.setSalary(m.id, v); toast.success(`Renda de ${monthLabel(m.id)}: ${money(v)}`) }} />
-                  <AlertDialog>
-                    <AlertDialogTrigger render={<Button variant="ghost" size="icon-xs" aria-label="Excluir mês" />}><Trash2 /></AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Excluir {monthLabel(m.id)}?</AlertDialogTitle>
-                        <AlertDialogDescription>Todos os lançamentos deste mês serão removidos.</AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction variant="destructive" onClick={() => s.deleteMonth(m.id)}>Excluir</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
+        <DataTable
+          id="renda-mensal"
+          rows={months}
+          rowId={(m) => m.id}
+          label="meses"
+          pageSize={10}
+          search={(m) => monthLabel(m.id)}
+          searchPlaceholder="Buscar mês…"
+          emptyText="Nenhum mês cadastrado."
+          columns={[
+            { id: "month", header: "Mês", fixed: true, sortValue: (m) => m.id, filterValue: (m) => m.id.slice(0, 4),
+              cell: (m) => <span className="font-medium whitespace-nowrap">{monthLabel(m.id)}</span> },
+            { id: "salary", header: "Renda", align: "right", fixed: true, sortValue: (m) => m.salary,
+              cell: (m) => <InlineMoney value={m.salary} onSave={(v) => { s.setSalary(m.id, v); toast.success(`Renda de ${monthLabel(m.id)}: ${money(v)}`) }} /> },
+          ]}
+          rowActions={(m) => (
+            <AlertDialog>
+              <AlertDialogTrigger render={<Button variant="ghost" size="icon-sm" aria-label="Excluir mês" />}><Trash2 /></AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Excluir {monthLabel(m.id)}?</AlertDialogTitle>
+                  <AlertDialogDescription>Todos os lançamentos deste mês serão removidos.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction variant="destructive" onClick={() => s.deleteMonth(m.id)}>Excluir</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        />
       </Card>
 
       <div className="grid gap-4 md:gap-5 md:grid-cols-2">
