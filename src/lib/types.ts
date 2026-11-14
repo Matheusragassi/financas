@@ -35,6 +35,8 @@ export interface Settings {
   categories: string[]
   methods: string[]
   budgetAlert: number
+  /** Link da planilha do Google usada na importação */
+  sheetUrl?: string
 }
 
 export interface Backup {

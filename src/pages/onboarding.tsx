@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
 import { toast } from "sonner"
-import { FileUp, Sparkles, Wallet, PlusCircle, ShieldCheck, WifiOff } from "lucide-react"
+import { FileUp, Sparkles, Wallet, PlusCircle, ShieldCheck, WifiOff, Sheet as SheetIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,12 +10,15 @@ import { readBackup } from "@/lib/backup"
 import { demoBackup } from "@/lib/demo"
 import { currentMonthId, parseMoney } from "@/lib/format"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { SheetImportDialog } from "@/components/sheet-import-dialog"
+import { AuthorCredit } from "@/components/author-credit"
 
 export function Onboarding() {
   const { importBackup, startEmpty } = useStore()
   const fileRef = useRef<HTMLInputElement>(null)
   const [name, setName] = useState("")
   const [salary, setSalary] = useState("")
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   async function onFile(f?: File) {
     if (!f) return
@@ -46,15 +49,25 @@ export function Onboarding() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="md:col-span-1">
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card className="ring-2 ring-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><SheetIcon className="size-4" /> Importar do Google Planilhas</CardTitle>
+              <CardDescription>Cole o link da sua planilha de gastos e o app lê todos os meses.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" onClick={() => setSheetOpen(true)}>Colar link da planilha</Button>
+            </CardContent>
+          </Card>
+
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><FileUp className="size-4" /> Importar backup</CardTitle>
               <CardDescription>Carregue um arquivo .json exportado por este app.</CardDescription>
             </CardHeader>
             <CardContent>
               <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => onFile(e.target.files?.[0])} />
-              <Button className="w-full" onClick={() => fileRef.current?.click()}>Escolher arquivo</Button>
+              <Button variant="secondary" className="w-full" onClick={() => fileRef.current?.click()}>Escolher arquivo</Button>
             </CardContent>
           </Card>
 
@@ -84,11 +97,13 @@ export function Onboarding() {
               <CardDescription>12 meses de dados fictícios para conhecer o app.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full" onClick={() => importBackup(demoBackup())}>Ver demonstração</Button>
+              <Button variant="outline" className="w-full" onClick={() => importBackup(demoBackup(), { demo: true })}>Ver demonstração</Button>
             </CardContent>
           </Card>
         </div>
+        <AuthorCredit className="justify-center" />
       </div>
+      <SheetImportDialog open={sheetOpen} onOpenChange={setSheetOpen} />
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react"
+import { Plus, Sparkles, LogOut } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -27,6 +27,8 @@ const TITLES = {
 
 export default function App() {
   const initialized = useStore((s) => s.initialized)
+  const isDemo = useStore((s) => s.isDemo)
+  const resetAll = useStore((s) => s.resetAll)
   const route = useRoute()
   const month = useSelectedMonth()
   const [adding, setAdding] = useState(false)
@@ -49,6 +51,15 @@ export default function App() {
             </Button>
           </div>
         </header>
+        {isDemo && (
+          <div className="flex flex-wrap items-center gap-2 border-b bg-chart-1/10 px-3 py-2 text-sm md:px-4">
+            <Sparkles className="size-4 text-chart-1" />
+            <span>Você está vendo uma <b>demonstração</b> com dados fictícios.</span>
+            <Button size="sm" className="ml-auto" onClick={() => { resetAll(); window.location.hash = "" }}>
+              <LogOut /> Sair da demo e usar meus dados
+            </Button>
+          </div>
+        )}
         <main className="mx-auto w-full max-w-7xl flex-1 p-3 pb-24 md:p-6">
           {route === "dashboard" && <Dashboard onAdd={() => setAdding(true)} />}
           {route === "lancamentos" && <Expenses />}

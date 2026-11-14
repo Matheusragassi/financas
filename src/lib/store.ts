@@ -16,12 +16,13 @@ export type Scope = "this" | "future" | "all"
 
 interface State {
   initialized: boolean
+  isDemo: boolean
   settings: Settings
   months: Month[]
   expenses: Expense[]
   selectedMonth: string | null
   setSelectedMonth: (m: string) => void
-  importBackup: (b: Backup) => void
+  importBackup: (b: Backup, opts?: { demo?: boolean }) => void
   exportBackup: () => Backup
   resetAll: () => void
   startEmpty: (salary: number, name: string, month: string) => void
@@ -78,15 +79,17 @@ export const useStore = create<State>()(
   persist(
     (set, get) => ({
       initialized: false,
+      isDemo: false,
       settings: DEFAULT_SETTINGS,
       months: [],
       expenses: [],
       selectedMonth: null,
       setSelectedMonth: (m) => set({ selectedMonth: m }),
 
-      importBackup: (b) =>
+      importBackup: (b, opts) =>
         set({
           initialized: true,
+          isDemo: !!opts?.demo,
           settings: { ...DEFAULT_SETTINGS, ...b.settings },
           months: sortMonths(b.months),
           expenses: b.expenses.map((e) => ({ ...e, id: e.id || uid() })),
@@ -96,10 +99,11 @@ export const useStore = create<State>()(
         const { settings, months, expenses } = get()
         return { app: "financas", version: 1, exportedAt: new Date().toISOString(), settings, months, expenses }
       },
-      resetAll: () => set({ initialized: false, settings: DEFAULT_SETTINGS, months: [], expenses: [], selectedMonth: null }),
+      resetAll: () => set({ initialized: false, isDemo: false, settings: DEFAULT_SETTINGS, months: [], expenses: [], selectedMonth: null }),
       startEmpty: (salary, name, month) =>
         set({
           initialized: true,
+          isDemo: false,
           settings: { ...DEFAULT_SETTINGS, defaultSalary: salary, ownerName: name },
           months: [{ id: month, salary }],
           expenses: [],

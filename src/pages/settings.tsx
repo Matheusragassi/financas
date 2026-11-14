@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
 import { toast } from "sonner"
-import { Download, FileUp, Plus, RotateCcw, Smartphone, Trash2, X } from "lucide-react"
+import { Download, FileUp, Plus, RefreshCw, RotateCcw, Sheet as SheetIcon, Smartphone, Trash2, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,6 +14,7 @@ import { useStore } from "@/lib/store"
 import { downloadJson, readBackup } from "@/lib/backup"
 import { money, monthLabel, parseMoney } from "@/lib/format"
 import { useInstallPrompt } from "@/lib/use-install"
+import { SheetImportDialog } from "@/components/sheet-import-dialog"
 
 export function SettingsPage() {
   const s = useStore()
@@ -21,6 +22,7 @@ export function SettingsPage() {
   const install = useInstallPrompt()
   const [newCat, setNewCat] = useState("")
   const [newMethod, setNewMethod] = useState("")
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   async function onFile(f?: File) {
     if (!f) return
@@ -59,6 +61,23 @@ export function SettingsPage() {
           {install && <Button variant="outline" onClick={install}><Smartphone /> Instalar app</Button>}
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><SheetIcon className="size-4" /> Google Planilhas</CardTitle>
+          <CardDescription>
+            {s.settings.sheetUrl
+              ? "Dados importados da sua planilha. Se você continuar editando lá, use “Atualizar” para trazer as mudanças (substitui os dados do app)."
+              : "Importe todos os meses de uma planilha compartilhada por link."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          <Button variant={s.settings.sheetUrl ? "default" : "outline"} onClick={() => setSheetOpen(true)}>
+            {s.settings.sheetUrl ? <><RefreshCw /> Atualizar da planilha</> : <><SheetIcon /> Importar planilha</>}
+          </Button>
+        </CardContent>
+      </Card>
+      <SheetImportDialog open={sheetOpen} onOpenChange={setSheetOpen} defaultUrl={s.settings.sheetUrl ?? ""} />
 
       <Card>
         <CardHeader><CardTitle>Perfil</CardTitle></CardHeader>

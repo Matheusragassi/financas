@@ -6,6 +6,7 @@ import {
 import { useRoute, type Route } from "@/lib/use-route"
 import { useStore } from "@/lib/store"
 import { useOnline } from "@/lib/use-online"
+import { AuthorCredit } from "@/components/author-credit"
 
 const NAV: { route: Route; label: string; icon: typeof Wallet }[] = [
   { route: "dashboard", label: "Visão geral", icon: LayoutDashboard },
@@ -63,6 +64,7 @@ export function AppSidebar() {
           {online ? <span className="size-2 rounded-full bg-success" /> : <WifiOff className="size-3.5" />}
           {online ? "Online · dados salvos neste aparelho" : "Offline · tudo continua funcionando"}
         </div>
+        <AuthorCredit className="px-2 pb-1 group-data-[collapsible=icon]:hidden" />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
