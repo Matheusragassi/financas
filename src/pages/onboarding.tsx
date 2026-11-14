@@ -195,7 +195,7 @@ export function Onboarding() {
                 )}
                 {googleEnabled() && !last && (
                   <Button size="lg" disabled={busy} onClick={() => google()}
-                    className="h-11 gap-2.5 bg-foreground text-background shadow-[0_8px_24px_-8px_rgba(59,130,246,0.6)] hover:bg-foreground/90">
+                    className="h-11 gap-2.5 bg-foreground text-background hover:bg-foreground/90">
                     {busy ? <Loader2 className="animate-spin" /> : <GoogleIcon className="size-[18px]" />}
                     Continuar com Google
                   </Button>

@@ -103,7 +103,7 @@ export default function App() {
         </main>
         <Button
           size="icon-lg"
-          className="fixed right-4 bottom-4 z-30 size-14 rounded-full bg-brand text-brand-foreground shadow-[0_10px_30px_-6px_rgba(59,130,246,0.6)] hover:bg-brand/90 sm:hidden"
+          className="fixed right-4 bottom-4 z-30 size-14 rounded-full bg-brand text-brand-foreground shadow-lg hover:bg-brand/90 sm:hidden"
           onClick={() => setAdding(true)}
           aria-label="Novo gasto"
         >
