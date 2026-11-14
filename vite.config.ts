@@ -19,7 +19,7 @@ export default defineConfig({
         short_name: "Folia",
         description: "Gestão financeira pessoal que funciona offline.",
         lang: "pt-BR",
-        theme_color: "#34D399",
+        theme_color: "#3B82F6",
         background_color: "#090B12",
         display: "standalone",
         start_url: "./",

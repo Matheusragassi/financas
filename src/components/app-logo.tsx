@@ -48,7 +48,7 @@ export function FoliaMark({ className, leaf = "currentColor" }: { className?: st
 /** Ícone do app: folha branca sobre o verde da Folia */
 export function AppLogo({ className }: { className?: string }) {
   return (
-    <span className={cn("relative inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[28%] bg-[linear-gradient(145deg,#5EE3B0,#34D399_55%,#0b9e6f)] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]", className)}>
+    <span className={cn("relative inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[28%] bg-[linear-gradient(145deg,#5B9BFF,#3B82F6_55%,#2557C7)] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]", className)}>
       <FoliaMark className="h-[54%] w-auto" leaf="#ffffff" />
     </span>
   )

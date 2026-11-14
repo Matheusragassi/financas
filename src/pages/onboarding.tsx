@@ -124,8 +124,8 @@ export function Onboarding() {
           </div>
           <div className="relative">
           <div className="flex flex-col items-center text-center">
-            <AppLogo className="size-16 shadow-[0_14px_40px_-8px_rgba(52,211,153,0.6),inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform duration-500 hover:-rotate-6 hover:scale-105" />
-            <FoliaWordmark className="mt-5 h-6 w-auto" />
+            <AppLogo className="size-16 shadow-[0_14px_40px_-10px_rgba(59,130,246,0.5),inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform duration-500 hover:-rotate-6 hover:scale-105" />
+            <FoliaWordmark className="mt-5 h-6 w-auto" leaf="#3B82F6" />
             <p className="mt-1.5 text-sm text-balance text-muted-foreground">
               {view === "guest"
                   ? "Só precisamos de duas informações para começar."

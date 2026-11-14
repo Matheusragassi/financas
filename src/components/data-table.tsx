@@ -8,7 +8,6 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { TablePager, TableScroll, usePagination } from "@/components/table-pager"
 import { cn } from "@/lib/utils"
 
@@ -146,9 +145,7 @@ export function DataTable<T>(props: Props<T>) {
             </Popover>
           )}
           <DropdownMenu>
-            <DropdownMenuTrigger render={
-              <Tooltip><TooltipTrigger render={<Button variant="outline" size="icon-sm" aria-label="Colunas" />}><Columns3 /></TooltipTrigger><TooltipContent>Colunas</TooltipContent></Tooltip>
-            } />
+            <DropdownMenuTrigger render={<Button variant="outline" size="icon-sm" aria-label="Colunas" title="Colunas" />}><Columns3 /></DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuGroup>
                 <DropdownMenuLabel>Colunas visíveis</DropdownMenuLabel>
@@ -193,10 +190,12 @@ export function DataTable<T>(props: Props<T>) {
                   <TableHead key={c.id} className={cn("px-3", c.align === "right" && "text-right", c.className)}>
                     {c.sortValue ? (
                       <button onClick={() => cycleSort(c.id)}
-                        className={cn("group/sort -mx-1.5 inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium transition-colors hover:bg-foreground/5 hover:text-foreground",
-                          c.align === "right" && "flex-row-reverse", dir && "text-foreground")}>
-                        {c.header}
-                        {dir === 1 ? <ArrowUp className="size-3.5 text-brand" /> : dir === -1 ? <ArrowDown className="size-3.5 text-brand" /> : <ChevronsUpDown className="size-3 opacity-0 transition-opacity group-hover/sort:opacity-40" />}
+                        className={cn("group/sort -mx-1.5 flex h-7 w-full items-center gap-2 rounded-md px-1.5 font-medium transition-colors hover:bg-foreground/5 hover:text-foreground",
+                          c.align === "right" ? "flex-row-reverse" : "justify-between", dir && "text-foreground")}>
+                        <span className="truncate">{c.header}</span>
+                        <span className={cn("flex size-5 shrink-0 items-center justify-center rounded transition-colors", dir ? "text-brand" : "text-muted-foreground/50 group-hover/sort:text-muted-foreground")}>
+                          {dir === 1 ? <ArrowUp className="size-3.5" /> : dir === -1 ? <ArrowDown className="size-3.5" /> : <ChevronsUpDown className="size-3.5" />}
+                        </span>
                       </button>
                     ) : <span className="font-medium">{c.header}</span>}
                   </TableHead>
@@ -237,10 +236,7 @@ export function DataTable<T>(props: Props<T>) {
 
 function IconBtn({ children, label, onClick, active }: { children: React.ReactNode; label: string; onClick: () => void; active?: boolean }) {
   return (
-    <Tooltip>
-      <TooltipTrigger render={<Button variant="outline" size="icon-sm" aria-label={label} onClick={onClick} className={active ? "border-brand/40 text-brand" : undefined} />}>{children}</TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
+    <Button variant="outline" size="icon-sm" aria-label={label} title={label} onClick={onClick} className={active ? "border-brand/40 text-brand" : undefined}>{children}</Button>
   )
 }
 

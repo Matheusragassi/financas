@@ -1,4 +1,3 @@
-import { FoliaWordmark } from "@/components/app-logo"
 import { DashboardSkeleton, TableSkeleton } from "@/components/skeletons"
 import { useHydrated } from "@/lib/use-hydrated"
 import { ChevronLeft, ChevronRight, Plus, Sparkles, LogOut } from "lucide-react"
@@ -67,7 +66,7 @@ export default function App() {
                 <ChevronLeft className="size-4" />
               </button>
             )}
-            <a href="#/dashboard" className="hidden items-center text-muted-foreground transition-colors hover:text-foreground sm:inline-flex" aria-label="Folia"><FoliaWordmark className="h-2.5 w-auto" /></a>
+            <a href="#/dashboard" className="hidden font-brand text-sm font-semibold lowercase tracking-tight text-muted-foreground transition-colors hover:text-foreground sm:inline">folia</a>
             <ChevronRight className="hidden size-3.5 text-muted-foreground/60 sm:block" />
             {PARENT[route] && (
               <>

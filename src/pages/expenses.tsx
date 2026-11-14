@@ -5,7 +5,6 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Switch } from "@/components/ui/switch"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -127,7 +126,7 @@ export function Expenses() {
               <label className="flex h-8 items-center gap-2 rounded-lg px-2 text-xs text-muted-foreground hover:bg-foreground/[0.04]">
                 <Switch checked={allMonths} onCheckedChange={setAllMonths} size="sm" /> Todos os meses
               </label>
-              <Tooltip><TooltipTrigger render={<Button variant="outline" size="icon-sm" aria-label="Exportar CSV" onClick={() => exportCsv(list)} />}><Download /></TooltipTrigger><TooltipContent>Exportar CSV</TooltipContent></Tooltip>
+              <Button variant="outline" size="icon-sm" aria-label="Exportar CSV" title="Exportar CSV" onClick={() => exportCsv(list)}><Download /></Button>
             </>
           )}
           bulkActions={(sel, clear) => (
