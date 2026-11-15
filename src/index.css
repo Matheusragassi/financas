@@ -1,15 +1,17 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
-@import "@fontsource/prompt/600.css";
+@import "@fontsource/space-grotesk";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-sans);
-    --font-brand: 'Prompt', var(--font-sans);
-    --font-sans: 'Twemoji Country Flags', 'Geist Variable', sans-serif;
+    --font-heading: 'Space Grotesk', var(--font-sans);
+    --font-brand: 'Space Grotesk', var(--font-sans);
+    --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+    --font-sans: 'Twemoji Country Flags', 'Inter Variable', system-ui, sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -59,89 +61,117 @@
 }
 
 :root {
-    /* Gráficos: paleta MAVI em variações de tom validadas (contraste e daltonismo) */
-    --background: oklch(0.966 0.005 255);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.952 0.006 255);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.952 0.006 255);
-    --muted-foreground: oklch(0.48 0.012 258);
-    --accent: oklch(0.948 0.008 255);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.9 0.006 255);
-    --input: oklch(0.9 0.006 255);
-    --ring: color-mix(in srgb, #1A3FEB 60%, transparent);
-    --chart-1: #1A3FEB;
-    --chart-2: #0b9e6f;
-    --chart-3: #8044f1;
-    --chart-4: #cf6227;
-    --chart-5: #8c6fdc;
+    /* ── Paleta Gastu (manual da marca) ── */
+    /* Neutral scale */
+    --neutral-50: #F7F8FB; --neutral-100: #F2F4F8; --neutral-200: #DDE1EA;
+    --neutral-300: #B8BFCE; --neutral-400: #8A93A8; --neutral-500: #6B7490;
+    --neutral-600: #5D6680; --neutral-700: #3A4359; --neutral-800: #232B3D;
+    --neutral-900: #141A28; --neutral-950: #0B0F1A;
+    /* Blue scale */
+    --blue-50: #EEF2FF; --blue-100: #DCE4FF; --blue-200: #B9C8FF;
+    --blue-300: #8CA4FF; --blue-400: #5C7BFF; --blue-500: #2F54FF;
+    --blue-600: #1A3FEB; --blue-700: #1230C4; --blue-800: #11279A;
+    --blue-900: #0E1F6E; --blue-950: #080F3A;
+    /* Functional */
+    --entrada: #22C55E; --saida: #FF4D4F; --alerta: #FFC21A; --fluxo: #00C2E0;
+    --lima: #C6FF3D;
+
+    /* ── Light theme: cores mapeadas da escala Gastu ── */
+    --background: var(--neutral-50);
+    --foreground: var(--neutral-950);
+    --card: #FFFFFF;
+    --card-foreground: var(--neutral-950);
+    --popover: #FFFFFF;
+    --popover-foreground: var(--neutral-950);
+    --primary: var(--neutral-950);
+    --primary-foreground: #FFFFFF;
+    --secondary: var(--neutral-100);
+    --secondary-foreground: var(--neutral-950);
+    --muted: var(--neutral-100);
+    --muted-foreground: var(--neutral-500);
+    --accent: var(--blue-50);
+    --accent-foreground: var(--neutral-950);
+    --destructive: var(--saida);
+    --border: var(--neutral-200);
+    --input: var(--neutral-200);
+    --ring: color-mix(in srgb, var(--blue-600) 60%, transparent);
     --radius: 0.75rem;
-    --chart-6: #5a9b05;
-    --chart-7: #2b92bc;
-    --chart-8: #94A3B8;
-    --brand: #1A3FEB;
-    --brand-foreground: #ffffff;
-    --success: #0b7a0b;
-    --warning: #b86e00;
-    --critical: #d03b3b;
-    --sidebar: oklch(0.985 0.005 255);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.948 0.008 255);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.9 0.006 255);
-    --sidebar-ring: oklch(0.708 0 0);
+
+    /* Charts: blue scale + functional colors */
+    --chart-1: var(--blue-600);
+    --chart-2: #15803D;
+    --chart-3: var(--blue-300);
+    --chart-4: var(--saida);
+    --chart-5: var(--fluxo);
+    --chart-6: var(--blue-800);
+    --chart-7: #D97706;
+    --chart-8: var(--neutral-400);
+
+    /* Brand */
+    --brand: var(--blue-600);
+    --brand-foreground: #FFFFFF;
+    --success: #15803D;
+    --warning: #D97706;
+    --critical: #DC2626;
+
+    /* Sidebar */
+    --sidebar: var(--neutral-50);
+    --sidebar-foreground: var(--neutral-950);
+    --sidebar-primary: var(--blue-600);
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: var(--blue-50);
+    --sidebar-accent-foreground: var(--neutral-950);
+    --sidebar-border: var(--neutral-200);
+    --sidebar-ring: var(--neutral-400);
 }
 
 .dark {
-    --background: oklch(0.13 0.004 270);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.175 0.005 270);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.19 0.005 270);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: color-mix(in srgb, #1A3FEB 60%, transparent);
-    --chart-1: #2F54FF;
-    --chart-2: #18ad7b;
-    --chart-3: #8a57f9;
-    --chart-4: #de7037;
-    --chart-5: #9a7deb;
-    --chart-6: #64aa12;
-    --chart-7: #3da0ca;
-    --chart-8: #64748B;
-    --brand: #2F54FF;
-    --brand-foreground: #ffffff;
-    --success: #2fbf4a;
-    --warning: #fab219;
-    --critical: #ec6a6a;
-    --sidebar: oklch(0.155 0.005 270);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    /* ── Dark theme: escala Gastu invertida ── */
+    --background: var(--neutral-950);
+    --foreground: var(--neutral-100);
+    --card: var(--neutral-900);
+    --card-foreground: var(--neutral-100);
+    --popover: var(--neutral-800);
+    --popover-foreground: var(--neutral-100);
+    --primary: var(--neutral-100);
+    --primary-foreground: var(--neutral-950);
+    --secondary: var(--neutral-800);
+    --secondary-foreground: var(--neutral-100);
+    --muted: var(--neutral-800);
+    --muted-foreground: var(--neutral-400);
+    --accent: var(--blue-950);
+    --accent-foreground: var(--neutral-100);
+    --destructive: #FF6B6B;
+    --border: color-mix(in srgb, var(--neutral-700) 60%, transparent);
+    --input: color-mix(in srgb, var(--neutral-700) 70%, transparent);
+    --ring: color-mix(in srgb, var(--blue-500) 60%, transparent);
+
+    /* Charts: brighter on dark */
+    --chart-1: var(--blue-500);
+    --chart-2: var(--entrada);
+    --chart-3: var(--blue-300);
+    --chart-4: #FF6B6B;
+    --chart-5: var(--fluxo);
+    --chart-6: var(--lima);
+    --chart-7: var(--alerta);
+    --chart-8: var(--neutral-400);
+
+    /* Brand */
+    --brand: var(--blue-500);
+    --brand-foreground: #FFFFFF;
+    --success: var(--entrada);
+    --warning: var(--alerta);
+    --critical: #FF6B6B;
+
+    /* Sidebar */
+    --sidebar: var(--neutral-900);
+    --sidebar-foreground: var(--neutral-100);
+    --sidebar-primary: var(--blue-500);
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: var(--blue-950);
+    --sidebar-accent-foreground: var(--neutral-100);
+    --sidebar-border: color-mix(in srgb, var(--neutral-700) 50%, transparent);
+    --sidebar-ring: var(--neutral-600);
 }
 
 @layer base {
@@ -160,7 +190,7 @@
   html.dark { color-scheme: dark; }
   body { -webkit-font-smoothing: antialiased; font-feature-settings: "tnum" 1, "cv11" 1; }
 }
-.num { font-variant-numeric: tabular-nums; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
 /* Vidro (glassmorphism): usa as utilities nativas do Tailwind para o backdrop-filter
    (a sintaxe multi-função via @utility era quebrada pelo minificador). */

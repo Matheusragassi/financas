@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { FieldLabel } from "@/components/field-label"
 import { MoneyInput } from "@/components/money-input"
 import { SimpleSelect } from "@/components/simple-select"
-import { AppLogo, GastuLogo } from "@/components/app-logo"
+import { GastuLogo } from "@/components/app-logo"
 import { AuthorCredit } from "@/components/author-credit"
 import { FunSteps } from "@/components/fun-steps"
 import { GoogleIcon } from "@/components/google-icon"
@@ -75,8 +75,7 @@ export function Onboarding() {
         <div className="relative rounded-[28px] glass p-7 sm:p-8">
           <div className="relative">
           <div className="flex flex-col items-center text-center">
-            <AppLogo className="size-16 shadow-[0_14px_40px_-10px_rgba(26,63,235,0.5),inset_0_1px_0_rgba(255,255,255,0.25)] transition-transform duration-500 hover:-rotate-6 hover:scale-105" />
-            <GastuLogo className="mt-5 h-[18px] w-auto" />
+            <GastuLogo className="mt-2 h-[24px] w-auto" />
             <p className="mt-1.5 text-sm text-balance text-muted-foreground">
               {view === "guest"
                   ? "Só precisamos de duas informações para começar."

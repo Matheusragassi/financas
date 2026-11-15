@@ -21,9 +21,8 @@ export function GastuSymbol({ className, fill = "currentColor" }: { className?: 
 
 export function AppLogo({ className }: { className?: string }) {
   return (
-    <span className={cn("relative inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[28%] bg-[#1A3FEB] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]", className)}>
+    <span className={cn("relative inline-flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-[22%] bg-brand shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]", className)}>
       <svg viewBox="0 0 9 9" className="h-full w-full" shapeRendering="crispEdges" role="img" aria-label="Gastu">
-        <rect width="9" height="9" fill="#1A3FEB" />
         <path transform="translate(2 2)" d={SYMBOL_PATH} fill="#fff" />
         <rect x="7" y="5" width="2" height="1" fill="#fff" />
       </svg>

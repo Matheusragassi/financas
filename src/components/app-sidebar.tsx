@@ -8,7 +8,7 @@ import { useStore } from "@/lib/store"
 import { useOnline } from "@/lib/use-online"
 import { AuthorCredit } from "@/components/author-credit"
 import { NavUser } from "@/components/nav-user"
-import { AppLogo } from "@/components/app-logo"
+import { AppLogo, GastuLogo } from "@/components/app-logo"
 import { useSync } from "@/lib/sync"
 
 const NAV: { route: Route; label: string; icon: typeof LayoutDashboard }[] = [
@@ -33,9 +33,9 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="gap-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0!" render={<a href="#/dashboard" />}>
-              <AppLogo className="size-8 shrink-0 transition-transform group-hover/menu-button:scale-105" />
+              <AppLogo className="size-9 shrink-0 rounded-[10px] transition-transform group-hover/menu-button:scale-105" />
               <div className="flex flex-1 flex-col overflow-hidden text-left leading-tight group-data-[collapsible=icon]:hidden">
-                <span className="text-[15px] leading-none font-semibold tracking-tight">Gastu</span>
+                <GastuLogo className="h-[14px] w-auto max-w-[84px]" />
                 <span className="truncate text-[11px] text-muted-foreground">{name ? `de ${name}` : "finanças pessoais"}</span>
               </div>
             </SidebarMenuButton>

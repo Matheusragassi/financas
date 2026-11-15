@@ -124,16 +124,15 @@ export default function App() {
   )
 }
 
-/** Fundo pontilhado fixo atrás do conteúdo (dá profundidade e faz o vidro aparecer) */
+/** Fundo com pattern maze Gastu (marca) atrás do conteúdo */
 function AppBackdrop() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      {/* base levemente tonal, mais presente no claro para o pontilhado respirar */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_90%_at_50%_-10%,color-mix(in_srgb,var(--brand)_7%,transparent),transparent_60%)] dark:bg-[radial-gradient(ellipse_120%_90%_at_50%_-10%,color-mix(in_srgb,var(--brand)_6%,transparent),transparent_55%)]" />
-      {/* pontilhado — mais visível no claro */}
-      <div className="absolute inset-0 opacity-[0.9] dark:opacity-[0.4]" style={{
-        backgroundImage: "radial-gradient(color-mix(in srgb, var(--foreground) 22%, transparent) 1px, transparent 1.4px)",
-        backgroundSize: "22px 22px",
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_90%_at_50%_-10%,color-mix(in_srgb,var(--brand)_6%,transparent),transparent_55%)]" />
+      <div className="absolute inset-0 opacity-[0.025] dark:opacity-[0.04]" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 42 10' shape-rendering='crispEdges'%3E%3Cpath d='M13 4L13 3L10 3L10 0L18 0L18 4L20 4L20 0L21 0L21 5L17 5L17 1L16 1L16 5L15 5L15 1L11 1L11 2L14 2L14 5L8 5L8 4L6 4L6 5L5 5L5 4L4 4L4 5L0 5L0 0L4 0L4 1L1 1L1 4L3 4L3 3L5 3L5 0L9 0L9 4ZM6 1L6 3L8 3L8 1Z' fill='currentColor'/%3E%3C/svg%3E")`,
+        backgroundSize: "84px 20px",
+        color: "var(--foreground)",
       }} />
     </div>
   )
