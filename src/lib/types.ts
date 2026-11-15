@@ -25,6 +25,8 @@ export interface Expense {
   groupId?: string
   /** Cartão de crédito usado (id em Settings.cards) */
   cardId?: string
+  /** Timestamp ISO de quando o lançamento foi adicionado */
+  createdAt?: string
 }
 
 export interface CreditCard {

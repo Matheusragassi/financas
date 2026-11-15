@@ -147,12 +147,13 @@ export const useStore = create<State>()(
               installmentCurrent: i,
               lastInstallment: i === e.installmentTotal,
               status: k === 0 ? e.status : openStatus(e.method),
+              createdAt: new Date().toISOString(),
             })
           }
         } else {
           const n = Math.max(1, opts?.repeat ?? 1)
           for (let k = 0; k < n; k++)
-            items.push({ ...e, id: uid(), groupId, month: addMonths(e.month, k), status: k === 0 ? e.status : openStatus(e.method) })
+            items.push({ ...e, id: uid(), groupId, month: addMonths(e.month, k), status: k === 0 ? e.status : openStatus(e.method), createdAt: new Date().toISOString() })
         }
         set((s) => ({
           expenses: [...s.expenses, ...items],

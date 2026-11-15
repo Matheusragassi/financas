@@ -55,6 +55,11 @@ export function formatDate(iso: string | null) {
   const [y, m, d] = iso.split("-")
   return `${d}/${m}/${y}`
 }
+
+const dtFmt = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" })
+export function formatDateTime(iso: string) {
+  try { return dtFmt.format(new Date(iso)) } catch { return "—" }
+}
 /** Converte "1.234,56" ou "1234.56" em número */
 export function parseMoney(input: string): number {
   const s = input.replace(/[^\d,.-]/g, "")

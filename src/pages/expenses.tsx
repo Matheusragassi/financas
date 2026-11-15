@@ -20,7 +20,7 @@ import { CardChip } from "@/components/card-visual"
 import { tableCardClass } from "@/components/table-pager"
 import { useStore } from "@/lib/store"
 import { useSelectedMonth } from "@/lib/use-month"
-import { formatDate, money, monthLabel } from "@/lib/format"
+import { formatDate, formatDateTime, money, monthLabel } from "@/lib/format"
 import { downloadCsv } from "@/lib/backup"
 import { openStatus } from "@/lib/status"
 import { KIND_LABEL, STATUS_LABEL, type Expense } from "@/lib/types"
@@ -77,6 +77,7 @@ export function Expenses() {
         : <span className="text-muted-foreground">—</span>,
     },
     { id: "date", header: "Compra", defaultHidden: true, sortValue: (e) => e.purchaseDate ?? "", cell: (e) => <span className="num whitespace-nowrap text-muted-foreground">{formatDate(e.purchaseDate)}</span> },
+    { id: "createdAt", header: "Adicionado em", defaultHidden: false, sortValue: (e) => e.createdAt ?? "", cell: (e) => <span className="num whitespace-nowrap text-xs text-muted-foreground">{e.createdAt ? formatDateTime(e.createdAt) : "—"}</span> },
     { id: "status", header: "Status", sortValue: (e) => STATUS_LABEL[e.status], filterValue: (e) => STATUS_LABEL[e.status], cell: (e) => <StatusBadge status={e.status} onClick={() => toggleStatus(e)} /> },
     {
       id: "amount", header: "Valor", align: "right", fixed: true, sortValue: (e) => e.amount,
