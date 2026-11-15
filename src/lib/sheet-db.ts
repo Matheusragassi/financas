@@ -27,21 +27,7 @@ export async function findDataFile(): Promise<RemoteFile | null> {
 export const getFileMeta = (id: string) => gfetch<RemoteFile>(`${DRIVE}/${id}?fields=id,modifiedTime,webViewLink`)
 
 export async function createDataFile(ownerName: string): Promise<RemoteFile> {
-  const brandColor = { red: 0.231, green: 0.510, blue: 0.965 } // #3B82F6
-  const darkBg = { red: 0.11, green: 0.13, blue: 0.17 }
-  const lightText = { red: 1, green: 1, blue: 1 }
-  const mutedText = { red: 0.6, green: 0.63, blue: 0.68 }
-
-  const headerFmt = (sheetId: number, cols: number) => ([
-    // Fundo azul no cabeçalho
-    { repeatCell: { range: { sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: cols },
-      cell: { userEnteredFormat: { backgroundColor: brandColor, textFormat: { bold: true, foregroundColor: lightText, fontSize: 10 },
-        horizontalAlignment: "CENTER", verticalAlignment: "MIDDLE", padding: { top: 6, bottom: 6 } } }, fields: "userEnteredFormat" } },
-    // Congelar cabeçalho
-    { updateSheetProperties: { properties: { sheetId, gridProperties: { frozenRowCount: 1 } }, fields: "gridProperties.frozenRowCount" } },
-  ])
-
-  const sheet = await gfetch<{ spreadsheetId: string; sheets: { properties: { sheetId: number; title: string } }[] }>(SHEETS, {
+  const sheet = await gfetch<{ spreadsheetId: string }>(SHEETS, {
     method: "POST",
     body: JSON.stringify({
       properties: { title: `Quest — dados${ownerName ? ` de ${ownerName}` : ""}`, locale: "pt_BR" },
@@ -53,70 +39,8 @@ export async function createDataFile(ownerName: string): Promise<RemoteFile> {
       ],
     }),
   })
-
-  const ids = Object.fromEntries(sheet.sheets.map((s) => [s.properties.title, s.properties.sheetId]))
-
-  // Preencher a aba "Sobre" com informações do sistema
-  const sobreRows = [
-    ["Quest — Finanças Pessoais", "", ""],
-    ["", "", ""],
-    ["Esta planilha é o banco de dados do seu app Quest.", "", ""],
-    ["Seus lançamentos, meses e configurações ficam salvos aqui automaticamente.", "", ""],
-    ["", "", ""],
-    ["ℹ️  Informações", "", ""],
-    ["Proprietário", ownerName || "—", ""],
-    ["Criada em", new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }), ""],
-    ["Versão do app", "Quest v1", ""],
-    ["Site", "https://matheusragassi.github.io/financas/", ""],
-    ["", "", ""],
-    ["⚠️  Importante", "", ""],
-    ["• Não renomeie as abas (Lançamentos, Meses, Config)", "", ""],
-    ["• Você pode consultar os dados diretamente aqui no Sheets", "", ""],
-    ["• Alterações manuais serão sobrescritas na próxima sincronização", "", ""],
-    ["• Para usar os dados em outra planilha, copie (não mova)", "", ""],
-    ["", "", ""],
-    ["Feito com ❤️ por MAVI — matheusragassi.art", "", ""],
-  ]
-
-  await gfetch(`${SHEETS}/${sheet.spreadsheetId}/values:batchUpdate`, {
-    method: "POST",
-    body: JSON.stringify({ valueInputOption: "RAW", data: [{ range: "Sobre!A1", values: sobreRows }] }),
-  })
-
-  // Formatar tudo
-  await gfetch(`${SHEETS}/${sheet.spreadsheetId}:batchUpdate`, {
-    method: "POST",
-    body: JSON.stringify({ requests: [
-      // Aba "Sobre" — fundo escuro, título grande
-      { repeatCell: { range: { sheetId: ids.Sobre, startRowIndex: 0, endRowIndex: 18, startColumnIndex: 0, endColumnIndex: 3 },
-        cell: { userEnteredFormat: { backgroundColor: darkBg, textFormat: { foregroundColor: mutedText, fontSize: 10 } } }, fields: "userEnteredFormat" } },
-      { repeatCell: { range: { sheetId: ids.Sobre, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: 1 },
-        cell: { userEnteredFormat: { backgroundColor: darkBg, textFormat: { foregroundColor: lightText, fontSize: 18, bold: true } } }, fields: "userEnteredFormat" } },
-      // Subtítulos
-      { repeatCell: { range: { sheetId: ids.Sobre, startRowIndex: 5, endRowIndex: 6, startColumnIndex: 0, endColumnIndex: 1 },
-        cell: { userEnteredFormat: { textFormat: { foregroundColor: brandColor, fontSize: 11, bold: true } } }, fields: "userEnteredFormat.textFormat" } },
-      { repeatCell: { range: { sheetId: ids.Sobre, startRowIndex: 11, endRowIndex: 12, startColumnIndex: 0, endColumnIndex: 1 },
-        cell: { userEnteredFormat: { textFormat: { foregroundColor: { red: 0.95, green: 0.75, blue: 0.2 }, fontSize: 11, bold: true } } }, fields: "userEnteredFormat.textFormat" } },
-      // Valores na coluna B (Proprietário, Data, etc)
-      { repeatCell: { range: { sheetId: ids.Sobre, startRowIndex: 6, endRowIndex: 10, startColumnIndex: 1, endColumnIndex: 2 },
-        cell: { userEnteredFormat: { textFormat: { foregroundColor: lightText } } }, fields: "userEnteredFormat.textFormat" } },
-      // Largura das colunas do Sobre
-      { updateDimensionProperties: { range: { sheetId: ids.Sobre, dimension: "COLUMNS", startIndex: 0, endIndex: 1 }, properties: { pixelSize: 420 }, fields: "pixelSize" } },
-      { updateDimensionProperties: { range: { sheetId: ids.Sobre, dimension: "COLUMNS", startIndex: 1, endIndex: 2 }, properties: { pixelSize: 320 }, fields: "pixelSize" } },
-      // Cabeçalhos das abas de dados
-      ...headerFmt(ids["Lançamentos"], EXPENSE_COLS.length),
-      ...headerFmt(ids.Meses, 2),
-      ...headerFmt(ids.Config, 2),
-      // Largura das colunas de Lançamentos
-      { updateDimensionProperties: { range: { sheetId: ids["Lançamentos"], dimension: "COLUMNS", startIndex: 0, endIndex: 1 }, properties: { pixelSize: 120 }, fields: "pixelSize" } },
-      { updateDimensionProperties: { range: { sheetId: ids["Lançamentos"], dimension: "COLUMNS", startIndex: 2, endIndex: 3 }, properties: { pixelSize: 250 }, fields: "pixelSize" } },
-      { updateDimensionProperties: { range: { sheetId: ids["Lançamentos"], dimension: "COLUMNS", startIndex: 5, endIndex: 6 }, properties: { pixelSize: 120 }, fields: "pixelSize" } },
-      // Formato de moeda na coluna "valor" (índice 5)
-      { repeatCell: { range: { sheetId: ids["Lançamentos"], startRowIndex: 1, endRowIndex: 1000, startColumnIndex: 5, endColumnIndex: 6 },
-        cell: { userEnteredFormat: { numberFormat: { type: "CURRENCY", pattern: "R$ #,##0.00" } } }, fields: "userEnteredFormat.numberFormat" } },
-    ] }),
-  })
-
+  // Formata em background (não bloqueia a criação)
+  upgradeSheetFormat(sheet.spreadsheetId, ownerName).catch(() => {})
   // Marca o arquivo para encontrá-lo em outros aparelhos
   return gfetch<RemoteFile>(`${DRIVE}/${sheet.spreadsheetId}?fields=id,modifiedTime,webViewLink`, {
     method: "PATCH",
@@ -198,4 +122,110 @@ export async function writeData(id: string, b: Backup): Promise<string> {
     }),
   })
   return rev
+}
+
+/* ─── Formatação para planilhas existentes ─── */
+
+const BRAND = { red: 0.231, green: 0.510, blue: 0.965 }
+const DARK_BG = { red: 0.11, green: 0.13, blue: 0.17 }
+const WHITE = { red: 1, green: 1, blue: 1 }
+const MUTED = { red: 0.6, green: 0.63, blue: 0.68 }
+
+function headerRequests(sheetId: number, cols: number) {
+  return [
+    { repeatCell: { range: { sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: cols },
+      cell: { userEnteredFormat: { backgroundColor: BRAND, textFormat: { bold: true, foregroundColor: WHITE, fontSize: 10 },
+        horizontalAlignment: "CENTER", verticalAlignment: "MIDDLE", padding: { top: 6, bottom: 6 } } }, fields: "userEnteredFormat" } },
+    { updateSheetProperties: { properties: { sheetId, gridProperties: { frozenRowCount: 1 } }, fields: "gridProperties.frozenRowCount" } },
+  ]
+}
+
+function sobreContent(ownerName: string) {
+  return [
+    ["Quest — Finanças Pessoais", "", ""],
+    ["", "", ""],
+    ["Esta planilha é o banco de dados do seu app Quest.", "", ""],
+    ["Seus lançamentos, meses e configurações ficam salvos aqui automaticamente.", "", ""],
+    ["", "", ""],
+    ["ℹ️  Informações", "", ""],
+    ["Proprietário", ownerName || "—", ""],
+    ["Atualizado em", new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }), ""],
+    ["Versão do app", "Quest v1", ""],
+    ["Site", "https://matheusragassi.github.io/financas/", ""],
+    ["", "", ""],
+    ["⚠️  Importante", "", ""],
+    ["• Não renomeie as abas (Lançamentos, Meses, Config)", "", ""],
+    ["• Você pode consultar os dados diretamente aqui no Sheets", "", ""],
+    ["• Alterações manuais serão sobrescritas na próxima sincronização", "", ""],
+    ["• Para usar os dados em outra planilha, copie (não mova)", "", ""],
+    ["", "", ""],
+    ["Feito com ❤️ por MAVI — matheusragassi.art", "", ""],
+  ]
+}
+
+function sobreFormatRequests(sobreId: number) {
+  return [
+    { repeatCell: { range: { sheetId: sobreId, startRowIndex: 0, endRowIndex: 18, startColumnIndex: 0, endColumnIndex: 3 },
+      cell: { userEnteredFormat: { backgroundColor: DARK_BG, textFormat: { foregroundColor: MUTED, fontSize: 10 } } }, fields: "userEnteredFormat" } },
+    { repeatCell: { range: { sheetId: sobreId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: 1 },
+      cell: { userEnteredFormat: { backgroundColor: DARK_BG, textFormat: { foregroundColor: WHITE, fontSize: 18, bold: true } } }, fields: "userEnteredFormat" } },
+    { repeatCell: { range: { sheetId: sobreId, startRowIndex: 5, endRowIndex: 6, startColumnIndex: 0, endColumnIndex: 1 },
+      cell: { userEnteredFormat: { textFormat: { foregroundColor: BRAND, fontSize: 11, bold: true } } }, fields: "userEnteredFormat.textFormat" } },
+    { repeatCell: { range: { sheetId: sobreId, startRowIndex: 11, endRowIndex: 12, startColumnIndex: 0, endColumnIndex: 1 },
+      cell: { userEnteredFormat: { textFormat: { foregroundColor: { red: 0.95, green: 0.75, blue: 0.2 }, fontSize: 11, bold: true } } }, fields: "userEnteredFormat.textFormat" } },
+    { repeatCell: { range: { sheetId: sobreId, startRowIndex: 6, endRowIndex: 10, startColumnIndex: 1, endColumnIndex: 2 },
+      cell: { userEnteredFormat: { textFormat: { foregroundColor: WHITE } } }, fields: "userEnteredFormat.textFormat" } },
+    { updateDimensionProperties: { range: { sheetId: sobreId, dimension: "COLUMNS", startIndex: 0, endIndex: 1 }, properties: { pixelSize: 420 }, fields: "pixelSize" } },
+    { updateDimensionProperties: { range: { sheetId: sobreId, dimension: "COLUMNS", startIndex: 1, endIndex: 2 }, properties: { pixelSize: 320 }, fields: "pixelSize" } },
+  ]
+}
+
+/**
+ * Atualiza a formatação de uma planilha existente:
+ * cria a aba "Sobre" se não existir, formata cabeçalhos e colunas.
+ * Seguro para rodar mais de uma vez (idempotente).
+ */
+export async function upgradeSheetFormat(id: string, ownerName: string): Promise<void> {
+  // Buscar metadados da planilha para obter sheetIds
+  const meta = await gfetch<{ sheets: { properties: { sheetId: number; title: string } }[] }>(
+    `${SHEETS}/${id}?fields=sheets.properties(sheetId,title)`)
+  const ids = Object.fromEntries(meta.sheets.map((s) => [s.properties.title, s.properties.sheetId]))
+
+  const requests: unknown[] = []
+
+  // Criar aba "Sobre" se não existe
+  let sobreId = ids.Sobre
+  if (sobreId == null) {
+    // Adicionar a aba na posição 0 (primeira)
+    const tempId = 9999
+    requests.push({ addSheet: { properties: { sheetId: tempId, title: "Sobre", index: 0, gridProperties: { columnCount: 3 } } } })
+    sobreId = tempId
+  }
+
+  // Formatação do Sobre
+  requests.push(...sobreFormatRequests(sobreId))
+
+  // Formatação das abas de dados (se existirem)
+  if (ids["Lançamentos"] != null) {
+    requests.push(
+      ...headerRequests(ids["Lançamentos"], EXPENSE_COLS.length),
+      { updateDimensionProperties: { range: { sheetId: ids["Lançamentos"], dimension: "COLUMNS", startIndex: 0, endIndex: 1 }, properties: { pixelSize: 120 }, fields: "pixelSize" } },
+      { updateDimensionProperties: { range: { sheetId: ids["Lançamentos"], dimension: "COLUMNS", startIndex: 2, endIndex: 3 }, properties: { pixelSize: 250 }, fields: "pixelSize" } },
+      { updateDimensionProperties: { range: { sheetId: ids["Lançamentos"], dimension: "COLUMNS", startIndex: 5, endIndex: 6 }, properties: { pixelSize: 120 }, fields: "pixelSize" } },
+      { repeatCell: { range: { sheetId: ids["Lançamentos"], startRowIndex: 1, endRowIndex: 1000, startColumnIndex: 5, endColumnIndex: 6 },
+        cell: { userEnteredFormat: { numberFormat: { type: "CURRENCY", pattern: "R$ #,##0.00" } } }, fields: "userEnteredFormat.numberFormat" } },
+    )
+  }
+  if (ids.Meses != null) requests.push(...headerRequests(ids.Meses, 2))
+  if (ids.Config != null) requests.push(...headerRequests(ids.Config, 2))
+
+  // Aplicar tudo de uma vez
+  await gfetch(`${SHEETS}/${id}:batchUpdate`, { method: "POST", body: JSON.stringify({ requests }) })
+
+  // Preencher conteúdo do Sobre
+  await gfetch(`${SHEETS}/${id}/values/${encodeURIComponent("Sobre!A1:C18")}:clear`, { method: "POST", body: JSON.stringify({}) })
+  await gfetch(`${SHEETS}/${id}/values/${encodeURIComponent("Sobre!A1")}?valueInputOption=RAW`, {
+    method: "PUT",
+    body: JSON.stringify({ values: sobreContent(ownerName) }),
+  })
 }

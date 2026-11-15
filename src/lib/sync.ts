@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { AuthError, ScopeError, fetchUser, hasValidToken, requestToken, signOutGoogle, type GoogleUser } from "./google"
-import { createDataFile, findDataFile, getFileMeta, getRemoteRev, readData, writeData } from "./sheet-db"
+import { createDataFile, findDataFile, getFileMeta, getRemoteRev, readData, upgradeSheetFormat, writeData } from "./sheet-db"
 import { useStore } from "./store"
 import { googleEnabled } from "./config"
 import type { Backup } from "./types"
@@ -124,6 +124,8 @@ export async function signIn(opts?: { hint?: string; chooseAccount?: boolean; co
     let file = sameUser && get().fileId ? await getFileMeta(get().fileId!).catch(() => null) : null
     file ??= await findDataFile()
     if (file) {
+      // Atualiza formatação em background (não bloqueia o sync)
+      upgradeSheetFormat(file.id, useStore.getState().settings.ownerName || user.name).catch(() => {})
       const remote = await readData(file.id)
       const remoteEmpty = !remote.expenses.length && !remote.months.length
       set({ fileId: file.id, fileUrl: file.webViewLink ?? null })
