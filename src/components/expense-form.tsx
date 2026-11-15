@@ -51,6 +51,8 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
   const [newCard, setNewCard] = useState(false)
   const [confirmClose, setConfirmClose] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const touch = (k: string) => setTouched((t) => (t[k] ? t : { ...t, [k]: true }))
   const cards = settings.cards ?? []
 
   useEffect(() => {
@@ -73,6 +75,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
     setRepeat("1")
     setScope("all")
     setSubmitted(false)
+    setTouched({})
     setCardId(e?.cardId ?? "")
   }, [open, expense, month, settings.categories, settings.methods]) // eslint-disable-line
 
@@ -155,11 +158,11 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="grid gap-1.5 sm:col-span-2">
               <FieldLabel htmlFor="desc" required>Descrição</FieldLabel>
-              <Input id="desc" autoFocus aria-invalid={submitted && !description.trim()} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ex.: Mercado, Netflix, Notebook…" />
+              <Input id="desc" autoFocus aria-invalid={(submitted || touched.desc) && !description.trim()} onBlur={() => touch("desc")} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ex.: Mercado, Netflix, Notebook…" />
             </div>
             <div className="grid gap-1.5">
               <FieldLabel htmlFor="amount" required>{isInst ? "Valor da parcela" : "Valor"}</FieldLabel>
-              <MoneyInput id="amount" aria-invalid={submitted && !amount} value={amount} onChange={setAmount} />
+              <MoneyInput id="amount" aria-invalid={(submitted || touched.amount) && !amount} onBlur={() => touch("amount")} value={amount} onChange={setAmount} />
             </div>
             <div className="grid gap-1.5">
               <FieldLabel required>Mês</FieldLabel>
@@ -170,7 +173,7 @@ export function ExpenseForm({ open, onOpenChange, month, expense }: Props) {
               <>
                 <div className="grid gap-1.5">
                   <FieldLabel htmlFor="ntotal" required>Total de parcelas</FieldLabel>
-                  <Input id="ntotal" inputMode="numeric" className="num" aria-invalid={submitted && isInst && !nT} value={nTotal} onChange={(e) => { const nv = e.target.value.replace(/\D/g, ""); setNTotal(nv); const t = parseInt(nv) || 0; if (total && t) setAmount(Math.round((total / t) * 100) / 100) }} placeholder="10" />
+                  <Input id="ntotal" inputMode="numeric" className="num" aria-invalid={(submitted || touched.ntotal) && isInst && !nT} onBlur={() => touch("ntotal")} value={nTotal} onChange={(e) => { const nv = e.target.value.replace(/\D/g, ""); setNTotal(nv); const t = parseInt(nv) || 0; if (total && t) setAmount(Math.round((total / t) * 100) / 100) }} placeholder="10" />
                 </div>
                 <div className="grid gap-1.5">
                   <FieldLabel htmlFor="ncur" required>Parcela atual</FieldLabel>

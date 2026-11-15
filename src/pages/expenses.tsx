@@ -128,8 +128,10 @@ export function Expenses() {
                 <Switch checked={allMonths} onCheckedChange={setAllMonths} /> Todos os meses
               </label>
               <Button variant="outline" size="icon-sm" aria-label="Exportar CSV" title="Exportar CSV" onClick={() => exportCsv(list)}><Download /></Button>
-              <Button size="sm" className="bg-brand text-brand-foreground hover:bg-brand/90" onClick={() => setAdding(true)}><Plus /> <span className="hidden sm:inline">Novo gasto</span></Button>
             </>
+          )}
+          endToolbar={() => (
+            <Button size="sm" className="bg-brand text-brand-foreground hover:bg-brand/90" onClick={() => setAdding(true)}><Plus /> <span className="hidden sm:inline">Novo gasto</span></Button>
           )}
           bulkActions={(sel, clear) => (
             <>

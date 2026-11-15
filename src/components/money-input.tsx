@@ -17,9 +17,10 @@ export const MoneyInput = forwardRef<HTMLInputElement, {
   currency?: string
   required?: boolean
   "aria-invalid"?: boolean
+  onBlur?: () => void
   /** Esconde a bandeira (quando há um seletor de moeda ao lado) */
   hideFlag?: boolean
-}>(function MoneyInput({ value, onChange, id, className, autoFocus, currency, required, hideFlag, ...rest }, ref) {
+}>(function MoneyInput({ value, onChange, id, className, autoFocus, currency, required, hideFlag, onBlur, ...rest }, ref) {
   const c = currency ? currencyOf(currency) : activeCurrency()
   const factor = 10 ** c.decimals
   const text = value ? moneyDigitsFor(value, c.code) : ""
@@ -47,6 +48,7 @@ export const MoneyInput = forwardRef<HTMLInputElement, {
           const digits = e.target.value.replace(/\D/g, "").replace(/^0+/, "").slice(0, 13)
           onChange(digits ? Number(digits) / factor : 0)
         }}
+        onBlur={onBlur}
         onFocus={(e) => requestAnimationFrame(() => e.target.setSelectionRange(e.target.value.length, e.target.value.length))}
         className="num h-full w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
       />

@@ -45,6 +45,8 @@ interface Props<T> {
   total?: { label: string; value: (rows: T[]) => React.ReactNode }
   /** Controles extra na barra (ex.: CSV). Deixe-os como ícone (size="icon-sm"). */
   toolbar?: (filtered: T[]) => React.ReactNode
+  /** Controles no final da barra (depois de Filtros e Colunas). */
+  endToolbar?: (filtered: T[]) => React.ReactNode
   onFilteredChange?: (filtered: T[]) => void
   emptyText?: string
   initialSort?: { id: string; dir: 1 | -1 }
@@ -125,10 +127,9 @@ export function DataTable<T>(props: Props<T>) {
           {filterCols.length > 0 && (
             <Popover>
               <PopoverTrigger render={
-                <Button variant="outline" size="sm" className={cn("gap-1.5", filterCount > 0 && "border-brand/40 text-foreground")} />
+                <Button variant="outline" size="icon-sm" aria-label="Filtros" title="Filtros" className={cn(filterCount > 0 && "border-brand/40 text-foreground")} />
               }>
                 <Filter className={cn("size-4", filterCount > 0 && "text-brand")} />
-                <span className="hidden sm:inline">Filtros</span>
                 {filterCount > 0 && <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold text-brand-foreground">{filterCount}</span>}
               </PopoverTrigger>
               <PopoverContent align="end" className="w-72 p-0">
@@ -160,6 +161,7 @@ export function DataTable<T>(props: Props<T>) {
               <DropdownMenuItem onClick={() => setHiddenCols(columns.filter((c) => c.defaultHidden).map((c) => c.id))}>Restaurar padrão</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          {props.endToolbar?.(filtered)}
         </div>
       </div>
 
