@@ -115,9 +115,9 @@ export function Installments() {
                   <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/[0.06]"><div className="h-full rounded-full bg-chart-1" style={{ width: `${i.progress * 100}%` }} /></div>
                   <span className="num w-11 text-xs text-muted-foreground">{i.expense.installmentCurrent}/{i.expense.installmentTotal}</span>
                 </div>) },
-            { id: "amount", header: "Parcela", align: "right", sortValue: (i) => i.expense.amount, cell: (i) => <span className="num">{money(i.expense.amount)}</span> },
-            { id: "total", header: "Valor total", align: "right", defaultHidden: true, sortValue: (i) => i.expense.totalValue ?? 0, cell: (i) => <span className="num text-muted-foreground">{i.expense.totalValue ? money(i.expense.totalValue) : "—"}</span> },
-            { id: "remaining", header: "Restante", align: "right", fixed: true, sortValue: (i) => i.remainingValue,
+            { id: "amount", header: "Parcela", sortValue: (i) => i.expense.amount, cell: (i) => <span className="num">{money(i.expense.amount)}</span> },
+            { id: "total", header: "Valor total", defaultHidden: true, sortValue: (i) => i.expense.totalValue ?? 0, cell: (i) => <span className="num text-muted-foreground">{i.expense.totalValue ? money(i.expense.totalValue) : "—"}</span> },
+            { id: "remaining", header: "Restante", fixed: true, sortValue: (i) => i.remainingValue,
               cell: (i) => i.remaining === 0
                 ? <Badge variant="secondary" className="text-success">Última</Badge>
                 : <div><div className="num font-medium">{money(i.remainingValue)}</div><div className="text-xs text-muted-foreground">{i.remaining}x</div></div> },

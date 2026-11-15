@@ -112,14 +112,14 @@ export function Reports() {
           total={{ label: "Total do período", value: (rows) => <span className="num font-semibold">{money(rows.reduce((a, r) => a + r.total, 0))}</span> }}
           columns={[
             { id: "month", header: "Mês", fixed: true, sortValue: (h) => h.month, filterValue: (h) => h.month.slice(0, 4), cell: (h) => <span className="font-medium whitespace-nowrap">{monthLabel(h.month)}</span> },
-            { id: "salary", header: "Renda", align: "right", sortValue: (h) => h.salary, cell: (h) => <span className="num text-muted-foreground">{money(h.salary)}</span> },
-            { id: "total", header: "Gastos", align: "right", sortValue: (h) => h.total, cell: (h) => <span className="num">{money(h.total)}</span> },
-            { id: "fixed", header: "Fixos", align: "right", sortValue: (h) => h.fixed, cell: (h) => <span className="num text-muted-foreground">{money(h.fixed)}</span> },
-            { id: "variable", header: "Variáveis", align: "right", sortValue: (h) => h.variable, cell: (h) => <span className="num text-muted-foreground">{money(h.variable)}</span> },
-            { id: "commitment", header: "Comprometido", align: "right", sortValue: (h) => h.commitment,
+            { id: "salary", header: "Renda", sortValue: (h) => h.salary, cell: (h) => <span className="num text-muted-foreground">{money(h.salary)}</span> },
+            { id: "total", header: "Gastos", sortValue: (h) => h.total, cell: (h) => <span className="num">{money(h.total)}</span> },
+            { id: "fixed", header: "Fixos", sortValue: (h) => h.fixed, cell: (h) => <span className="num text-muted-foreground">{money(h.fixed)}</span> },
+            { id: "variable", header: "Variáveis", sortValue: (h) => h.variable, cell: (h) => <span className="num text-muted-foreground">{money(h.variable)}</span> },
+            { id: "commitment", header: "Comprometido", sortValue: (h) => h.commitment,
               filterValue: (h) => (h.commitment > 1 ? "Acima da renda" : h.commitment > 0.9 ? "No limite" : "Dentro da renda"),
               cell: (h) => <span className={cn("num", h.commitment > 1 && "text-critical")}>{percent(h.commitment)}</span> },
-            { id: "balance", header: "Saldo", align: "right", sortValue: (h) => h.balance, cell: (h) => <span className={cn("num font-medium", h.balance < 0 ? "text-critical" : "text-success")}>{money(h.balance)}</span> },
+            { id: "balance", header: "Saldo", sortValue: (h) => h.balance, cell: (h) => <span className={cn("num font-medium", h.balance < 0 ? "text-critical" : "text-success")}>{money(h.balance)}</span> },
           ]}
         />
       </Card>

@@ -120,7 +120,7 @@ export function SettingsPage() {
           columns={[
             { id: "month", header: "Mês", fixed: true, sortValue: (m) => m.id, filterValue: (m) => m.id.slice(0, 4),
               cell: (m) => <span className="font-medium whitespace-nowrap">{monthLabel(m.id)}</span> },
-            { id: "salary", header: "Renda", align: "right", fixed: true, sortValue: (m) => m.salary,
+            { id: "salary", header: "Renda", fixed: true, sortValue: (m) => m.salary,
               cell: (m) => <InlineMoney value={m.salary} onSave={(v) => { s.setSalary(m.id, v); toast.success(`Renda de ${monthLabel(m.id)}: ${money(v)}`) }} /> },
           ]}
           rowActions={(m) => (

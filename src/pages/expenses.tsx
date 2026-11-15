@@ -80,7 +80,7 @@ export function Expenses() {
     { id: "createdAt", header: "Adicionado em", defaultHidden: false, sortValue: (e) => e.createdAt ?? "", cell: (e) => <span className="num whitespace-nowrap text-xs text-muted-foreground">{e.createdAt ? formatDateTime(e.createdAt) : "—"}</span> },
     { id: "status", header: "Status", sortValue: (e) => STATUS_LABEL[e.status], filterValue: (e) => STATUS_LABEL[e.status], cell: (e) => <StatusBadge status={e.status} onClick={() => toggleStatus(e)} /> },
     {
-      id: "amount", header: "Valor", align: "right", fixed: true, sortValue: (e) => e.amount,
+      id: "amount", header: "Valor", fixed: true, sortValue: (e) => e.amount,
       cell: (e) => <InlineMoney value={e.amount} onSave={(v) => { const n = updateExpense(e.id, { amount: v }, "all"); toast.success("Valor atualizado", { description: `${e.description}: ${money(v)}${n > 1 ? ` · ${n} meses` : ""}` }) }} />,
     },
   ], [allMonths, cardOf, updateExpense]) // eslint-disable-line

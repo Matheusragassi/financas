@@ -32,11 +32,11 @@ export function AppSidebar() {
       <SidebarHeader className="px-3 pt-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className="gap-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0!" render={<a href="#/dashboard" />}>
-              <AppLogo className="size-9 shrink-0 rounded-[10px] transition-transform group-hover/menu-button:scale-105" />
-              <div className="flex flex-1 flex-col overflow-hidden text-left leading-tight group-data-[collapsible=icon]:hidden">
-                <GastuLogo className="h-[14px] w-auto max-w-[84px]" />
-                <span className="truncate text-[11px] text-muted-foreground">{name ? `de ${name}` : "finanças pessoais"}</span>
+            <SidebarMenuButton size="lg" className="h-auto gap-3 py-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0!" render={<a href="#/dashboard" />}>
+              <AppLogo className="size-10 shrink-0 rounded-xl shadow-md transition-transform group-hover/menu-button:scale-105" />
+              <div className="flex flex-1 flex-col gap-0.5 overflow-hidden group-data-[collapsible=icon]:hidden">
+                <GastuLogo className="h-[18px] w-auto" />
+                <span className="truncate text-xs text-muted-foreground">{name ? `de ${name}` : "finanças pessoais"}</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
