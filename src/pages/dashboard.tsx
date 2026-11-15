@@ -13,6 +13,7 @@ import { useSelectedMonth } from "@/lib/use-month"
 import { history, installmentsOf, monthSummary, topN } from "@/lib/stats"
 import { addMonths, money, monthLabel, percent } from "@/lib/format"
 import { KIND_LABEL } from "@/lib/types"
+import { cn } from "@/lib/utils"
 
 export function Dashboard({ onAdd }: { onAdd: () => void }) {
   const { expenses, months, generateNextMonth, settings } = useStore()
@@ -77,15 +78,21 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
               {delta >= 0 ? <ArrowUpRight className="size-3.5 text-critical" /> : <ArrowDownRight className="size-3.5 text-success" />}
               {percent(Math.abs(delta))} {delta >= 0 ? "acima" : "abaixo"} do mês anterior
             </span>
-          ) : `${s.count} lançamentos`}
-        />
+          ) : `${s.count} lançamentos`}>
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-foreground/[0.06]">
+            <div className="h-full rounded-full bg-foreground/20" style={{ width: prev.total ? `${Math.min((s.total / (prev.total * 2)) * 100, 100)}%` : "50%" }} />
+          </div>
+        </StatCard>
         <StatCard
           label="Saldo restante"
           value={money(s.balance)}
           icon={PiggyBank}
           tone={s.balance < 0 ? "bad" : "good"}
-          hint={`Renda de ${money(s.salary)}`}
-        />
+          hint={`Renda de ${money(s.salary)}`}>
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-foreground/[0.06]">
+            <div className={cn("h-full rounded-full", s.balance < 0 ? "bg-critical" : "bg-success")} style={{ width: `${s.salary ? Math.min(Math.abs(s.balance) / s.salary * 100, 100) : 0}%` }} />
+          </div>
+        </StatCard>
         <StatCard label="Comprometimento" value={percent(s.commitment)} icon={TrendingUp} tone={s.commitment > 1 ? "bad" : "default"}
           hint={s.commitment > 1 ? "Orçamento excedido" : s.commitment > 0.9 ? "Atenção: perto do limite" : "Dentro do orçamento"}>
           <Meter value={s.commitment} className="mt-1" />
@@ -95,7 +102,7 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
             <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-brand" /> {money(s.billed)} na fatura</span>
             <span className="flex items-center gap-1"><CircleDashed className="size-3" /> {money(s.pending)} pendente</span>
           </span>}>
-          <div className="mt-1 flex h-2 gap-0.5 overflow-hidden rounded-full bg-foreground/[0.06]">
+          <div className="mt-1 flex h-1.5 gap-0.5 overflow-hidden rounded-full bg-foreground/[0.06]">
             <div className="h-full bg-success" style={{ width: `${s.total ? (s.paid / s.total) * 100 : 0}%` }} />
             <div className="h-full bg-brand" style={{ width: `${s.total ? (s.billed / s.total) * 100 : 0}%` }} />
           </div>
