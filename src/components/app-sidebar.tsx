@@ -29,9 +29,9 @@ export function AppSidebar() {
   const { setOpenMobile } = useSidebar()
   return (
     <Sidebar collapsible="icon" variant="sidebar">
-      <SidebarHeader>
-        <a href="#/dashboard" className="group/brand flex flex-col items-center gap-2 px-3 pt-5 pb-4 transition-colors group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:pt-3 group-data-[collapsible=icon]:pb-2">
-          <AppLogo className="size-11 shrink-0 rounded-xl shadow-lg transition-transform group-hover/brand:scale-105 group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:rounded-lg" />
+      <SidebarHeader className="p-0 group-data-[collapsible=icon]:p-0">
+        <a href="#/dashboard" className="group/brand flex flex-col items-center gap-2 px-3 pt-5 pb-4 transition-opacity hover:opacity-80 group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:pt-3 group-data-[collapsible=icon]:pb-1">
+          <AppLogo className="size-11 shrink-0 rounded-xl shadow-lg transition-transform group-hover/brand:scale-105 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:rounded-lg" />
           <div className="flex flex-col items-center gap-0.5 group-data-[collapsible=icon]:hidden">
             <GastuLogo className="h-5 w-auto" />
             <span className="text-[11px] text-muted-foreground">{name ? `de ${name}` : "finanças pessoais"}</span>
