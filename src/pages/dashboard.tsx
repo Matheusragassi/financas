@@ -1,12 +1,10 @@
 import { useMemo } from "react"
 import { toast } from "sonner"
-import {
-  ArrowDownRight, ArrowUpRight, CalendarPlus,
-  PiggyBank, Plus, Receipt, ShieldCheck, TrendingDown, TrendingUp, Wallet,
-} from "lucide-react"
+import { ArrowDownRight, ArrowUpRight, CalendarPlus, CheckCircle2, CircleDashed, PiggyBank, Receipt, ShieldCheck, TrendingUp, Plus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { StatCard } from "@/components/stat-card"
 import { GettingStarted } from "@/components/getting-started"
 import { cardStats } from "@/lib/cards"
 import { BarList, Donut, Meter, SERIES, TrendChart } from "@/components/charts"
@@ -15,7 +13,6 @@ import { useSelectedMonth } from "@/lib/use-month"
 import { history, installmentsOf, monthSummary, topN } from "@/lib/stats"
 import { addMonths, money, monthLabel, percent } from "@/lib/format"
 import { KIND_LABEL } from "@/lib/types"
-import { cn } from "@/lib/utils"
 
 export function Dashboard({ onAdd }: { onAdd: () => void }) {
   const { expenses, months, generateNextMonth, settings } = useStore()
@@ -53,14 +50,8 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
       </Card>
     )
 
-  // Dados para as mini-stats
-  const paidPct = s.total ? s.paid / s.total : 0
-  const billedPct = s.total ? s.billed / s.total : 0
-  const pendingPct = s.total ? s.pending / s.total : 0
-
   return (
     <div className="space-y-6 md:space-y-8">
-      {/* Cabeçalho com mês e ação */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-sm text-muted-foreground">Resumo de</p>
@@ -76,60 +67,41 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
         )}
       </div>
 
-      {/* Card hero — panorama financeiro */}
-      <Card className="overflow-hidden">
-        <CardContent className="p-0">
-          <div className="grid gap-px bg-foreground/6 sm:grid-cols-2 lg:grid-cols-4">
-            {/* Total do mês */}
-            <HeroCell
-              label="Total do mês"
-              value={money(s.total)}
-              icon={Receipt}
-              sub={s.count + " lançamentos"}
-              delta={prev.total ? delta : undefined}
-            />
-            {/* Saldo */}
-            <HeroCell
-              label="Saldo restante"
-              value={money(s.balance)}
-              icon={PiggyBank}
-              tone={s.balance < 0 ? "bad" : "good"}
-              sub={`Renda de ${money(s.salary)}`}
-            />
-            {/* Comprometimento */}
-            <HeroCell
-              label="Comprometimento"
-              value={percent(s.commitment)}
-              icon={s.commitment > 0.9 ? TrendingUp : TrendingDown}
-              tone={s.commitment > 1 ? "bad" : s.commitment > 0.9 ? "warn" : "good"}
-              sub={s.commitment > 1 ? "Orçamento excedido" : s.commitment > 0.9 ? "Perto do limite" : "Dentro do orçamento"}
-            >
-              <Meter value={s.commitment} className="mt-2" />
-            </HeroCell>
-            {/* Status de pagamento */}
-            <div className="flex flex-col gap-3 bg-card p-5">
-              <div className="flex items-center gap-2">
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.05] text-muted-foreground">
-                  <Wallet className="size-4" />
-                </span>
-                <span className="text-[13px] font-medium text-muted-foreground">Pagamentos</span>
-              </div>
-              <div className="flex h-3 gap-0.5 overflow-hidden rounded-full bg-foreground/[0.06]">
-                <div className="h-full bg-success transition-all duration-500" style={{ width: `${paidPct * 100}%` }} />
-                <div className="h-full bg-brand transition-all duration-500" style={{ width: `${billedPct * 100}%` }} />
-                <div className="h-full bg-foreground/15 transition-all duration-500" style={{ width: `${pendingPct * 100}%` }} />
-              </div>
-              <div className="grid grid-cols-3 gap-1 text-center">
-                <MiniStat color="bg-success" label="Pago" value={money(s.paid)} pct={paidPct} />
-                <MiniStat color="bg-brand" label="Fatura" value={money(s.billed)} pct={billedPct} />
-                <MiniStat color="bg-foreground/30" label="Pendente" value={money(s.pending)} pct={pendingPct} />
-              </div>
-            </div>
+      <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+        <StatCard
+          label="Total do mês"
+          value={money(s.total)}
+          icon={Receipt}
+          hint={prev.total ? (
+            <span className="flex items-center gap-1">
+              {delta >= 0 ? <ArrowUpRight className="size-3.5 text-critical" /> : <ArrowDownRight className="size-3.5 text-success" />}
+              {percent(Math.abs(delta))} {delta >= 0 ? "acima" : "abaixo"} do mês anterior
+            </span>
+          ) : `${s.count} lançamentos`}
+        />
+        <StatCard
+          label="Saldo restante"
+          value={money(s.balance)}
+          icon={PiggyBank}
+          tone={s.balance < 0 ? "bad" : "good"}
+          hint={`Renda de ${money(s.salary)}`}
+        />
+        <StatCard label="Comprometimento" value={percent(s.commitment)} icon={TrendingUp} tone={s.commitment > 1 ? "bad" : "default"}
+          hint={s.commitment > 1 ? "Orçamento excedido" : s.commitment > 0.9 ? "Atenção: perto do limite" : "Dentro do orçamento"}>
+          <Meter value={s.commitment} className="mt-1" />
+        </StatCard>
+        <StatCard label="Pago" value={money(s.paid)} icon={CheckCircle2}
+          hint={<span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-brand" /> {money(s.billed)} na fatura</span>
+            <span className="flex items-center gap-1"><CircleDashed className="size-3" /> {money(s.pending)} pendente</span>
+          </span>}>
+          <div className="mt-1 flex h-2 gap-0.5 overflow-hidden rounded-full bg-foreground/[0.06]">
+            <div className="h-full bg-success" style={{ width: `${s.total ? (s.paid / s.total) * 100 : 0}%` }} />
+            <div className="h-full bg-brand" style={{ width: `${s.total ? (s.billed / s.total) * 100 : 0}%` }} />
           </div>
-        </CardContent>
-      </Card>
+        </StatCard>
+      </div>
 
-      {/* Parcelas + composição */}
       <div className="grid gap-4 md:gap-5 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -138,7 +110,6 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
           </CardHeader>
           <CardContent><TrendChart data={trend} /></CardContent>
         </Card>
-
         <Card>
           <CardHeader>
             <CardTitle>Composição</CardTitle>
@@ -156,14 +127,13 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
               <div className="rounded-lg bg-muted/60 p-3">
                 <div className="text-xs text-muted-foreground">Terminam este mês</div>
                 <div className="num text-lg font-semibold">{ending.length}</div>
-                <div className="num text-xs text-muted-foreground">{relief > 0 ? `alívio de ${money(relief)}` : "nenhuma"}</div>
+                <div className="num text-xs text-muted-foreground">alívio de {money(relief)}</div>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Gráficos de categoria + cartão/método */}
       <div className="grid gap-4 md:gap-5 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -194,7 +164,6 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
         )}
       </div>
 
-      {/* Maiores gastos + parcelas */}
       <div className="grid gap-4 md:gap-5 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -202,10 +171,9 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
             <CardDescription>Top 5 do mês</CardDescription>
           </CardHeader>
           <CardContent>
-            <ul className="divide-y divide-foreground/6">
-              {s.top.map((e, i) => (
-                <li key={e.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.05] text-xs font-semibold text-muted-foreground">{i + 1}</span>
+            <ul className="divide-y">
+              {s.top.map((e) => (
+                <li key={e.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium">{e.description}</div>
                     <div className="text-xs text-muted-foreground">
@@ -237,7 +205,7 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                        <div className="h-full rounded-full bg-chart-1 transition-all duration-500" style={{ width: `${i.progress * 100}%` }} />
+                        <div className="h-full rounded-full bg-chart-1" style={{ width: `${i.progress * 100}%` }} />
                       </div>
                       <span className="num w-28 text-right text-xs text-muted-foreground">{i.expense.installmentCurrent}/{i.expense.installmentTotal} · {money(i.expense.amount)}</span>
                     </div>
@@ -248,66 +216,6 @@ export function Dashboard({ onAdd }: { onAdd: () => void }) {
           </CardContent>
         </Card>
       </div>
-    </div>
-  )
-}
-
-/* ─── Componentes internos ─── */
-
-const TONE_MAP = {
-  default: "bg-foreground/[0.05] text-muted-foreground",
-  good: "bg-success/12 text-success",
-  bad: "bg-critical/12 text-critical",
-  warn: "bg-warning/12 text-warning",
-} as const
-
-function HeroCell({
-  label, value, icon: Icon, sub, tone = "default", delta, children,
-}: {
-  label: string
-  value: string
-  icon: typeof Receipt
-  sub: string
-  tone?: "default" | "good" | "bad" | "warn"
-  delta?: number
-  children?: React.ReactNode
-}) {
-  return (
-    <div className="flex flex-col gap-1 bg-card p-5">
-      <div className="flex items-center gap-2">
-        <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-lg transition-colors", TONE_MAP[tone])}>
-          <Icon className="size-4" />
-        </span>
-        <span className="text-[13px] font-medium text-muted-foreground">{label}</span>
-      </div>
-      <div className="mt-1 flex items-baseline gap-2">
-        <span className={cn(
-          "num text-[1.6rem] leading-none font-semibold tracking-tight sm:text-[1.75rem]",
-          tone === "bad" && "text-critical",
-          tone === "good" && "text-success",
-        )}>{value}</span>
-        {delta != null && (
-          <span className={cn("flex items-center gap-0.5 text-xs font-medium", delta >= 0 ? "text-critical" : "text-success")}>
-            {delta >= 0 ? <ArrowUpRight className="size-3.5" /> : <ArrowDownRight className="size-3.5" />}
-            {percent(Math.abs(delta))}
-          </span>
-        )}
-      </div>
-      <span className="text-xs text-muted-foreground">{sub}</span>
-      {children}
-    </div>
-  )
-}
-
-function MiniStat({ color, label, value, pct }: { color: string; label: string; value: string; pct: number }) {
-  return (
-    <div className="flex flex-col items-center gap-0.5">
-      <div className="flex items-center gap-1">
-        <span className={cn("size-2 rounded-full", color)} />
-        <span className="text-[11px] text-muted-foreground">{label}</span>
-      </div>
-      <span className="num text-xs font-semibold">{value}</span>
-      <span className="num text-[10px] text-muted-foreground">{percent(pct)}</span>
     </div>
   )
 }
