@@ -181,7 +181,7 @@ export function DataTable<T>(props: Props<T>) {
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               {selectable && (
-                <TableHead className="w-12 px-3">
+                <TableHead className="w-10 min-w-10 px-0 text-center">
                   <Checkbox checked={allPageSelected} aria-label="Selecionar página"
                     onCheckedChange={(v) => setSelected((s) => { const n = new Set(s); pg.visible.forEach((r) => (v ? n.add(rowId(r)) : n.delete(rowId(r)))); return n })} />
                 </TableHead>
@@ -212,7 +212,7 @@ export function DataTable<T>(props: Props<T>) {
               return (
                 <TableRow key={rid} data-state={selected.has(rid) ? "selected" : undefined}
                   className={cn("transition-colors", hiddenRows.includes(rid) && "opacity-40", props.rowClassName?.(row))}>
-                  {selectable && <TableCell className="px-3"><Checkbox checked={selected.has(rid)} onCheckedChange={() => toggle(rid)} aria-label="Selecionar linha" /></TableCell>}
+                  {selectable && <TableCell className="w-10 min-w-10 px-0 text-center"><Checkbox checked={selected.has(rid)} onCheckedChange={() => toggle(rid)} aria-label="Selecionar linha" /></TableCell>}
                   {visibleCols.map((c) => (
                     <TableCell key={c.id} className={cn("px-3", c.align === "right" && "text-right", c.align === "center" && "text-center", c.className)}>{c.cell(row)}</TableCell>
                   ))}
