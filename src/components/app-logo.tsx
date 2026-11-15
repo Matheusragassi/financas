@@ -1,40 +1,36 @@
 import { cn } from "@/lib/utils"
 
-/*
- * Quest — finanças como missões. Símbolo em pixel (grid de 13px, sistema MAVI):
- * um balão de diálogo (a quest que se resolve conversando) com a perna do "Q".
- * O ponto central é o ponto de interação (azul da marca).
- */
-const B = 13
-// X = traço; o = ponto de interação
-const GRID = ["XXXXX", "X...X", "X.o.X", "X...X", "XX.XX", ".X..."]
-interface Px { x: number; y: number; dot: boolean }
-const BLOCKS: Px[] = []
-GRID.forEach((row, y) => [...row].forEach((c, x) => { if (c !== ".") BLOCKS.push({ x, y, dot: c === "o" }) }))
-const W = GRID[0].length * B
-const H = GRID.length * B
+const LOGO_PATH = "M13 4 L13 3 L10 3 L10 0 L18 0 L18 4 L20 4 L20 0 L21 0 L21 5 L17 5 L17 1 L16 1 L16 5 L15 5 L15 1 L11 1 L11 2 L14 2 L14 5 L8 5 L8 4 L6 4 L6 5 L5 5 L5 4 L4 4 L4 5 L0 5 L0 0 L4 0 L4 1 L1 1 L1 4 L3 4 L3 3 L5 3 L5 0 L9 0 L9 4ZM6 1 L6 3 L8 3 L8 1Z"
+const SYMBOL_PATH = "M1 1 L1 4 L3 4 L3 3 L5 3 L5 4 L4 4 L4 5 L0 5 L0 0 L4 0 L4 1Z"
 
-/** Símbolo da marca (traço herda a cor do texto; ponto na cor da marca) */
-export function QuestMark({ className, stroke = "currentColor", dot = "#3B82F6" }: { className?: string; stroke?: string; dot?: string }) {
+export function GastuLogo({ className, fill = "currentColor" }: { className?: string; fill?: string }) {
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className={className} shapeRendering="crispEdges" role="img" aria-label="Quest">
-      {[...BLOCKS].sort((a, b) => Number(a.dot) - Number(b.dot)).map((p, i) => (
-        <rect key={i} x={p.x * B} y={p.y * B} width={B + 0.3} height={B + 0.3} fill={p.dot ? dot : stroke} />
-      ))}
+    <svg viewBox="0 0 21 5" className={className} shapeRendering="crispEdges" role="img" aria-label="Gastu">
+      <path d={LOGO_PATH} fill={fill} />
     </svg>
   )
 }
 
-/** Ícone do app: símbolo branco sobre o azul da marca, ponto azul vivo */
+export function GastuSymbol({ className, fill = "currentColor" }: { className?: string; fill?: string }) {
+  return (
+    <svg viewBox="0 0 5 5" className={className} shapeRendering="crispEdges" role="img" aria-label="Gastu">
+      <path d={SYMBOL_PATH} fill={fill} />
+    </svg>
+  )
+}
+
 export function AppLogo({ className }: { className?: string }) {
   return (
-    <span className={cn("relative inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[28%] bg-[linear-gradient(145deg,#5B9BFF,#3B82F6_55%,#2557C7)] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]", className)}>
-      <QuestMark className="h-[56%] w-auto" stroke="#ffffff" dot="#1E40AF" />
+    <span className={cn("relative inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[28%] bg-[#1A3FEB] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]", className)}>
+      <svg viewBox="0 0 9 9" className="h-full w-full" shapeRendering="crispEdges" role="img" aria-label="Gastu">
+        <rect width="9" height="9" fill="#1A3FEB" />
+        <path transform="translate(2 2)" d={SYMBOL_PATH} fill="#fff" />
+        <rect x="7" y="5" width="2" height="1" fill="#fff" />
+      </svg>
     </span>
   )
 }
 
-/** Assinatura MAVI (pixel grid 13×13), herda a cor do texto */
 export function MaviLogo({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 169 39" className={className} fill="currentColor" aria-label="MAVI" role="img">

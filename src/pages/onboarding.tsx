@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { FieldLabel } from "@/components/field-label"
 import { MoneyInput } from "@/components/money-input"
 import { SimpleSelect } from "@/components/simple-select"
-import { AppLogo } from "@/components/app-logo"
+import { AppLogo, GastuLogo } from "@/components/app-logo"
 import { AuthorCredit } from "@/components/author-credit"
 import { FunSteps } from "@/components/fun-steps"
 import { GoogleIcon } from "@/components/google-icon"
@@ -75,8 +75,8 @@ export function Onboarding() {
         <div className="relative rounded-[28px] glass p-7 sm:p-8">
           <div className="relative">
           <div className="flex flex-col items-center text-center">
-            <AppLogo className="size-16 shadow-[0_14px_40px_-10px_rgba(59,130,246,0.5),inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform duration-500 hover:-rotate-6 hover:scale-105" />
-            <span className="mt-5 font-brand text-[30px] leading-none font-semibold lowercase tracking-tight">quest</span>
+            <AppLogo className="size-16 shadow-[0_14px_40px_-10px_rgba(26,63,235,0.5),inset_0_1px_0_rgba(255,255,255,0.25)] transition-transform duration-500 hover:-rotate-6 hover:scale-105" />
+            <GastuLogo className="mt-5 h-[18px] w-auto" />
             <p className="mt-1.5 text-sm text-balance text-muted-foreground">
               {view === "guest"
                   ? "Só precisamos de duas informações para começar."
@@ -233,7 +233,7 @@ function Backdrop({ className }: { className?: string }) {
     <div aria-hidden className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}>
       {/* camada das waves: blobs coloridos somando luz (screen no escuro), bem desfocados */}
       <div className="absolute inset-0 blur-[70px] [&>div]:absolute [&>div]:rounded-[45%] dark:[&>div]:mix-blend-screen">
-        <div className="aurora-1 -top-[20%] left-[8%] h-[65%] w-[55%] bg-[#3B82F6]/45 dark:bg-[#3B82F6]/55" />
+        <div className="aurora-1 -top-[20%] left-[8%] h-[65%] w-[55%] bg-[#1A3FEB]/45 dark:bg-[#1A3FEB]/55" />
         <div className="aurora-2 top-[10%] -right-[12%] h-[70%] w-[55%] bg-[#6D28D9]/40 dark:bg-[#6D28D9]/55" />
         <div className="aurora-3 -bottom-[22%] left-[18%] h-[65%] w-[60%] bg-[#7DD3FC]/40 dark:bg-[#22D3EE]/45" />
         <div className="aurora-4 bottom-[6%] right-[14%] h-[45%] w-[45%] bg-[#A78BFA]/35 dark:bg-[#A78BFA]/40" />

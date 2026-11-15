@@ -160,13 +160,13 @@ export function AccountPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><ShieldCheck className="size-4" /> Senha e segurança</CardTitle>
           <CardDescription>
-            O Quest não guarda senhas. O acesso é feito pela sua conta Google, protegida pela senha e pela verificação em duas etapas do próprio Google.
+            O Gastu não guarda senhas. O acesso é feito pela sua conta Google, protegida pela senha e pela verificação em duas etapas do próprio Google.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-2 sm:grid-cols-3">
           <SecurityLink icon={KeyRound} title="Alterar senha" desc="Troque a senha da sua conta Google" href="https://myaccount.google.com/signinoptions/password" />
           <SecurityLink icon={LifeBuoy} title="Esqueci a senha" desc="Recupere o acesso à conta Google" href="https://accounts.google.com/signin/recovery" />
-          <SecurityLink icon={ShieldCheck} title="Acessos do app" desc="Veja ou revogue o acesso do Quest" href="https://myaccount.google.com/permissions" />
+          <SecurityLink icon={ShieldCheck} title="Acessos do app" desc="Veja ou revogue o acesso do Gastu" href="https://myaccount.google.com/permissions" />
         </CardContent>
       </Card>}
 
@@ -184,7 +184,7 @@ export function AccountPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Apagar todos os dados deste aparelho?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  {p.google ? "A planilha no seu Google Drive não é apagada: para excluí-la de vez, apague o arquivo “Quest — dados” no Drive." : "Sem conta Google conectada, isso não pode ser desfeito."}
+                  {p.google ? "A planilha no seu Google Drive não é apagada: para excluí-la de vez, apague o arquivo \"Gastu — dados\" no Drive." : "Sem conta Google conectada, isso não pode ser desfeito."}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

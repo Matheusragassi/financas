@@ -13,7 +13,7 @@ import { money } from "@/lib/format"
 import type { CreditCard } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-const SWATCHES = ["#820AD1", "#3B82F6", "#EC7000", "#CC092F", "#11C76F", "#0D2C54", "#2B2B2B", "#E87BA4"]
+const SWATCHES = ["#820AD1", "#1A3FEB", "#EC7000", "#CC092F", "#11C76F", "#0D2C54", "#2B2B2B", "#E87BA4"]
 
 export function CardDialog({ open, onOpenChange, card, onSaved }: {
   open: boolean; onOpenChange: (o: boolean) => void; card?: CreditCard | null; onSaved?: (id: string) => void

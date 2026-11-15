@@ -30,7 +30,7 @@ export async function createDataFile(ownerName: string): Promise<RemoteFile> {
   const sheet = await gfetch<{ spreadsheetId: string }>(SHEETS, {
     method: "POST",
     body: JSON.stringify({
-      properties: { title: `Quest — dados${ownerName ? ` de ${ownerName}` : ""}`, locale: "pt_BR" },
+      properties: { title: `Gastu — dados${ownerName ? ` de ${ownerName}` : ""}`, locale: "pt_BR" },
       sheets: [
         { properties: { title: "Sobre", gridProperties: { columnCount: 3 } } },
         { properties: { title: "Lançamentos", gridProperties: { frozenRowCount: 1 } } },
@@ -44,7 +44,7 @@ export async function createDataFile(ownerName: string): Promise<RemoteFile> {
   // Marca o arquivo para encontrá-lo em outros aparelhos
   return gfetch<RemoteFile>(`${DRIVE}/${sheet.spreadsheetId}?fields=id,modifiedTime,webViewLink`, {
     method: "PATCH",
-    body: JSON.stringify({ appProperties: { [APP_KEY]: "1" }, description: "Dados do app Quest. Não renomeie as abas." }),
+    body: JSON.stringify({ appProperties: { [APP_KEY]: "1" }, description: "Dados do app Gastu. Não renomeie as abas." }),
   })
 }
 
@@ -126,7 +126,7 @@ export async function writeData(id: string, b: Backup): Promise<string> {
 
 /* ─── Formatação para planilhas existentes ─── */
 
-const BRAND = { red: 0.231, green: 0.510, blue: 0.965 }
+const BRAND = { red: 0.102, green: 0.247, blue: 0.922 }
 const DARK_BG = { red: 0.11, green: 0.13, blue: 0.17 }
 const WHITE = { red: 1, green: 1, blue: 1 }
 const MUTED = { red: 0.6, green: 0.63, blue: 0.68 }
@@ -142,15 +142,15 @@ function headerRequests(sheetId: number, cols: number) {
 
 function sobreContent(ownerName: string) {
   return [
-    ["Quest — Finanças Pessoais", "", ""],
+    ["Gastu — Finanças Pessoais", "", ""],
     ["", "", ""],
-    ["Esta planilha é o banco de dados do seu app Quest.", "", ""],
+    ["Esta planilha é o banco de dados do seu app Gastu.", "", ""],
     ["Seus lançamentos, meses e configurações ficam salvos aqui automaticamente.", "", ""],
     ["", "", ""],
     ["ℹ️  Informações", "", ""],
     ["Proprietário", ownerName || "—", ""],
     ["Atualizado em", new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }), ""],
-    ["Versão do app", "Quest v1", ""],
+    ["Versão do app", "Gastu v1", ""],
     ["Site", "https://matheusragassi.github.io/financas/", ""],
     ["", "", ""],
     ["⚠️  Importante", "", ""],

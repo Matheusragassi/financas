@@ -66,7 +66,7 @@ export default function App() {
                 <ChevronLeft className="size-4" />
               </button>
             )}
-            <a href="#/dashboard" className="hidden text-sm font-semibold tracking-tight text-muted-foreground transition-colors hover:text-foreground sm:inline">Quest</a>
+            <a href="#/dashboard" className="hidden text-sm font-semibold tracking-tight text-muted-foreground transition-colors hover:text-foreground sm:inline">Gastu</a>
             <ChevronRight className="hidden size-3.5 text-muted-foreground/60 sm:block" />
             {PARENT[route] && (
               <>

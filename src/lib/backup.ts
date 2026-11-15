@@ -25,6 +25,6 @@ export function downloadCsv(rows: (string | number)[][], filename: string) {
 export async function readBackup(file: File): Promise<Backup> {
   const data = JSON.parse(await file.text())
   if (!data || !Array.isArray(data.expenses) || !Array.isArray(data.months))
-    throw new Error("Arquivo inválido: não parece um backup do Quest.")
+    throw new Error("Arquivo inválido: não parece um backup do Gastu.")
   return data as Backup
 }
